@@ -1,0 +1,52 @@
+name,position,team,salary,projected_points
+Patrick Mahomes,QB,KC,8200,24.5
+Josh Allen,QB,BUF,8400,25.8
+Lamar Jackson,QB,BAL,8300,24.9
+Jalen Hurts,QB,PHI,7900,23.6
+Dak Prescott,QB,DAL,7600,22.1
+Tua Tagovailoa,QB,MIA,6800,19.4
+Jared Goff,QB,DET,6900,19.8
+Brock Purdy,QB,SF,7200,20.5
+Christian McCaffrey,RB,SF,9500,22.4
+Austin Ekeler,RB,LAC,7800,17.2
+Derrick Henry,RB,TEN,7600,16.9
+Saquon Barkley,RB,NYG,7400,16.1
+Bijan Robinson,RB,ATL,7200,15.8
+Tony Pollard,RB,DAL,6900,14.9
+Josh Jacobs,RB,LV,6700,14.2
+Kenneth Walker III,RB,SEA,6400,13.5
+Jahmyr Gibbs,RB,DET,6300,13.9
+Isiah Pacheco,RB,KC,5900,12.4
+Rachaad White,RB,TB,5800,12.1
+Javonte Williams,RB,DEN,5200,10.5
+Tyreek Hill,WR,MIA,9200,20.3
+CeeDee Lamb,WR,DAL,8900,19.8
+Justin Jefferson,WR,MIN,8800,19.5
+Amon-Ra St. Brown,WR,DET,8100,18.2
+A.J. Brown,WR,PHI,7900,17.9
+Stefon Diggs,WR,BUF,7700,17.4
+Puka Nacua,WR,LAR,7400,16.8
+Davante Adams,WR,LV,7300,16.5
+DK Metcalf,WR,SEA,6900,15.2
+Chris Olave,WR,NO,6600,14.6
+Garrett Wilson,WR,NYJ,6500,14.3
+Amari Cooper,WR,CLE,6200,13.7
+Mike Evans,WR,TB,6100,13.5
+Tee Higgins,WR,CIN,5900,13.1
+Jaylen Waddle,WR,MIA,5800,12.9
+Travis Kelce,TE,KC,7100,15.6
+Sam LaPorta,TE,DET,6200,13.2
+Mark Andrews,TE,BAL,5900,12.4
+T.J. Hockenson,TE,MIN,5600,11.6
+George Kittle,TE,SF,5400,11.1
+Dallas Goedert,TE,PHI,4800,9.8
+Evan Engram,TE,JAX,4600,9.3
+David Njoku,TE,CLE,4300,8.7
+San Francisco 49ers,DEF,SF,3400,9.5
+Baltimore Ravens,DEF,BAL,3300,9.1
+Dallas Cowboys,DEF,DAL,3200,8.8
+Cleveland Browns,DEF,CLE,3100,8.6
+Buffalo Bills,DEF,BUF,3000,8.3
+Pittsburgh Steelers,DEF,PIT,2900,8.0
+New York Jets,DEF,NYJ,2800,7.8
+Kansas City Chiefs,DEF,KC,2700,7.5

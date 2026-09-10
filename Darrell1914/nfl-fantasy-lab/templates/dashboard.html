@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Standings - NFL Fantasy Lab{% endblock %}
+{% block content %}
+  <h1>League Standings</h1>
+  <table id="standings-table">
+    <thead>
+      <tr>
+        <th>Team</th><th>W</th><th>L</th><th>T</th>
+        <th>Win %</th><th>PF</th><th>PA</th><th>Diff</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr class="team-row">
+        <td>{{ team.team }}</td>
+        <td>{{ team.wins }}</td>
+        <td>{{ team.losses }}</td>
+        <td>{{ team.ties }}</td>
+        <td>{{ "%.3f"|format(team.win_pct) }}</td>
+        <td>{{ team.points_for }}</td>
+        <td>{{ team.points_against }}</td>
+        <td>{{ team.point_diff }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

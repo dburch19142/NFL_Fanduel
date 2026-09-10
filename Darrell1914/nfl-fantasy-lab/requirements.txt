@@ -1,0 +1,14 @@
+Flask>=3.0.3
+pandas>=2.2.3
+PuLP>=2.8.0
+pytest>=8.2.2
+pytest-playwright>=0.5.1
+playwright>=1.45.0
+appdirs>=1.4.4
+fastparquet>=2024.2.0
+
+# nfl_data_py pins pandas<2.0, which has no prebuilt wheel for recent Python
+# on Windows and fails to build from source. Its actual code works fine
+# against modern pandas, so install it with --no-deps and rely on the
+# pandas/appdirs/fastparquet versions above instead:
+#   pip install --no-deps nfl_data_py

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Lineup Optimizer - NFL Fantasy Lab{% endblock %}
+{% block content %}
+  <h1>Fantasy Lineup Optimizer</h1>
+  <p>Enter a salary cap and generate the highest-scoring lineup that fits under it
+     (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX, 1 DEF) &mdash; matches FanDuel's NFL classic
+     contest rules ($60,000 default cap).</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <p class="flash flash-{{ category }}">{{ message }}</p>
+    {% endfor %}
+  {% endwith %}
+
+  <div id="data-source" class="data-source">
+    <strong>Player pool:</strong> {{ pool_source }} &mdash; {{ player_count }} players available.
+  </div>
+
+  <details id="upload-panel">
+    <summary>Upload a FanDuel salary export</summary>
+    <p class="hint">
+      In FanDuel, open a contest's lineup builder and use its "Export to CSV"
+      option to download the current player pool, then upload that file here.
+    </p>
+    <form method="post" action="{{ url_for('upload_fanduel_csv') }}" enctype="multipart/form-data" id="upload-form">
+      <input type="file" name="fanduel_csv" id="fanduel_csv" accept=".csv" required>
+      <button type="submit" id="upload-btn">Upload</button>
+    </form>
+  </details>
+
+  <form method="post" id="optimizer-form">
+    <label for="salary_cap">Salary cap ($)</label>
+    <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
+    <button type="submit" id="generate-btn">Generate Optimal Lineup</button>
+  </form>
+
+  {% if error %}
+    <p id="error-message" class="error">{{ error }}</p>
+  {% endif %}
+
+  {% if lineup %}
+    <div id="lineup-results">
+      <h2>Optimal Lineup</h2>
+      <table id="lineup-table">
+        <thead>
+          <tr><th>Position</th><th>Player</th><th>Team</th><th>Salary</th><th>Proj. Pts</th></tr>
+        </thead>
+        <tbody>
+          {% for p in lineup.players %}
+          <tr class="lineup-row">
+            <td>{{ p.position }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.team }}</td>
+            <td>${{ "{:,}".format(p.salary) }}</td>
+            <td>{{ p.projected_points }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p id="total-salary">Total salary: ${{ "{:,}".format(lineup.total_salary) }}</p>
+      <p id="total-points">Total projected points: {{ lineup.total_points }}</p>
+    </div>
+  {% endif %}
+{% endblock %}

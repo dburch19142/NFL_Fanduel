@@ -1,15 +1,33 @@
+import os
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 import pandas as pd
 
+# All data paths in this app (data/teams.csv, data/players.csv, data/cache, ...)
+# are relative, so make sure they resolve against this file's directory
+# regardless of what directory the process was launched from.
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 from optimizer import optimize_lineup, InfeasibleLineupError, DEFAULT_SALARY_CAP
 from fanduel_import import FanDuelImportError
 from player_pool import build_player_pool, save_uploaded_csv
+from game_predictor import (
+    build_training_frame,
+    current_season_form,
+    evaluate_model,
+    load_game_results,
+    predict_matchup,
+    split_by_season,
+    train_model,
+)
+from real_stats import latest_available_season
 
 app = Flask(__name__)
 app.secret_key = "dev-only-not-for-production"
 
 TEAMS_CSV = "data/teams.csv"
+PREDICTOR_SEASONS_OF_HISTORY = 5
 
 
 @app.route("/")
@@ -55,6 +73,62 @@ def optimizer_page():
     )
 
 
+def _train_game_predictor():
+    """Trains the game-outcome model on all but the most recent season and
+    evaluates it on that season, so the reported metrics reflect performance
+    on games the model never saw during training."""
+    latest_season = latest_available_season()
+    seasons = list(range(latest_season - PREDICTOR_SEASONS_OF_HISTORY + 1, latest_season + 1))
+
+    games = load_game_results(seasons)
+    frame = build_training_frame(games)
+    train, test = split_by_season(frame, test_season=latest_season)
+
+    model = train_model(train)
+    metrics = evaluate_model(model, test)
+    form = current_season_form(games, season=latest_season).sort_values("team")
+
+    return model, metrics, form, latest_season
+
+
+@app.route("/predictor", methods=["GET", "POST"])
+def predictor_page():
+    model, metrics, form, season = _train_game_predictor()
+    team_form = form.set_index("team").to_dict(orient="index")
+    teams = sorted(team_form.keys())
+
+    prediction = None
+    error = None
+    home_team = request.form.get("home_team")
+    away_team = request.form.get("away_team")
+
+    if request.method == "POST":
+        if not home_team or not away_team:
+            error = "Please choose both a home and an away team."
+        elif home_team == away_team:
+            error = "Home and away teams must be different."
+        else:
+            probability = predict_matchup(model, form.set_index("team").loc[home_team], form.set_index("team").loc[away_team])
+            prediction = {
+                "home_team": home_team,
+                "away_team": away_team,
+                "home_win_probability": round(probability * 100, 1),
+                "away_win_probability": round((1 - probability) * 100, 1),
+            }
+
+    return render_template(
+        "predictor.html",
+        metrics=metrics,
+        season=season,
+        teams=teams,
+        team_form=team_form,
+        prediction=prediction,
+        error=error,
+        home_team=home_team,
+        away_team=away_team,
+    )
+
+
 @app.route("/upload", methods=["POST"])
 def upload_fanduel_csv():
     file = request.files.get("fanduel_csv")
@@ -76,4 +150,7 @@ def upload_fanduel_csv():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # use_reloader=False: the reloader re-execs the process using the original
+    # (possibly relative) launch command, which breaks once the chdir() above
+    # has already moved the process into this file's directory.
+    app.run(debug=True, use_reloader=False)

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Game Predictor - NFL Fantasy Lab{% endblock %}
+{% block content %}
+  <h1>Game Outcome Predictor</h1>
+  <p>A logistic regression trained on real NFL results from prior seasons, using
+     each team's win percentage and average point differential entering a game
+     to predict who wins.</p>
+
+  <div id="model-metrics" class="data-source">
+    <strong>Held-out accuracy ({{ season }} season, {{ metrics.n_games }} games the model never trained on):</strong>
+    {{ "%.1f"|format(metrics.accuracy * 100) }}% accuracy &middot;
+    {{ "%.1f"|format(metrics.precision * 100) }}% precision &middot;
+    {{ "%.1f"|format(metrics.recall * 100) }}% recall &middot;
+    {{ "%.3f"|format(metrics.f1) }} F1 &middot;
+    {{ "%.3f"|format(metrics.roc_auc) }} ROC-AUC
+  </div>
+
+  <table id="confusion-matrix-table">
+    <caption>Confusion matrix &mdash; rows are what actually happened, columns are what the model predicted</caption>
+    <thead>
+      <tr><th></th><th>Predicted away win</th><th>Predicted home win</th></tr>
+    </thead>
+    <tbody>
+      <tr><th>Actual away win</th><td>{{ metrics.confusion_matrix[0][0] }}</td><td>{{ metrics.confusion_matrix[0][1] }}</td></tr>
+      <tr><th>Actual home win</th><td>{{ metrics.confusion_matrix[1][0] }}</td><td>{{ metrics.confusion_matrix[1][1] }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Predict a Matchup</h2>
+  <p>Uses each team's actual {{ season }} results to date.</p>
+
+  {% if error %}
+    <p id="error-message" class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" id="predictor-form">
+    <label for="home_team">Home team</label>
+    <select name="home_team" id="home_team">
+      <option value="">Choose a team&hellip;</option>
+      {% for team in teams %}
+        <option value="{{ team }}" {% if team == home_team %}selected{% endif %}>{{ team }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="away_team">Away team</label>
+    <select name="away_team" id="away_team">
+      <option value="">Choose a team&hellip;</option>
+      {% for team in teams %}
+        <option value="{{ team }}" {% if team == away_team %}selected{% endif %}>{{ team }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" id="predict-btn">Predict</button>
+  </form>
+
+  {% if prediction %}
+    <div id="prediction-result">
+      <h2>Prediction</h2>
+      <p>
+        <strong>{{ prediction.home_team }}</strong> (home): {{ prediction.home_win_probability }}% to win<br>
+        <strong>{{ prediction.away_team }}</strong> (away): {{ prediction.away_win_probability }}% to win
+      </p>
+    </div>
+  {% endif %}
+{% endblock %}

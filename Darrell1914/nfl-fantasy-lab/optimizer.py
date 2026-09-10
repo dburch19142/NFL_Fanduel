@@ -7,6 +7,8 @@ Maximizes total projected points subject to the salary cap.
 import pandas as pd
 import pulp
 
+from real_stats import normalize_name
+
 PLAYERS_CSV = "data/players.csv"
 DEFAULT_SALARY_CAP = 60000
 
@@ -29,6 +31,24 @@ def load_players(path: str = PLAYERS_CSV) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def _dedupe_players(players: pd.DataFrame) -> pd.DataFrame:
+    """Collapses rows that represent the same real person into one.
+
+    Keyed on normalized name + team (not name alone) so two different real
+    players who happen to share a name -- e.g. the two NFL WRs both named
+    Mike Williams -- aren't merged together, since they never share a team.
+    Keeps the highest-scoring row of each duplicate group.
+    """
+    keys = players["name"].apply(normalize_name) + "|" + players["team"].astype(str).str.upper()
+    deduped = (
+        players.assign(_dedupe_key=keys)
+        .sort_values("projected_points", ascending=False)
+        .drop_duplicates(subset="_dedupe_key", keep="first")
+        .drop(columns="_dedupe_key")
+    )
+    return deduped.reset_index(drop=True)
+
+
 def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> pd.DataFrame:
     """Return the optimal lineup (as a DataFrame) under the given salary cap.
 
@@ -36,6 +56,7 @@ def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> p
     """
     if players is None:
         players = load_players()
+    players = _dedupe_players(players)
 
     prob = pulp.LpProblem("lineup_optimizer", pulp.LpMaximize)
     picks = {i: pulp.LpVariable(f"pick_{i}", cat="Binary") for i in players.index}

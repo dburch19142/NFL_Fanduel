@@ -26,7 +26,12 @@ COLUMN_ALIASES = {
     "first_name": ["first name"],
     "last_name": ["last name"],
     "fppg": ["fppg"],
+    "injury_indicator": ["injury indicator"],
 }
+
+# Statuses that mean a player is unlikely or unable to play. "Questionable"
+# is deliberately kept -- those players start more often than not.
+OUT_INJURY_STATUSES = {"O", "OUT", "IR", "D", "DOUBTFUL", "PUP", "NFI", "SUSP", "NA"}
 
 
 class FanDuelImportError(ValueError):
@@ -60,6 +65,7 @@ def load_fanduel_csv(file) -> pd.DataFrame:
     first_col = _find_column(columns_lower, COLUMN_ALIASES["first_name"])
     last_col = _find_column(columns_lower, COLUMN_ALIASES["last_name"])
     fppg_col = _find_column(columns_lower, COLUMN_ALIASES["fppg"])
+    injury_col = _find_column(columns_lower, COLUMN_ALIASES["injury_indicator"])
 
     missing = []
     if position_col is None:
@@ -91,9 +97,15 @@ def load_fanduel_csv(file) -> pd.DataFrame:
     out["team"] = df[team_col].str.strip().str.upper()
     out["salary"] = pd.to_numeric(df[salary_col], errors="coerce")
     out["fppg"] = pd.to_numeric(df[fppg_col], errors="coerce") if fppg_col else 0.0
+    out["injury_status"] = df[injury_col].fillna("").str.strip().str.upper() if injury_col else ""
 
     out = out.dropna(subset=["name", "position", "team", "salary"])
     out = out[out["name"] != ""]
+
+    injured = out["injury_status"].isin(OUT_INJURY_STATUSES)
+    out.attrs["excluded_injured_count"] = int(injured.sum())
+    out = out[~injured].drop(columns="injury_status")
+
     return out.reset_index(drop=True)
 
 

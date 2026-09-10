@@ -64,7 +64,11 @@ def upload_fanduel_csv():
 
     try:
         parsed = save_uploaded_csv(file)
-        flash(f"Loaded {len(parsed)} players from {file.filename}.", "success")
+        excluded = parsed.attrs.get("excluded_injured_count", 0)
+        message = f"Loaded {len(parsed)} players from {file.filename}."
+        if excluded:
+            message += f" Omitted {excluded} ruled out, doubtful, or otherwise unavailable."
+        flash(message, "success")
     except FanDuelImportError as exc:
         flash(str(exc), "error")
 

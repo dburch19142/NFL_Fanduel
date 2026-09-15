@@ -3,6 +3,10 @@
 Roster follows FanDuel's NFL classic contest rules:
 1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX (RB/WR/TE), 1 DEF, $60,000 salary cap.
 Maximizes total projected points subject to the salary cap.
+
+Also enforces a QB stack: whichever QB is picked must be paired with at
+least one WR or TE from the same team, since a passing touchdown scores
+for both the QB and his pass-catcher -- a standard DFS strategy.
 """
 import pandas as pd
 import pulp
@@ -21,6 +25,7 @@ ROSTER_SLOTS = {
 }
 FLEX_ELIGIBLE = ("RB", "WR", "TE")
 FLEX_COUNT = 1
+STACK_POSITIONS = ("WR", "TE")
 
 
 class InfeasibleLineupError(Exception):
@@ -86,6 +91,17 @@ def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> p
     prob += pulp.lpSum(picks[i] for i in flex_idx) == sum(
         ROSTER_SLOTS[p] for p in FLEX_ELIGIBLE
     ) + FLEX_COUNT
+
+    # QB stack: if a given QB is picked, at least one WR/TE from his team
+    # must be picked too. picks[q] <= sum(teammates) forces the sum to be
+    # >=1 whenever picks[q]=1, and is a no-op whenever picks[q]=0.
+    qb_idx = players.index[players["position"] == "QB"]
+    for q in qb_idx:
+        team = players.loc[q, "team"]
+        teammates = players.index[
+            (players["team"] == team) & (players["position"].isin(STACK_POSITIONS))
+        ]
+        prob += picks[q] <= pulp.lpSum(picks[i] for i in teammates)
 
     status = prob.solve(pulp.PULP_CBC_CMD(msg=False))
 

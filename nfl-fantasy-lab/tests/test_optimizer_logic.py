@@ -79,6 +79,30 @@ def test_dedupe_drops_exact_duplicate_rows():
     assert len(deduped) == len(PLAYERS)
 
 
+def test_lineup_stacks_qb_with_a_teammate():
+    lineup = optimize_lineup(DEFAULT_SALARY_CAP, PLAYERS)
+    qb_team = lineup.loc[lineup["position"] == "QB", "team"].iloc[0]
+    catchers = lineup[lineup["position"].isin(["WR", "TE"])]
+    assert qb_team in set(catchers["team"])
+
+
+def test_qb_with_no_teammate_in_pool_is_never_picked():
+    # A QB with no WR/TE from his team in the pool can never satisfy the
+    # stack requirement, so the solver must skip him even though he's the
+    # obvious pure points-per-dollar pick.
+    lonely_qb = PLAYERS[PLAYERS["position"] == "QB"].iloc[0].copy()
+    lonely_qb["name"] = "Lonely QB"
+    lonely_qb["team"] = "ZZZ"
+    lonely_qb["salary"] = 5000
+    lonely_qb["projected_points"] = 999.0
+    players_with_lonely_qb = pd.concat(
+        [PLAYERS, lonely_qb.to_frame().T], ignore_index=True
+    )
+
+    lineup = optimize_lineup(DEFAULT_SALARY_CAP, players_with_lonely_qb)
+    assert "Lonely QB" not in set(lineup["name"])
+
+
 def test_dedupe_keeps_same_name_different_team_distinct():
     # Two different real players can share a name (e.g. two NFL WRs named
     # Mike Williams) -- dedup must key on name+team, not name alone, or one

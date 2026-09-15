@@ -1,33 +1,33 @@
 team,wins,losses,ties,points_for,points_against
-Kansas City Chiefs,11,6,0,371,294
-Buffalo Bills,11,6,0,451,311
-Baltimore Ravens,12,5,0,483,280
-San Francisco 49ers,12,5,0,491,298
-Dallas Cowboys,12,5,0,509,315
-Detroit Lions,12,5,0,461,395
-Philadelphia Eagles,11,6,0,433,342
-Miami Dolphins,11,6,0,496,391
-Green Bay Packers,9,8,0,383,367
-Pittsburgh Steelers,10,7,0,304,308
-Houston Texans,10,7,0,371,335
-Cleveland Browns,11,6,0,349,296
-Los Angeles Rams,10,7,0,404,377
-Indianapolis Colts,9,8,0,392,392
-Seattle Seahawks,9,8,0,364,387
-New Orleans Saints,9,8,0,344,354
-Tampa Bay Buccaneers,9,8,0,353,344
-Denver Broncos,8,9,0,332,335
-Cincinnati Bengals,9,8,0,344,373
-Minnesota Vikings,7,10,0,353,388
-Las Vegas Raiders,8,9,0,330,405
-Jacksonville Jaguars,9,8,0,353,373
-Atlanta Falcons,7,10,0,320,343
-Chicago Bears,7,10,0,340,379
-New York Jets,7,10,0,268,355
-Los Angeles Chargers,5,12,0,346,398
-Arizona Cardinals,4,13,0,330,443
-Washington Commanders,4,13,0,383,516
-New England Patriots,4,13,0,236,366
-Tennessee Titans,6,11,0,308,357
-New York Giants,6,11,0,254,371
-Carolina Panthers,2,15,0,236,404
+Buffalo Bills,1,0,0,36,31
+Miami Dolphins,0,1,0,13,27
+New York Jets,1,0,0,23,10
+New England Patriots,0,1,0,10,13
+Baltimore Ravens,1,0,0,41,23
+Cincinnati Bengals,1,0,0,33,27
+Cleveland Browns,0,1,0,10,34
+Pittsburgh Steelers,1,0,0,20,13
+Houston Texans,0,1,0,31,36
+Indianapolis Colts,0,1,0,23,41
+Jacksonville Jaguars,1,0,0,34,10
+Tennessee Titans,0,1,0,10,23
+Denver Broncos,0,1,0,14,16
+Kansas City Chiefs,1,0,0,16,14
+Las Vegas Raiders,1,0,0,27,13
+Los Angeles Chargers,0,1,0,14,26
+Dallas Cowboys,0,1,0,20,28
+New York Giants,1,0,0,28,20
+Philadelphia Eagles,1,0,0,24,22
+Washington Commanders,0,1,0,22,24
+Chicago Bears,1,0,0,59,37
+Detroit Lions,1,0,0,31,30
+Green Bay Packers,0,1,0,22,39
+Minnesota Vikings,1,0,0,39,22
+Atlanta Falcons,0,1,0,13,20
+Carolina Panthers,0,1,0,37,59
+New Orleans Saints,0,1,0,30,31
+Tampa Bay Buccaneers,0,1,0,27,33
+Arizona Cardinals,1,0,0,26,14
+Los Angeles Rams,0,1,0,7,27
+San Francisco 49ers,1,0,0,27,7
+Seattle Seahawks,1,0,0,13,10

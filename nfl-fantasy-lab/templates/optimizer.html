@@ -2,9 +2,10 @@
 {% block title %}Lineup Optimizer - NFL Fantasy Lab{% endblock %}
 {% block content %}
   <h1>Fantasy Lineup Optimizer</h1>
-  <p>Enter a salary cap and generate the highest-scoring lineup that fits under it
-     (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX, 1 DEF) &mdash; matches FanDuel's NFL classic
-     contest rules ($60,000 default cap).</p>
+  <p>Enter a salary cap and generate the {{ lineup_count }} highest-scoring distinct lineups that fit
+     under it (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX, 1 DEF) &mdash; matches FanDuel's NFL classic
+     contest rules ($60,000 default cap). Each lineup differs from every other one by at
+     least one player.</p>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -31,34 +32,44 @@
   <form method="post" id="optimizer-form">
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
-    <button type="submit" id="generate-btn">Generate Optimal Lineup</button>
+    <label for="must_include">Must include (optional)</label>
+    <input type="text" id="must_include" name="must_include" value="{{ must_include }}" placeholder="e.g. Caleb Williams">
+    <button type="submit" id="generate-btn">Generate {{ lineup_count }} Lineups</button>
   </form>
 
   {% if error %}
     <p id="error-message" class="error">{{ error }}</p>
   {% endif %}
 
-  {% if lineup %}
+  {% if lineups %}
     <div id="lineup-results">
-      <h2>Optimal Lineup</h2>
-      <table id="lineup-table">
-        <thead>
-          <tr><th>Position</th><th>Player</th><th>Team</th><th>Salary</th><th>Proj. Pts</th></tr>
-        </thead>
-        <tbody>
-          {% for p in lineup.players %}
-          <tr class="lineup-row">
-            <td>{{ p.position }}</td>
-            <td>{{ p.name }}</td>
-            <td>{{ p.team }}</td>
-            <td>${{ "{:,}".format(p.salary) }}</td>
-            <td>{{ p.projected_points }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <p id="total-salary">Total salary: ${{ "{:,}".format(lineup.total_salary) }}</p>
-      <p id="total-points">Total projected points: {{ lineup.total_points }}</p>
+      {% if lineups|length < lineup_count %}
+        <p class="hint">Only {{ lineups|length }} distinct lineup{{ "s" if lineups|length != 1 else "" }}
+           fit this pool and cap &mdash; not enough roster-eligible variety left for more.</p>
+      {% endif %}
+      {% for lineup in lineups %}
+      <div class="lineup-block" id="lineup-{{ loop.index }}">
+        <h2>Lineup {{ loop.index }}</h2>
+        <table class="lineup-table">
+          <thead>
+            <tr><th>Position</th><th>Player</th><th>Team</th><th>Salary</th><th>Proj. Pts</th></tr>
+          </thead>
+          <tbody>
+            {% for p in lineup.players %}
+            <tr class="lineup-row">
+              <td>{{ p.position }}</td>
+              <td>{{ p.name }}</td>
+              <td>{{ p.team }}</td>
+              <td>${{ "{:,}".format(p.salary) }}</td>
+              <td>{{ p.projected_points }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p class="lineup-total-salary">Total salary: ${{ "{:,}".format(lineup.total_salary) }}</p>
+        <p class="lineup-total-points">Total projected points: {{ lineup.total_points }}</p>
+      </div>
+      {% endfor %}
     </div>
   {% endif %}
 {% endblock %}

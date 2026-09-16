@@ -32,6 +32,10 @@ class InfeasibleLineupError(Exception):
     pass
 
 
+class PlayerNotFoundError(Exception):
+    pass
+
+
 def load_players(path: str = PLAYERS_CSV) -> pd.DataFrame:
     return pd.read_csv(path)
 
@@ -54,15 +58,20 @@ def _dedupe_players(players: pd.DataFrame) -> pd.DataFrame:
     return deduped.reset_index(drop=True)
 
 
-def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Return the optimal lineup (as a DataFrame) under the given salary cap.
+def _solve(
+    players: pd.DataFrame,
+    salary_cap: float,
+    forbidden_combos: list[frozenset[int]],
+    required_index: int | None = None,
+) -> list[int]:
+    """Solves one lineup, forbidding any combination of picks that exactly
+    matches a previously-found lineup (by row index into `players`), and
+    optionally forcing a specific row index to be included (a "must-include"
+    or "locked" player, in DFS terms).
 
-    Raises InfeasibleLineupError if no valid roster fits under the cap.
+    Returns the list of chosen row indices. Raises InfeasibleLineupError if
+    no valid, not-yet-used roster fits under the cap.
     """
-    if players is None:
-        players = load_players()
-    players = _dedupe_players(players)
-
     prob = pulp.LpProblem("lineup_optimizer", pulp.LpMaximize)
     picks = {i: pulp.LpVariable(f"pick_{i}", cat="Binary") for i in players.index}
 
@@ -103,6 +112,14 @@ def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> p
         ]
         prob += picks[q] <= pulp.lpSum(picks[i] for i in teammates)
 
+    # Uniqueness: a lineup that picks every single player from an earlier
+    # lineup is forbidden, forcing at least one swap versus each one already found.
+    for combo in forbidden_combos:
+        prob += pulp.lpSum(picks[i] for i in combo) <= len(combo) - 1
+
+    if required_index is not None:
+        prob += picks[required_index] == 1
+
     status = prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
     if pulp.LpStatus[status] != "Optimal":
@@ -110,15 +127,109 @@ def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> p
             f"No valid lineup fits under a ${salary_cap:,.0f} salary cap."
         )
 
-    chosen = [i for i in players.index if picks[i].value() == 1]
-    lineup = players.loc[chosen].sort_values(
+    return [i for i in players.index if picks[i].value() == 1]
+
+
+def _to_lineup_df(players: pd.DataFrame, chosen: list[int]) -> pd.DataFrame:
+    return players.loc[chosen].sort_values(
         by="position", key=lambda col: col.map({"QB": 0, "RB": 1, "WR": 2, "TE": 3, "DEF": 4})
     ).reset_index(drop=True)
-    return lineup
+
+
+def _resolve_required_player(
+    players: pd.DataFrame, name: str, team: str | None = None
+) -> int:
+    """Finds the row index of a must-include player by (normalized) name,
+    optionally narrowed by team when the name alone is ambiguous.
+
+    Raises PlayerNotFoundError with the closest name matches if there's no
+    match, or more than one and no team was given to disambiguate.
+    """
+    target = normalize_name(name)
+    keys = players["name"].apply(normalize_name)
+    matches = players.index[keys == target]
+
+    if team:
+        team_matches = matches[players.loc[matches, "team"].str.upper() == team.upper()]
+        if len(team_matches) > 0:
+            matches = team_matches
+
+    if len(matches) == 0:
+        close = players[keys.str.contains(target.split(" ")[-1], na=False)]["name"].unique()
+        hint = f" Close matches in the pool: {list(close)[:5]}." if len(close) else ""
+        raise PlayerNotFoundError(f"No player named '{name}' found in the pool.{hint}")
+
+    if len(matches) > 1:
+        teams = players.loc[matches, "team"].tolist()
+        raise PlayerNotFoundError(
+            f"Multiple players named '{name}' found (teams: {teams}). "
+            "Specify a team to disambiguate."
+        )
+
+    return matches[0]
+
+
+def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Return the single optimal lineup (as a DataFrame) under the given salary cap.
+
+    Raises InfeasibleLineupError if no valid roster fits under the cap.
+    """
+    if players is None:
+        players = load_players()
+    players = _dedupe_players(players)
+    chosen = _solve(players, salary_cap, forbidden_combos=[])
+    return _to_lineup_df(players, chosen)
+
+
+def optimize_lineups(
+    salary_cap: float,
+    players: pd.DataFrame | None = None,
+    count: int = 5,
+    required_name: str | None = None,
+    required_team: str | None = None,
+) -> list[pd.DataFrame]:
+    """Returns up to `count` distinct lineups, best first.
+
+    Each lineup differs from every earlier one by at least one player.
+    Later lineups trade off some points for that variety, since each one
+    is the best lineup that avoids exactly repeating any earlier one.
+    Raises InfeasibleLineupError if not even one lineup fits under the cap;
+    returns fewer than `count` lineups if the pool is too thin to build more
+    distinct ones (e.g. FLEX-eligible depth at one position runs out).
+
+    If `required_name` is given, every returned lineup is forced to include
+    that player (a "locked" pick, in DFS terms) -- e.g. a QB you've decided
+    on for a favorable matchup, letting the solver build the best roster
+    around them. Raises PlayerNotFoundError if no such player is in the pool.
+    """
+    if players is None:
+        players = load_players()
+    players = _dedupe_players(players)
+
+    required_index = None
+    if required_name is not None:
+        required_index = _resolve_required_player(players, required_name, required_team)
+
+    lineups: list[pd.DataFrame] = []
+    forbidden_combos: list[frozenset[int]] = []
+    for _ in range(count):
+        try:
+            chosen = _solve(players, salary_cap, forbidden_combos, required_index)
+        except InfeasibleLineupError:
+            break
+        lineups.append(_to_lineup_df(players, chosen))
+        forbidden_combos.append(frozenset(chosen))
+
+    if not lineups:
+        raise InfeasibleLineupError(
+            f"No valid lineup fits under a ${salary_cap:,.0f} salary cap."
+        )
+    return lineups
 
 
 if __name__ == "__main__":
-    lineup = optimize_lineup(DEFAULT_SALARY_CAP)
-    print(lineup)
-    print(f"\nTotal salary: ${lineup['salary'].sum():,.0f}")
-    print(f"Total projected points: {lineup['projected_points'].sum():.1f}")
+    for n, lineup in enumerate(optimize_lineups(DEFAULT_SALARY_CAP), start=1):
+        print(f"=== Lineup {n} ===")
+        print(lineup)
+        print(f"Total salary: ${lineup['salary'].sum():,.0f}")
+        print(f"Total projected points: {lineup['projected_points'].sum():.1f}\n")

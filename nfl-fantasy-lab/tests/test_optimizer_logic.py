@@ -10,7 +10,9 @@ import pytest
 
 from optimizer import (
     optimize_lineup,
+    optimize_lineups,
     InfeasibleLineupError,
+    PlayerNotFoundError,
     load_players,
     ROSTER_SLOTS,
     DEFAULT_SALARY_CAP,
@@ -101,6 +103,98 @@ def test_qb_with_no_teammate_in_pool_is_never_picked():
 
     lineup = optimize_lineup(DEFAULT_SALARY_CAP, players_with_lonely_qb)
     assert "Lonely QB" not in set(lineup["name"])
+
+
+def test_optimize_lineups_returns_five_distinct_lineups():
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5)
+    assert len(lineups) == 5
+
+    seen = set()
+    for lineup in lineups:
+        assert len(lineup) == 9
+        assert lineup["salary"].sum() <= DEFAULT_SALARY_CAP
+        key = frozenset(zip(lineup["name"], lineup["team"]))
+        assert key not in seen, "lineup repeated exactly"
+        seen.add(key)
+
+
+def test_optimize_lineups_ranked_best_first():
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5)
+    totals = [lineup["projected_points"].sum() for lineup in lineups]
+    assert totals == sorted(totals, reverse=True)
+
+
+def test_optimize_lineups_each_lineup_still_stacks_the_qb():
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5)
+    for lineup in lineups:
+        qb_team = lineup.loc[lineup["position"] == "QB", "team"].iloc[0]
+        catchers = lineup[lineup["position"].isin(["WR", "TE"])]
+        assert qb_team in set(catchers["team"])
+
+
+def test_optimize_lineups_returns_fewer_when_pool_too_thin():
+    # Exactly enough players to fill every slot with zero spares anywhere
+    # except one extra RB for FLEX, so only a single valid 9-man roster
+    # exists -- optimize_lineups should return just that one lineup rather
+    # than erroring out trying to find 5.
+    thin_pool = pd.DataFrame(
+        [
+            {"name": "QB1", "position": "QB", "team": "AAA", "salary": 6000, "projected_points": 20},
+            {"name": "RB1", "position": "RB", "team": "AAA", "salary": 5000, "projected_points": 12},
+            {"name": "RB2", "position": "RB", "team": "BBB", "salary": 4800, "projected_points": 11},
+            {"name": "RB3", "position": "RB", "team": "BBB", "salary": 4500, "projected_points": 10},
+            {"name": "WR1", "position": "WR", "team": "AAA", "salary": 5200, "projected_points": 13},
+            {"name": "WR2", "position": "WR", "team": "BBB", "salary": 4900, "projected_points": 12},
+            {"name": "WR3", "position": "WR", "team": "BBB", "salary": 4200, "projected_points": 10},
+            {"name": "TE1", "position": "TE", "team": "AAA", "salary": 3000, "projected_points": 7},
+            {"name": "DEF1", "position": "DEF", "team": "AAA", "salary": 2000, "projected_points": 5},
+        ]
+    )
+
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, thin_pool, count=5)
+    assert len(lineups) == 1
+
+
+def test_optimize_lineups_infeasible_cap_raises():
+    with pytest.raises(InfeasibleLineupError):
+        optimize_lineups(500, PLAYERS, count=5)
+
+
+def test_required_player_is_forced_into_every_lineup():
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name="Patrick Mahomes")
+    assert len(lineups) == 5
+    for lineup in lineups:
+        assert "Patrick Mahomes" in set(lineup["name"])
+        # The stack requirement must still hold for the locked-in QB too.
+        catchers = lineup[lineup["position"].isin(["WR", "TE"])]
+        assert "KC" in set(catchers["team"])
+
+
+def test_required_player_not_found_raises():
+    with pytest.raises(PlayerNotFoundError):
+        optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, required_name="Nobody Real")
+
+
+def test_required_player_ambiguous_without_team_raises():
+    row = PLAYERS[PLAYERS["position"] == "WR"].iloc[0].copy()
+    twin_a, twin_b = row.copy(), row.copy()
+    twin_a["name"] = twin_b["name"] = "Same Name Guy"
+    twin_a["team"], twin_b["team"] = "AAA", "BBB"
+    players_with_twins = pd.concat(
+        [PLAYERS, twin_a.to_frame().T, twin_b.to_frame().T], ignore_index=True
+    )
+
+    with pytest.raises(PlayerNotFoundError):
+        optimize_lineups(DEFAULT_SALARY_CAP, players_with_twins, required_name="Same Name Guy")
+
+    # Naming the team disambiguates and succeeds.
+    lineups = optimize_lineups(
+        DEFAULT_SALARY_CAP, players_with_twins, count=1,
+        required_name="Same Name Guy", required_team="AAA",
+    )
+    matches = lineups[0][lineups[0]["name"] == "Same Name Guy"]
+    assert len(matches) == 1
+    assert matches.iloc[0]["team"] == "AAA"
 
 
 def test_dedupe_keeps_same_name_different_team_distinct():

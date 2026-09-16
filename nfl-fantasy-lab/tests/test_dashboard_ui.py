@@ -33,18 +33,28 @@ def test_standings_sorted_by_win_pct_desc(page: Page, live_server: str):
     assert win_pcts == sorted(win_pcts, reverse=True)
 
 
-def test_optimizer_generates_lineup_within_cap(page: Page, live_server: str):
+def test_optimizer_generates_five_distinct_lineups_within_cap(page: Page, live_server: str):
     page.goto(live_server + "/optimizer")
     page.fill("#salary_cap", "60000")
     page.click("#generate-btn")
 
     expect(page.locator("#lineup-results")).to_be_visible()
-    lineup_rows = page.locator(".lineup-row")
-    assert lineup_rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
+    blocks = page.locator(".lineup-block")
+    expect(blocks).to_have_count(5)
 
-    total_text = page.locator("#total-salary").inner_text()
-    total_salary = int(re.sub(r"[^\d]", "", total_text))
-    assert total_salary <= 60000
+    seen = set()
+    for i in range(5):
+        block = blocks.nth(i)
+        rows = block.locator(".lineup-row")
+        assert rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
+
+        total_text = block.locator(".lineup-total-salary").inner_text()
+        total_salary = int(re.sub(r"[^\d]", "", total_text))
+        assert total_salary <= 60000
+
+        names = tuple(sorted(rows.locator("td:nth-child(2)").all_inner_texts()))
+        assert names not in seen, "a lineup repeated exactly"
+        seen.add(names)
 
 
 def test_optimizer_rejects_infeasible_cap(page: Page, live_server: str):
@@ -88,6 +98,7 @@ def test_upload_fanduel_csv_switches_player_pool(page: Page, live_server: str, m
     page.click("#generate-btn")
 
     expect(page.locator("#lineup-results")).to_be_visible()
-    assert page.locator(".lineup-row").count() == 9
-    names = page.locator(".lineup-row td:nth-child(2)").all_inner_texts()
+    first_block = page.locator(".lineup-block").first
+    assert first_block.locator(".lineup-row").count() == 9
+    names = first_block.locator(".lineup-row td:nth-child(2)").all_inner_texts()
     assert any("Test" in name for name in names)

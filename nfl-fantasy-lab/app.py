@@ -9,7 +9,12 @@ import pandas as pd
 # regardless of what directory the process was launched from.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from optimizer import optimize_lineup, InfeasibleLineupError, DEFAULT_SALARY_CAP
+from optimizer import (
+    optimize_lineups,
+    InfeasibleLineupError,
+    PlayerNotFoundError,
+    DEFAULT_SALARY_CAP,
+)
 from fanduel_import import FanDuelImportError
 from player_pool import build_player_pool, save_uploaded_csv
 from game_predictor import (
@@ -22,6 +27,8 @@ from game_predictor import (
     train_model,
 )
 from real_stats import latest_available_season
+
+LINEUP_COUNT = 5
 
 app = Flask(__name__)
 app.secret_key = "dev-only-not-for-production"
@@ -41,35 +48,47 @@ def dashboard():
 
 @app.route("/optimizer", methods=["GET", "POST"])
 def optimizer_page():
-    lineup = None
+    lineups = None
     error = None
     salary_cap = DEFAULT_SALARY_CAP
+    must_include = ""
 
     players, pool_source = build_player_pool()
 
     if request.method == "POST":
+        must_include = request.form.get("must_include", "").strip()
         try:
             salary_cap = float(request.form.get("salary_cap", DEFAULT_SALARY_CAP))
             if salary_cap <= 0:
                 raise ValueError("Salary cap must be positive.")
-            result = optimize_lineup(salary_cap, players)
-            lineup = {
-                "players": result.to_dict(orient="records"),
-                "total_salary": int(result["salary"].sum()),
-                "total_points": round(float(result["projected_points"].sum()), 1),
-            }
+            results = optimize_lineups(
+                salary_cap, players, count=LINEUP_COUNT,
+                required_name=must_include or None,
+            )
+            lineups = [
+                {
+                    "players": result.to_dict(orient="records"),
+                    "total_salary": int(result["salary"].sum()),
+                    "total_points": round(float(result["projected_points"].sum()), 1),
+                }
+                for result in results
+            ]
         except InfeasibleLineupError as exc:
+            error = str(exc)
+        except PlayerNotFoundError as exc:
             error = str(exc)
         except ValueError:
             error = "Please enter a valid positive number for the salary cap."
 
     return render_template(
         "optimizer.html",
-        lineup=lineup,
+        lineups=lineups,
         error=error,
         salary_cap=salary_cap,
         pool_source=pool_source,
         player_count=len(players),
+        lineup_count=LINEUP_COUNT,
+        must_include=must_include,
     )
 
 

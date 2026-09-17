@@ -160,6 +160,15 @@ def test_optimize_lineups_infeasible_cap_raises():
         optimize_lineups(500, PLAYERS, count=5)
 
 
+def test_position_shortfall_raises_specific_message_naming_the_position():
+    # Zero RBs at all -- a shortfall that has nothing to do with the salary
+    # cap (e.g. what matchup-eligibility filtering can produce), so the
+    # error should name RB specifically rather than blaming the cap.
+    no_rb_pool = PLAYERS[PLAYERS["position"] != "RB"]
+    with pytest.raises(InfeasibleLineupError, match="RB"):
+        optimize_lineups(DEFAULT_SALARY_CAP, no_rb_pool, count=5)
+
+
 def test_required_player_is_forced_into_every_lineup():
     lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name="Patrick Mahomes")
     assert len(lineups) == 5

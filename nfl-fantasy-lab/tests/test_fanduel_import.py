@@ -38,7 +38,7 @@ def test_missing_required_column_raises_clear_error():
     assert "salary" in message
 
 
-def test_omits_out_doubtful_and_ir_players_but_keeps_questionable():
+def test_omits_any_player_with_an_injury_or_questionable_designation():
     csv_text = (
         "Position,Nickname,Salary,Team,Injury Indicator\n"
         "QB,Healthy Guy,8000,KC,\n"
@@ -48,8 +48,8 @@ def test_omits_out_doubtful_and_ir_players_but_keeps_questionable():
         "TE,IR Guy,4000,BUF,IR\n"
     )
     df = load_fanduel_csv(io.StringIO(csv_text))
-    assert list(df["name"]) == ["Healthy Guy", "Questionable Guy"]
-    assert df.attrs["excluded_injured_count"] == 3
+    assert list(df["name"]) == ["Healthy Guy"]
+    assert df.attrs["excluded_injured_count"] == 4
 
 
 def test_missing_injury_column_keeps_everyone():

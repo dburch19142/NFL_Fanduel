@@ -137,6 +137,15 @@ button:hover {
   color: #555;
 }
 
+footer.note {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #ddd;
+  color: #666;
+  font-size: 0.82rem;
+  max-width: 70ch;
+}
+
 #upload-form {
   margin-bottom: 0;
 }

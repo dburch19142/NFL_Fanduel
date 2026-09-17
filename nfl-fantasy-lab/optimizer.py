@@ -58,6 +58,24 @@ def _dedupe_players(players: pd.DataFrame) -> pd.DataFrame:
     return deduped.reset_index(drop=True)
 
 
+def _check_position_minimums(players: pd.DataFrame, salary_cap: float) -> None:
+    """Raises a specific InfeasibleLineupError naming which position(s) don't
+    have enough candidates to fill their required slots, before the solver
+    even runs -- a much more useful message than the generic "no lineup fits
+    the cap" the LP itself reports when a position is simply empty (e.g.
+    after matchup-eligibility filtering leaves too few RBs to fill 2 slots).
+    """
+    shortfalls = []
+    for pos, minimum in ROSTER_SLOTS.items():
+        available = int((players["position"] == pos).sum())
+        if available < minimum:
+            shortfalls.append(f"{pos} (need {minimum}, have {available})")
+    if shortfalls:
+        raise InfeasibleLineupError(
+            "Not enough eligible players to fill the roster: " + ", ".join(shortfalls) + "."
+        )
+
+
 def _solve(
     players: pd.DataFrame,
     salary_cap: float,
@@ -101,8 +119,8 @@ def _solve(
         ROSTER_SLOTS[p] for p in FLEX_ELIGIBLE
     ) + FLEX_COUNT
 
-    # QB stack: if a given QB is picked, at least one WR/TE from his team
-    # must be picked too. picks[q] <= sum(teammates) forces the sum to be
+    # QB stack: if a given QB is picked, at least one WR or TE from his team
+    # must be picked too. picks[q] <= sum(teammates) forces that sum to be
     # >=1 whenever picks[q]=1, and is a no-op whenever picks[q]=0.
     qb_idx = players.index[players["position"] == "QB"]
     for q in qb_idx:
@@ -177,6 +195,7 @@ def optimize_lineup(salary_cap: float, players: pd.DataFrame | None = None) -> p
     if players is None:
         players = load_players()
     players = _dedupe_players(players)
+    _check_position_minimums(players, salary_cap)
     chosen = _solve(players, salary_cap, forbidden_combos=[])
     return _to_lineup_df(players, chosen)
 
@@ -205,6 +224,7 @@ def optimize_lineups(
     if players is None:
         players = load_players()
     players = _dedupe_players(players)
+    _check_position_minimums(players, salary_cap)
 
     required_index = None
     if required_name is not None:

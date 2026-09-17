@@ -2,10 +2,16 @@
 {% block title %}Lineup Optimizer - NFL Fantasy Lab{% endblock %}
 {% block content %}
   <h1>Fantasy Lineup Optimizer</h1>
+  {% if lineup_count == 1 %}
+  <p>Enter a salary cap and generate the highest-scoring lineup that fits under it
+     (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX, 1 DEF) &mdash; matches FanDuel's NFL classic
+     contest rules ($60,000 default cap).</p>
+  {% else %}
   <p>Enter a salary cap and generate the {{ lineup_count }} highest-scoring distinct lineups that fit
      under it (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX, 1 DEF) &mdash; matches FanDuel's NFL classic
      contest rules ($60,000 default cap). Each lineup differs from every other one by at
      least one player.</p>
+  {% endif %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -34,7 +40,7 @@
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
     <label for="must_include">Must include (optional)</label>
     <input type="text" id="must_include" name="must_include" value="{{ must_include }}" placeholder="e.g. Caleb Williams">
-    <button type="submit" id="generate-btn">Generate {{ lineup_count }} Lineups</button>
+    <button type="submit" id="generate-btn">{{ "Generate Lineup" if lineup_count == 1 else "Generate " ~ lineup_count ~ " Lineups" }}</button>
   </form>
 
   {% if error %}
@@ -49,7 +55,7 @@
       {% endif %}
       {% for lineup in lineups %}
       <div class="lineup-block" id="lineup-{{ loop.index }}">
-        <h2>Lineup {{ loop.index }}</h2>
+        {% if lineup_count > 1 %}<h2>Lineup {{ loop.index }}</h2>{% endif %}
         <table class="lineup-table">
           <thead>
             <tr><th>Position</th><th>Player</th><th>Team</th><th>Salary</th><th>Proj. Pts</th></tr>
@@ -72,4 +78,16 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  <footer class="note">
+    <p>When you've uploaded a real FanDuel export, every QB/RB/WR/TE candidate also has to clear this
+       week's matchup rules before the optimizer will consider them: QB must rank top 15 at
+       the position in per-game passing yardage <em>and</em> passing touchdowns, and be facing a
+       bottom-10 pass defense; RB must rank top 15 in per-game rushing yardage <em>and</em> rushing
+       touchdowns, and be facing a bottom-5 rush defense; WR must rank top 15 in per-game
+       receiving yards, targets, <em>and</em> touchdowns; TE must rank top 15 in touchdowns. Anyone
+       carrying any injury designation &mdash; including Questionable &mdash; is excluded outright.
+       These are strict, intersecting filters, so especially early in a season it's normal for them
+       to leave too few eligible players at a position to build a lineup at all.</p>
+  </footer>
 {% endblock %}

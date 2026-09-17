@@ -33,28 +33,21 @@ def test_standings_sorted_by_win_pct_desc(page: Page, live_server: str):
     assert win_pcts == sorted(win_pcts, reverse=True)
 
 
-def test_optimizer_generates_five_distinct_lineups_within_cap(page: Page, live_server: str):
+def test_optimizer_generates_lineup_within_cap(page: Page, live_server: str):
     page.goto(live_server + "/optimizer")
     page.fill("#salary_cap", "60000")
     page.click("#generate-btn")
 
     expect(page.locator("#lineup-results")).to_be_visible()
     blocks = page.locator(".lineup-block")
-    expect(blocks).to_have_count(5)
+    expect(blocks).to_have_count(1)
 
-    seen = set()
-    for i in range(5):
-        block = blocks.nth(i)
-        rows = block.locator(".lineup-row")
-        assert rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
+    rows = blocks.first.locator(".lineup-row")
+    assert rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
 
-        total_text = block.locator(".lineup-total-salary").inner_text()
-        total_salary = int(re.sub(r"[^\d]", "", total_text))
-        assert total_salary <= 60000
-
-        names = tuple(sorted(rows.locator("td:nth-child(2)").all_inner_texts()))
-        assert names not in seen, "a lineup repeated exactly"
-        seen.add(names)
+    total_text = blocks.first.locator(".lineup-total-salary").inner_text()
+    total_salary = int(re.sub(r"[^\d]", "", total_text))
+    assert total_salary <= 60000
 
 
 def test_optimizer_rejects_infeasible_cap(page: Page, live_server: str):
@@ -74,14 +67,21 @@ def test_optimizer_rejects_negative_cap(page: Page, live_server: str):
     expect(page.locator("#error-message")).to_be_visible()
 
 
+def _unavailable(*args, **kwargs):
+    raise RuntimeError("live data not available in this test")
+
+
 def test_upload_fanduel_csv_switches_player_pool(page: Page, live_server: str, monkeypatch, no_uploaded_pool):
-    # The fixture uses fake player names, so skip the real-stats merge (which
-    # would otherwise hit the network) and fall back straight to FanDuel FPPG.
+    # The fixture uses fake player names/teams, so skip the real-stats merge
+    # and the matchup-eligibility filter -- both would otherwise hit the
+    # network, and the fake players could never appear in real ranking data
+    # anyway, so the eligibility filter would wipe out this whole fixture.
     monkeypatch.setattr(
         player_pool,
         "get_offense_projections",
         lambda *a, **k: pd.DataFrame(columns=["match_key", "position", "projected_points", "season"]),
     )
+    monkeypatch.setattr(player_pool, "build_eligibility", _unavailable)
 
     page.goto(live_server + "/optimizer")
     expect(page.locator("#data-source")).to_contain_text("sample data")

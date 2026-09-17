@@ -29,9 +29,13 @@ COLUMN_ALIASES = {
     "injury_indicator": ["injury indicator"],
 }
 
-# Statuses that mean a player is unlikely or unable to play. "Questionable"
-# is deliberately kept -- those players start more often than not.
-OUT_INJURY_STATUSES = {"O", "OUT", "IR", "D", "DOUBTFUL", "PUP", "NFI", "SUSP", "NA"}
+# Any non-empty injury designation, including "Questionable" -- a clean
+# bill of health is required, full stop. (An earlier version of this tool
+# kept Questionable players, on the theory that they start more often than
+# not; that's no longer the policy here.)
+OUT_INJURY_STATUSES = {
+    "O", "OUT", "IR", "D", "DOUBTFUL", "Q", "QUESTIONABLE", "PUP", "NFI", "SUSP", "NA",
+}
 
 
 class FanDuelImportError(ValueError):

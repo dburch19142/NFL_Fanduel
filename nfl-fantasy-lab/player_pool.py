@@ -8,9 +8,37 @@ import pandas as pd
 
 from fanduel_import import load_fanduel_csv
 from real_stats import get_offense_projections, normalize_name
+from matchup_filters import build_eligibility, TOP_N, BOTTOM_N_PASS_DEFENSE, BOTTOM_N_RUSH_DEFENSE
 from optimizer import PLAYERS_CSV
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
+
+
+def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Restricts QB/RB/WR/TE to this week's matchup-eligible players (see
+    matchup_filters.py for the exact top-N/bottom-N rules); DEF passes
+    through unfiltered, since FanDuel doesn't expose individual defensive
+    players to rank the same way. Falls back to the unfiltered pool, noted
+    as such, if the live schedule/stats can't be fetched.
+    """
+    try:
+        result = build_eligibility()
+    except Exception:
+        return pool, "matchup filters unavailable this run"
+
+    eligible = result["eligible"]
+    keys = list(zip(pool["name"].apply(normalize_name), pool["team"].str.upper()))
+    keep = [
+        pos == "DEF" or key in eligible.get(pos, set())
+        for key, pos in zip(keys, pool["position"])
+    ]
+    filtered = pool[keep].reset_index(drop=True)
+    note = (
+        f"week {result['week']} matchup filters (top-{TOP_N} stats, "
+        f"bottom-{BOTTOM_N_PASS_DEFENSE} pass D / bottom-{BOTTOM_N_RUSH_DEFENSE} rush D, "
+        "no injury designation)"
+    )
+    return filtered, note
 
 
 def save_uploaded_csv(file_storage) -> pd.DataFrame:
@@ -63,4 +91,6 @@ def build_player_pool(force_refresh_stats: bool = False) -> tuple[pd.DataFrame, 
     pool = pool.dropna(subset=["projected_points"])
     pool["projected_points"] = pool["projected_points"].round(2)
 
-    return pool, f"uploaded FanDuel salaries + {stats_note}"
+    pool, eligibility_note = _apply_matchup_eligibility(pool)
+
+    return pool, f"uploaded FanDuel salaries + {stats_note} + {eligibility_note}"

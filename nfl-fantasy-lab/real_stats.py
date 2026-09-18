@@ -2,6 +2,12 @@
 scores them using FanDuel's actual NFL classic scoring rules, to produce a
 season-average projection for each offensive skill player.
 
+Player-level stats come from nflverse's stats_player_week release, the same
+per-week dataset matchup_filters.py uses -- unlike the player_stats release
+(still used by latest_available_season, below, for the game predictor), it's
+kept current within the season in progress, so projections reflect actual
+current-season form instead of lagging a full season behind.
+
 FanDuel classic scoring (as used here):
   Passing:   0.04 pts/yard, +4/TD, -1/INT
   Rushing:   0.1 pts/yard,  +6/TD
@@ -22,6 +28,7 @@ import pandas as pd
 CACHE_DIR = "data/cache"
 CACHE_MAX_AGE_SECONDS = 24 * 60 * 60  # 1 day
 
+# Used only by latest_available_season(), for the game predictor's season range.
 PARQUET_URL = "https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats_{0}.parquet"
 
 SUFFIXES = (" jr", " sr", " ii", " iii", " iv", " v")
@@ -89,8 +96,12 @@ def get_offense_projections(season: int | None = None, force_refresh: bool = Fal
     """
     import os
 
+    # Deferred to avoid a circular import (matchup_filters imports normalize_name
+    # from this module at load time).
+    from matchup_filters import STATS_PLAYER_WEEK_URL, latest_season_with_player_data
+
     if season is None:
-        season = latest_available_season()
+        season = latest_season_with_player_data()
 
     cache_file = _cache_path(season)
     if not force_refresh and os.path.exists(cache_file):
@@ -98,18 +109,17 @@ def get_offense_projections(season: int | None = None, force_refresh: bool = Fal
         if age < CACHE_MAX_AGE_SECONDS:
             return pd.read_csv(cache_file)
 
-    import nfl_data_py as nfl
-
-    weekly = nfl.import_weekly_data([season])
+    weekly = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season))
     weekly = weekly[weekly["season_type"] == "REG"]
     weekly = weekly[weekly["position"].isin(["QB", "RB", "WR", "TE"])].copy()
+    weekly["interceptions"] = weekly["passing_interceptions"]
     weekly["fanduel_points"] = _fanduel_points(weekly)
 
     grouped = (
-        weekly.groupby(["player_display_name", "position", "recent_team"])
+        weekly.groupby(["player_display_name", "position", "team"])
         .agg(projected_points=("fanduel_points", "mean"), games_played=("fanduel_points", "count"))
         .reset_index()
-        .rename(columns={"player_display_name": "name", "recent_team": "team"})
+        .rename(columns={"player_display_name": "name"})
     )
     grouped["projected_points"] = grouped["projected_points"].round(2)
     grouped["season"] = season

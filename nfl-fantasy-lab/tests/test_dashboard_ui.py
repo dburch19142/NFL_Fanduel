@@ -1,6 +1,7 @@
 """Playwright regression tests that drive the app in a real browser."""
 import os
 import re
+import shutil
 
 import pandas as pd
 import pytest
@@ -13,10 +14,24 @@ FIXTURE_CSV = os.path.join(os.path.dirname(__file__), "fixtures", "fanduel_sampl
 
 @pytest.fixture
 def no_uploaded_pool():
-    """Ensures a FanDuel upload from one test doesn't leak into the next."""
+    """Ensures a FanDuel upload from one test doesn't leak into the next.
+
+    Snapshots whatever upload already exists (e.g. a real one a person saved
+    outside of tests) and restores it afterward, rather than just deleting
+    whatever the test leaves behind -- that used to destroy a real upload
+    any time this test ran after one.
+    """
+    pre_existing = player_pool.UPLOAD_PATH + ".pretest-backup"
+    had_upload = os.path.exists(player_pool.UPLOAD_PATH)
+    if had_upload:
+        shutil.move(player_pool.UPLOAD_PATH, pre_existing)
+
     yield
+
     if os.path.exists(player_pool.UPLOAD_PATH):
         os.remove(player_pool.UPLOAD_PATH)
+    if had_upload:
+        shutil.move(pre_existing, player_pool.UPLOAD_PATH)
 
 
 def test_standings_dashboard_loads(page: Page, live_server: str):

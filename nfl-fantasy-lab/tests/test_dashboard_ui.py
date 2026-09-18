@@ -14,24 +14,41 @@ FIXTURE_CSV = os.path.join(os.path.dirname(__file__), "fixtures", "fanduel_sampl
 
 @pytest.fixture
 def no_uploaded_pool():
-    """Ensures a FanDuel upload from one test doesn't leak into the next.
+    """Ensures a FanDuel upload from one test doesn't leak into the next, and
+    that driving a real upload through the live app doesn't leave test
+    fixture rows sitting in the real bundled sample data.
 
-    Snapshots whatever upload already exists (e.g. a real one a person saved
-    outside of tests) and restores it afterward, rather than just deleting
-    whatever the test leaves behind -- that used to destroy a real upload
-    any time this test ran after one.
+    save_uploaded_csv() refreshes PLAYERS_CSV (data/players.csv) as a side
+    effect of every upload, real or test-fixture, so a test that uploads
+    FIXTURE_CSV through the app would otherwise overwrite that real file with
+    "Test QB One"-style fixture rows.
+
+    UPLOAD_PATH is moved out of the way (this test expects to start from "no
+    upload yet") and restored after. PLAYERS_CSV is left in place -- always
+    expected to exist -- but backed up and restored, since the test's own
+    upload will overwrite it. Snapshotting and restoring rather than just
+    deleting matters because these paths can hold real data a person saved
+    outside of tests; deleting it unconditionally used to destroy it.
     """
-    pre_existing = player_pool.UPLOAD_PATH + ".pretest-backup"
+    upload_backup = player_pool.UPLOAD_PATH + ".pretest-backup"
     had_upload = os.path.exists(player_pool.UPLOAD_PATH)
     if had_upload:
-        shutil.move(player_pool.UPLOAD_PATH, pre_existing)
+        shutil.move(player_pool.UPLOAD_PATH, upload_backup)
+
+    players_backup = player_pool.PLAYERS_CSV + ".pretest-backup"
+    had_players_csv = os.path.exists(player_pool.PLAYERS_CSV)
+    if had_players_csv:
+        shutil.copy2(player_pool.PLAYERS_CSV, players_backup)
 
     yield
 
     if os.path.exists(player_pool.UPLOAD_PATH):
         os.remove(player_pool.UPLOAD_PATH)
     if had_upload:
-        shutil.move(pre_existing, player_pool.UPLOAD_PATH)
+        shutil.move(upload_backup, player_pool.UPLOAD_PATH)
+
+    if had_players_csv:
+        shutil.move(players_backup, player_pool.PLAYERS_CSV)
 
 
 def test_standings_dashboard_loads(page: Page, live_server: str):

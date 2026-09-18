@@ -41,11 +41,34 @@ def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return filtered, note
 
 
+def _refresh_sample_data(df: pd.DataFrame) -> None:
+    """Keeps the bundled sample-data fallback (PLAYERS_CSV) in sync with the
+    latest real FanDuel upload, so anyone who hasn't uploaded their own
+    export still sees a current, real slate instead of a stale fixture.
+
+    Uses FanDuel's own FPPG as the projection, since the real nflverse stats
+    merge only happens later in build_player_pool -- good enough for a
+    fallback dataset. Some rows (bench players with no games yet) have no
+    FPPG at all; those become 0 rather than left blank, since a blank
+    projected_points would break the optimizer's objective function.
+
+    Some weeks, one or two teams are legitimately absent from a FanDuel
+    export entirely -- e.g. a team that already played Thursday night before
+    this export was pulled. That's expected, not a bug to work around here.
+    """
+    sample = df.rename(columns={"fppg": "projected_points"})
+    sample["projected_points"] = sample["projected_points"].fillna(0).round(1)
+    sample[["name", "position", "team", "salary", "projected_points"]].to_csv(
+        PLAYERS_CSV, index=False
+    )
+
+
 def save_uploaded_csv(file_storage) -> pd.DataFrame:
     """Validates and persists an uploaded FanDuel export, returning its parsed form."""
     df = load_fanduel_csv(file_storage.stream)
     os.makedirs(os.path.dirname(UPLOAD_PATH), exist_ok=True)
     df.to_csv(UPLOAD_PATH, index=False)
+    _refresh_sample_data(df)
     return df
 
 

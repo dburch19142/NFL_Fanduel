@@ -1,4 +1,6 @@
-"""Unit tests for player_pool.py's matchup-eligibility filtering."""
+"""Unit tests for player_pool.py's matchup-eligibility filtering and upload handling."""
+import io
+
 import pandas as pd
 
 import player_pool
@@ -63,3 +65,29 @@ def test_matchup_eligibility_falls_back_gracefully_when_unavailable(monkeypatch)
 
     assert len(filtered) == len(pool)  # unfiltered fallback, nobody dropped
     assert "unavailable" in note
+
+
+class _FakeUpload:
+    def __init__(self, csv_text: str):
+        self.stream = io.BytesIO(csv_text.encode("utf-8"))
+
+
+def test_save_uploaded_csv_refreshes_sample_data(tmp_path, monkeypatch):
+    monkeypatch.setattr(player_pool, "UPLOAD_PATH", str(tmp_path / "fanduel_latest.csv"))
+    monkeypatch.setattr(player_pool, "PLAYERS_CSV", str(tmp_path / "players.csv"))
+
+    csv_text = (
+        "Position,Salary,Team,Nickname,FPPG,Injury Indicator\n"
+        "QB,8000,AAA,Healthy Guy,20.5,\n"
+        "WR,4000,BBB,Hurt Guy,15.0,Q\n"
+        "TE,4500,CCC,No Fppg Guy,,\n"
+    )
+
+    player_pool.save_uploaded_csv(_FakeUpload(csv_text))
+
+    sample = pd.read_csv(player_pool.PLAYERS_CSV)
+    assert set(sample["name"]) == {"Healthy Guy", "No Fppg Guy"}  # injured player excluded
+    assert list(sample.columns) == ["name", "position", "team", "salary", "projected_points"]
+
+    no_fppg_row = sample[sample["name"] == "No Fppg Guy"].iloc[0]
+    assert no_fppg_row["projected_points"] == 0  # blank FPPG becomes 0, not NaN

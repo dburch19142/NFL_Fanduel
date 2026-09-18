@@ -2,8 +2,8 @@
 
 Roster shape matches FanDuel's NFL classic contest: 1 QB, 2 RB, 3 WR, 1 TE,
 1 FLEX, 1 DEF, $60,000 default cap. The minimum possible 9-man lineup with
-the bundled sample data costs about $47,200, so test caps below that are
-expected to be infeasible.
+the bundled sample data costs $37,000, so test caps below that are expected
+to be infeasible.
 """
 import pandas as pd
 import pytest
@@ -170,13 +170,13 @@ def test_position_shortfall_raises_specific_message_naming_the_position():
 
 
 def test_required_player_is_forced_into_every_lineup():
-    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name="Patrick Mahomes")
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name="Caleb Williams")
     assert len(lineups) == 5
     for lineup in lineups:
-        assert "Patrick Mahomes" in set(lineup["name"])
+        assert "Caleb Williams" in set(lineup["name"])
         # The stack requirement must still hold for the locked-in QB too.
         catchers = lineup[lineup["position"].isin(["WR", "TE"])]
-        assert "KC" in set(catchers["team"])
+        assert "CHI" in set(catchers["team"])
 
 
 def test_required_player_not_found_raises():

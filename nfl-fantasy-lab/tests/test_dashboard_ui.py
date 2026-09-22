@@ -72,14 +72,22 @@ def test_optimizer_generates_lineup_within_cap(page: Page, live_server: str):
 
     expect(page.locator("#lineup-results")).to_be_visible()
     blocks = page.locator(".lineup-block")
-    expect(blocks).to_have_count(1)
+    expect(blocks).to_have_count(10)  # 10 distinct lineups, each differing by at least one player
 
-    rows = blocks.first.locator(".lineup-row")
-    assert rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
+    for i in range(blocks.count()):
+        block = blocks.nth(i)
+        rows = block.locator(".lineup-row")
+        assert rows.count() == 9  # QB, 2RB, 3WR, TE, FLEX, DEF (FanDuel classic)
 
-    total_text = blocks.first.locator(".lineup-total-salary").inner_text()
-    total_salary = int(re.sub(r"[^\d]", "", total_text))
-    assert total_salary <= 60000
+        total_text = block.locator(".lineup-total-salary").inner_text()
+        total_salary = int(re.sub(r"[^\d]", "", total_text))
+        assert total_salary <= 60000
+
+    lineups_rosters = [
+        frozenset(row.inner_text() for row in blocks.nth(i).locator(".lineup-row td:nth-child(2)").all())
+        for i in range(blocks.count())
+    ]
+    assert len(set(lineups_rosters)) == len(lineups_rosters)  # every lineup is actually distinct
 
 
 def test_optimizer_rejects_infeasible_cap(page: Page, live_server: str):

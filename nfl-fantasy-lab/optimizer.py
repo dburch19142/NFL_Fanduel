@@ -81,11 +81,14 @@ def _solve(
     salary_cap: float,
     forbidden_combos: list[frozenset[int]],
     required_index: int | None = None,
+    forbidden_indices: frozenset[int] = frozenset(),
 ) -> list[int]:
     """Solves one lineup, forbidding any combination of picks that exactly
-    matches a previously-found lineup (by row index into `players`), and
+    matches a previously-found lineup (by row index into `players`),
     optionally forcing a specific row index to be included (a "must-include"
-    or "locked" player, in DFS terms).
+    or "locked" player, in DFS terms), and optionally forbidding a set of row
+    indices from being picked at all (e.g. QBs already used in an earlier
+    lineup, to diversify the QB/stack across lineups).
 
     Returns the list of chosen row indices. Raises InfeasibleLineupError if
     no valid, not-yet-used roster fits under the cap.
@@ -137,6 +140,9 @@ def _solve(
 
     if required_index is not None:
         prob += picks[required_index] == 1
+
+    for i in forbidden_indices:
+        prob += picks[i] == 0
 
     status = prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
@@ -209,9 +215,13 @@ def optimize_lineups(
 ) -> list[pd.DataFrame]:
     """Returns up to `count` distinct lineups, best first.
 
-    Each lineup differs from every earlier one by at least one player.
-    Later lineups trade off some points for that variety, since each one
-    is the best lineup that avoids exactly repeating any earlier one.
+    Each lineup differs from every earlier one by at least one player, and
+    also uses a different QB -- and therefore a different QB/pass-catcher
+    stack -- than every earlier one, as long as a fresh, still-affordable
+    QB/stack combination exists. Only once every QB has already been used,
+    or no unused QB's stack fits under the cap, does a later lineup fall
+    back to reusing an earlier lineup's QB (the best lineup available at
+    that point). Later lineups trade off some points for this variety.
     Raises InfeasibleLineupError if not even one lineup fits under the cap;
     returns fewer than `count` lineups if the pool is too thin to build more
     distinct ones (e.g. FLEX-eligible depth at one position runs out).
@@ -220,6 +230,8 @@ def optimize_lineups(
     that player (a "locked" pick, in DFS terms) -- e.g. a QB you've decided
     on for a favorable matchup, letting the solver build the best roster
     around them. Raises PlayerNotFoundError if no such player is in the pool.
+    If the locked player is itself a QB, every lineup is naturally locked to
+    that same QB/stack, so the QB-diversity rule above doesn't apply.
     """
     if players is None:
         players = load_players()
@@ -229,16 +241,28 @@ def optimize_lineups(
     required_index = None
     if required_name is not None:
         required_index = _resolve_required_player(players, required_name, required_team)
+    required_is_qb = required_index is not None and players.loc[required_index, "position"] == "QB"
 
     lineups: list[pd.DataFrame] = []
     forbidden_combos: list[frozenset[int]] = []
+    used_qb_indices: set[int] = set()
     for _ in range(count):
+        forbidden_qbs = frozenset() if required_is_qb else frozenset(used_qb_indices)
         try:
-            chosen = _solve(players, salary_cap, forbidden_combos, required_index)
+            chosen = _solve(players, salary_cap, forbidden_combos, required_index, forbidden_qbs)
         except InfeasibleLineupError:
-            break
+            if not forbidden_qbs:
+                break
+            # No unused QB's stack is affordable anymore -- fall back to
+            # reusing an earlier lineup's QB rather than stopping early.
+            try:
+                chosen = _solve(players, salary_cap, forbidden_combos, required_index)
+            except InfeasibleLineupError:
+                break
         lineups.append(_to_lineup_df(players, chosen))
         forbidden_combos.append(frozenset(chosen))
+        qb_in_lineup = next(i for i in chosen if players.loc[i, "position"] == "QB")
+        used_qb_indices.add(qb_in_lineup)
 
     if not lineups:
         raise InfeasibleLineupError(

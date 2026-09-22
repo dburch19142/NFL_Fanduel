@@ -28,7 +28,7 @@ from game_predictor import (
 )
 from real_stats import latest_available_season
 
-LINEUP_COUNT = 1
+LINEUP_COUNT = 10
 
 app = Flask(__name__)
 app.secret_key = "dev-only-not-for-production"

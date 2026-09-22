@@ -8,7 +8,13 @@ import pandas as pd
 
 from fanduel_import import load_fanduel_csv
 from real_stats import get_offense_projections, normalize_name
-from matchup_filters import build_eligibility, TOP_N, BOTTOM_N_PASS_DEFENSE, BOTTOM_N_RUSH_DEFENSE
+from matchup_filters import (
+    build_eligibility,
+    TOP_N,
+    BOTTOM_N_PASS_DEFENSE,
+    BOTTOM_N_RUSH_DEFENSE,
+    BOTTOM_N_PASS_DEFENSE_WR_TE,
+)
 from optimizer import PLAYERS_CSV
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
@@ -35,7 +41,8 @@ def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     filtered = pool[keep].reset_index(drop=True)
     note = (
         f"week {result['week']} matchup filters (top-{TOP_N} stats, "
-        f"bottom-{BOTTOM_N_PASS_DEFENSE} pass D / bottom-{BOTTOM_N_RUSH_DEFENSE} rush D, "
+        f"bottom-{BOTTOM_N_PASS_DEFENSE} pass D for QB / bottom-{BOTTOM_N_RUSH_DEFENSE} rush D for RB / "
+        f"bottom-{BOTTOM_N_PASS_DEFENSE_WR_TE} pass D for WR-TE, "
         "no injury designation)"
     )
     return filtered, note

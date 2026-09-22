@@ -6,18 +6,15 @@ Rules implemented, each independently toggleable via ELIGIBILITY_RULES:
        week's opponent must be a bottom-10 pass defense (most pass yards
        allowed/game).
   RB:  top 15 in rushing yards/game AND top 15 in rushing TDs, AND this
-       week's opponent must be a bottom-5 rush defense (most rush yards
+       week's opponent must be a bottom-10 rush defense (most rush yards
        allowed/game).
   WR:  top 15 in receiving yards/game AND top 15 in targets/game AND top 15
-       in receiving TDs.
-  TE:  top 15 in receiving TDs (TE has no yardage/target rule of its own
-       here, but still has to clear the "every position ranks top 15 in
-       touchdowns" bar).
+       in receiving TDs/game, AND this week's opponent must be a bottom-15
+       pass defense in BOTH pass yards allowed/game AND pass TDs allowed/game.
+  TE:  top 15 in receiving yards/game AND top 15 in receiving TDs/game, AND
+       the same bottom-15 pass-defense matchup requirement as WR.
   DEF: no matchup rule -- FanDuel doesn't expose individual defensive
        players to rank this way, so team defenses pass through unfiltered.
-
-Note QB and RB use *different* bottom-N cutoffs for their opponent's
-defense (10 for pass, 5 for rush) -- that's intentional, not a typo.
 
 All rankings are per-player TOTALS across whatever regular-season games
 have been played so far, divided by games played (i.e. a true per-game
@@ -38,7 +35,8 @@ from real_stats import normalize_name
 
 TOP_N = 15
 BOTTOM_N_PASS_DEFENSE = 10
-BOTTOM_N_RUSH_DEFENSE = 5
+BOTTOM_N_RUSH_DEFENSE = 10
+BOTTOM_N_PASS_DEFENSE_WR_TE = 15
 CACHE_DIR = "data/cache"
 CACHE_MAX_AGE_SECONDS = 6 * 60 * 60  # matchups/stats can change gameday-to-gameday
 
@@ -119,31 +117,45 @@ def _bottom_n_teams(df: pd.DataFrame, stat_col: str, n: int) -> set[str]:
 
 
 def get_defense_eligibility(season: int) -> dict[str, set[str]]:
-    """Returns {'pass': {...worst pass defenses...}, 'rush': {...worst rush defenses...}}
-    -- team abbreviations allowing the most yards per game of that type.
-    Pass and rush use different bottom-N cutoffs (BOTTOM_N_PASS_DEFENSE and
-    BOTTOM_N_RUSH_DEFENSE respectively) -- see the module docstring."""
+    """Returns team abbreviations allowing the most yards/TDs per game of
+    each type, as several independently-sized bottom-N sets:
+      'pass':        bottom-BOTTOM_N_PASS_DEFENSE by pass yards allowed/game (used by QB)
+      'rush':        bottom-BOTTOM_N_RUSH_DEFENSE by rush yards allowed/game (used by RB)
+      'pass_yards_wr_te': bottom-BOTTOM_N_PASS_DEFENSE_WR_TE by pass yards allowed/game
+      'pass_tds_wr_te':   bottom-BOTTOM_N_PASS_DEFENSE_WR_TE by pass TDs allowed/game
+    WR/TE eligibility requires a team in *both* of the last two sets --
+    see the module docstring."""
     team_week = pd.read_parquet(STATS_TEAM_WEEK_URL.format(season))
     team_week = team_week[team_week["season_type"] == "REG"]
 
-    per_game = _per_game(team_week, ["team"], ["passing_yards", "rushing_yards"])
-    opponent_lookup_pass = per_game.set_index("team")["passing_yards"]
+    per_game = _per_game(team_week, ["team"], ["passing_yards", "passing_tds", "rushing_yards"])
+    opponent_lookup_pass_yds = per_game.set_index("team")["passing_yards"]
+    opponent_lookup_pass_tds = per_game.set_index("team")["passing_tds"]
     opponent_lookup_rush = per_game.set_index("team")["rushing_yards"]
 
     # A team's defense "allows" whatever its opponents' offenses average --
     # approximated here as the average of each opponent's own per-game output,
     # by joining each week's game back to that same opponent's own row.
     allowed = team_week[["team", "opponent_team", "week"]].drop_duplicates()
-    allowed["pass_yds_allowed"] = allowed["opponent_team"].map(opponent_lookup_pass)
+    allowed["pass_yds_allowed"] = allowed["opponent_team"].map(opponent_lookup_pass_yds)
+    allowed["pass_tds_allowed"] = allowed["opponent_team"].map(opponent_lookup_pass_tds)
     allowed["rush_yds_allowed"] = allowed["opponent_team"].map(opponent_lookup_rush)
     allowed = allowed.groupby("team").agg(
         pass_yds_allowed=("pass_yds_allowed", "mean"),
+        pass_tds_allowed=("pass_tds_allowed", "mean"),
         rush_yds_allowed=("rush_yds_allowed", "mean"),
     ).reset_index()
 
     worst_pass = _bottom_n_teams(allowed, "pass_yds_allowed", BOTTOM_N_PASS_DEFENSE)
     worst_rush = _bottom_n_teams(allowed, "rush_yds_allowed", BOTTOM_N_RUSH_DEFENSE)
-    return {"pass": worst_pass, "rush": worst_rush}
+    worst_pass_yards_wr_te = _bottom_n_teams(allowed, "pass_yds_allowed", BOTTOM_N_PASS_DEFENSE_WR_TE)
+    worst_pass_tds_wr_te = _bottom_n_teams(allowed, "pass_tds_allowed", BOTTOM_N_PASS_DEFENSE_WR_TE)
+    return {
+        "pass": worst_pass,
+        "rush": worst_rush,
+        "pass_yards_wr_te": worst_pass_yards_wr_te,
+        "pass_tds_wr_te": worst_pass_tds_wr_te,
+    }
 
 
 def _cache_path(season: int) -> str:
@@ -154,7 +166,8 @@ def build_eligibility(season: int | None = None, force_refresh: bool = False) ->
     """Computes this week's full eligibility picture. Returns a dict with:
       - 'season', 'week': what the eligibility was computed for
       - 'eligible': {'QB': {(name, team), ...}, 'RB': {...}, 'WR': {...}, 'TE': {...}}
-      - 'defense': the bottom-10-pass / bottom-5-rush defense sets, for display/debugging
+      - 'defense': the bottom-N defense sets described in get_defense_eligibility,
+        for display/debugging
 
     Cached to disk for a few hours at a time, since this pulls three separate
     live datasets (team stats, player stats, schedule) and none of them
@@ -196,7 +209,7 @@ def build_eligibility(season: int | None = None, force_refresh: bool = False) ->
     )
     te = _per_game(
         player_week[player_week["position"] == "TE"],
-        ["player_display_name", "team"], ["receiving_tds"],
+        ["player_display_name", "team"], ["receiving_yards", "receiving_tds"],
     )
 
     qb_yards_top = _top_n_keys(qb, "passing_yards", TOP_N)
@@ -213,12 +226,22 @@ def build_eligibility(season: int | None = None, force_refresh: bool = False) ->
         if matchups.get(team) in defense["rush"]
     }
 
+    wr_te_defense_eligible = defense["pass_yards_wr_te"] & defense["pass_tds_wr_te"]
+
     wr_yards_top = _top_n_keys(wr, "receiving_yards", TOP_N)
     wr_targets_top = _top_n_keys(wr, "targets", TOP_N)
     wr_tds_top = _top_n_keys(wr, "receiving_tds", TOP_N)
-    wr_eligible = wr_yards_top & wr_targets_top & wr_tds_top
+    wr_eligible = {
+        (name, team) for (name, team) in (wr_yards_top & wr_targets_top & wr_tds_top)
+        if matchups.get(team) in wr_te_defense_eligible
+    }
 
-    te_eligible = _top_n_keys(te, "receiving_tds", TOP_N)
+    te_yards_top = _top_n_keys(te, "receiving_yards", TOP_N)
+    te_tds_top = _top_n_keys(te, "receiving_tds", TOP_N)
+    te_eligible = {
+        (name, team) for (name, team) in (te_yards_top & te_tds_top)
+        if matchups.get(team) in wr_te_defense_eligible
+    }
 
     eligible = {"QB": qb_eligible, "RB": rb_eligible, "WR": wr_eligible, "TE": te_eligible}
 

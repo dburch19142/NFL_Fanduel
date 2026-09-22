@@ -22,6 +22,28 @@ from optimizer import (
 PLAYERS = load_players("data/players.csv")
 
 
+def _qb_with_unambiguous_stackmate() -> tuple[str, str]:
+    """Finds a (name, team) QB already in PLAYERS with a same-team WR/TE and
+    a name that appears only once in the pool.
+
+    data/players.csv is refreshed from real, live FanDuel data (see
+    player_pool.py), so any specific player hardcoded here would eventually
+    fall off the current week's slate and break this test -- picking one
+    dynamically keeps the test valid regardless of which real players are in
+    this week's data.
+    """
+    name_counts = PLAYERS["name"].value_counts()
+    for _, qb in PLAYERS[PLAYERS["position"] == "QB"].iterrows():
+        if name_counts[qb["name"]] != 1:
+            continue
+        teammates = PLAYERS[
+            (PLAYERS["team"] == qb["team"]) & (PLAYERS["position"].isin(["WR", "TE"]))
+        ]
+        if not teammates.empty:
+            return qb["name"], qb["team"]
+    raise RuntimeError("No unambiguous QB with a same-team WR/TE found in data/players.csv.")
+
+
 def test_default_salary_cap_matches_fanduel():
     assert DEFAULT_SALARY_CAP == 60000
 
@@ -170,13 +192,14 @@ def test_position_shortfall_raises_specific_message_naming_the_position():
 
 
 def test_required_player_is_forced_into_every_lineup():
-    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name="Caleb Williams")
+    qb_name, qb_team = _qb_with_unambiguous_stackmate()
+    lineups = optimize_lineups(DEFAULT_SALARY_CAP, PLAYERS, count=5, required_name=qb_name)
     assert len(lineups) == 5
     for lineup in lineups:
-        assert "Caleb Williams" in set(lineup["name"])
+        assert qb_name in set(lineup["name"])
         # The stack requirement must still hold for the locked-in QB too.
         catchers = lineup[lineup["position"].isin(["WR", "TE"])]
-        assert "CHI" in set(catchers["team"])
+        assert qb_team in set(catchers["team"])
 
 
 def test_required_player_not_found_raises():
@@ -185,10 +208,16 @@ def test_required_player_not_found_raises():
 
 
 def test_required_player_ambiguous_without_team_raises():
-    row = PLAYERS[PLAYERS["position"] == "WR"].iloc[0].copy()
-    twin_a, twin_b = row.copy(), row.copy()
-    twin_a["name"] = twin_b["name"] = "Same Name Guy"
-    twin_a["team"], twin_b["team"] = "AAA", "BBB"
+    # Deliberately unremarkable salary/points so neither twin is a lineup pick
+    # on its own merit -- isolates the test to the required-player/team
+    # disambiguation logic, regardless of what real players happen to be in
+    # PLAYERS this week.
+    twin_a = pd.Series(
+        {"name": "Same Name Guy", "position": "WR", "team": "AAA", "salary": 4000, "projected_points": 1.0}
+    )
+    twin_b = pd.Series(
+        {"name": "Same Name Guy", "position": "WR", "team": "BBB", "salary": 4000, "projected_points": 1.0}
+    )
     players_with_twins = pd.concat(
         [PLAYERS, twin_a.to_frame().T, twin_b.to_frame().T], ignore_index=True
     )

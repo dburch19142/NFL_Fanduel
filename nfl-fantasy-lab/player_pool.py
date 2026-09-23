@@ -15,9 +15,16 @@ from matchup_filters import (
     BOTTOM_N_RUSH_DEFENSE,
     BOTTOM_N_PASS_DEFENSE_WR_TE,
 )
-from optimizer import PLAYERS_CSV
+from optimizer import PLAYERS_CSV, ROSTER_SLOTS
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
+
+# Positions allowed to fall back to the full real slate (ignoring the
+# matchup-eligibility rule) when too few players clear it to fill the
+# roster. QB and RB are deliberately excluded -- they only need 1 and 2
+# picks respectively, so the strict rule stays in force for them even when
+# thin, per how this was scoped when added.
+RELAXABLE_POSITIONS = ("WR", "TE")
 
 
 def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
@@ -26,6 +33,12 @@ def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     through unfiltered, since FanDuel doesn't expose individual defensive
     players to rank the same way. Falls back to the unfiltered pool, noted
     as such, if the live schedule/stats can't be fetched.
+
+    If the strict rule leaves fewer WR or TE than the roster requires
+    (ROSTER_SLOTS['WR']/['TE']), that position alone falls back to the full
+    real slate instead of leaving the lineup impossible to build -- e.g. a
+    week early in the season where only 2 WRs clear every filter, but the
+    roster needs 3. QB and RB keep the strict requirement regardless.
     """
     try:
         result = build_eligibility()
@@ -34,17 +47,28 @@ def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 
     eligible = result["eligible"]
     keys = list(zip(pool["name"].apply(normalize_name), pool["team"].str.upper()))
-    keep = [
-        pos == "DEF" or key in eligible.get(pos, set())
-        for key, pos in zip(keys, pool["position"])
+    eligible_mask = pd.Series(
+        [pos == "DEF" or key in eligible.get(pos, set()) for key, pos in zip(keys, pool["position"])],
+        index=pool.index,
+    )
+
+    relaxed_positions = [
+        pos for pos in RELAXABLE_POSITIONS
+        if int(((pool["position"] == pos) & eligible_mask).sum()) < ROSTER_SLOTS[pos]
     ]
+
+    keep = eligible_mask | pool["position"].isin(relaxed_positions)
     filtered = pool[keep].reset_index(drop=True)
+
     note = (
         f"week {result['week']} matchup filters (top-{TOP_N} stats, "
         f"bottom-{BOTTOM_N_PASS_DEFENSE} pass D for QB / bottom-{BOTTOM_N_RUSH_DEFENSE} rush D for RB / "
         f"bottom-{BOTTOM_N_PASS_DEFENSE_WR_TE} pass D for WR-TE, "
-        "no injury designation)"
+        "no injury designation"
     )
+    if relaxed_positions:
+        note += f"; {'/'.join(relaxed_positions)} rule relaxed this week (too few eligible)"
+    note += ")"
     return filtered, note
 
 

@@ -7,6 +7,7 @@ case-insensitively against a list of known aliases rather than assuming one
 fixed schema. If your export doesn't match, the error message lists exactly
 what headers were found so the aliases below can be extended.
 """
+import csv
 import io
 
 import pandas as pd
@@ -57,16 +58,56 @@ def _find_column(columns_lower: dict, aliases: list[str]) -> str | None:
     return None
 
 
+def _read_text(file) -> str:
+    if isinstance(file, (bytes, str)) and not _looks_like_path(file):
+        content = file
+    elif isinstance(file, (bytes, str)):
+        with open(file, "rb") as handle:
+            content = handle.read()
+    else:
+        content = file.read()
+    return content.decode("utf-8-sig") if isinstance(content, bytes) else content.lstrip("\ufeff")
+
+
+def _read_player_table(text: str) -> pd.DataFrame:
+    """Reads the player list out of the CSV as a DataFrame of strings.
+
+    A plain export has its header on the first line. The "players list"
+    download from a contest's upload-template page instead puts the list to
+    the right of a blank lineup template (QB,RB,RB,... plus instructions),
+    so its header sits a few rows down and a few columns in. Either way the
+    header is the first row naming both a position and a salary column.
+    """
+    rows = list(csv.reader(io.StringIO(text)))
+    if not rows:
+        return pd.DataFrame()
+
+    header_idx = 0
+    for i, row in enumerate(rows):
+        cells = {c.strip().lower() for c in row}
+        if cells & set(COLUMN_ALIASES["position"]) and cells & set(COLUMN_ALIASES["salary"]):
+            header_idx = i
+            break
+
+    header = rows[header_idx]
+    # Blank header cells are the template's spacer columns, not player data.
+    keep = [j for j, name in enumerate(header) if name.strip()]
+    records = [
+        [row[j] if j < len(row) else "" for j in keep]
+        for row in rows[header_idx + 1:]
+    ]
+    df = pd.DataFrame(records, columns=[header[j] for j in keep])
+    df = df.loc[:, ~df.columns.duplicated()]
+    return df.replace(r"^\s*$", pd.NA, regex=True).dropna(how="all")
+
+
 def load_fanduel_csv(file) -> pd.DataFrame:
     """Loads a FanDuel player-pool export.
 
     `file` may be a path, an open file object, or raw bytes/str content.
     Returns a DataFrame with columns: name, position, team, salary, fppg.
     """
-    if isinstance(file, (bytes, str)) and not _looks_like_path(file):
-        df = pd.read_csv(io.StringIO(file if isinstance(file, str) else file.decode("utf-8")))
-    else:
-        df = pd.read_csv(file)
+    df = _read_player_table(_read_text(file))
 
     columns_lower = {c.strip().lower(): c for c in df.columns}
 

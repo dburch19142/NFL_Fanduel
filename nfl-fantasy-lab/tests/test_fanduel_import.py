@@ -68,3 +68,26 @@ def test_missing_injury_column_keeps_everyone():
     df = load_fanduel_csv(io.StringIO(csv_text))
     assert len(df) == 1
     assert df.attrs["excluded_injured_count"] == 0
+
+
+def test_parses_players_list_embedded_beside_lineup_template():
+    # The "players list" download from a contest's upload-template page: a
+    # blank lineup template on the left, the player list offset to the right.
+    pad = '"","","","","","","","","",""'
+    csv_text = (
+        'QB,RB,RB,WR,WR,WR,TE,FLEX,DEF,"","Instructions"\n'
+        f'{pad},"1) Create a lineup by inserting any player, from this list"\n'
+        f"{pad}\n"
+        f"{pad},Player ID + Player Name,Id,Position,First Name,Nickname,Last Name,FPPG,Played,"
+        "Salary,Game,Team,Opponent,Injury Indicator,Injury Details,Tier,,,Roster Position\n"
+        f"{pad},1-2:Jahmyr Gibbs,1-2,RB,Jahmyr,Jahmyr Gibbs,Gibbs,27,4,10000,DET@ARI,DET,ARI,,,,,,RB/FLEX\n"
+        f"{pad},1-3:Jeremiyah Love,1-3,RB,Jeremiyah,Jeremiyah Love,Love,10.85,4,6600,DET@ARI,ARI,DET,Q,Knee,,,,RB/FLEX\n"
+        f"{pad},1-4:Detroit Lions,1-4,D,Detroit,Detroit Lions,Lions,4.25,4,4100,DET@ARI,DET,ARI,,,,,,DEF\n"
+    )
+    for source in (io.StringIO(csv_text), io.BytesIO(b"\xef\xbb\xbf" + csv_text.encode("utf-8"))):
+        df = load_fanduel_csv(source)
+        assert list(df["name"]) == ["Jahmyr Gibbs", "Detroit Lions"]
+        assert list(df["position"]) == ["RB", "DEF"]
+        assert list(df["salary"]) == [10000, 4100]
+        assert list(df["fppg"]) == [27.0, 4.25]
+        assert df.attrs["excluded_injured_count"] == 1

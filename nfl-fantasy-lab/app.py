@@ -36,14 +36,29 @@ app.secret_key = "dev-only-not-for-production"
 TEAMS_CSV = "data/teams.csv"
 PREDICTOR_SEASONS_OF_HISTORY = 5
 
+DIVISIONS = {
+    "AFC East": ["Buffalo Bills", "Miami Dolphins", "New England Patriots", "New York Jets"],
+    "AFC North": ["Baltimore Ravens", "Cincinnati Bengals", "Cleveland Browns", "Pittsburgh Steelers"],
+    "AFC South": ["Houston Texans", "Indianapolis Colts", "Jacksonville Jaguars", "Tennessee Titans"],
+    "AFC West": ["Denver Broncos", "Kansas City Chiefs", "Las Vegas Raiders", "Los Angeles Chargers"],
+    "NFC East": ["Dallas Cowboys", "New York Giants", "Philadelphia Eagles", "Washington Commanders"],
+    "NFC North": ["Chicago Bears", "Detroit Lions", "Green Bay Packers", "Minnesota Vikings"],
+    "NFC South": ["Atlanta Falcons", "Carolina Panthers", "New Orleans Saints", "Tampa Bay Buccaneers"],
+    "NFC West": ["Arizona Cardinals", "Los Angeles Rams", "San Francisco 49ers", "Seattle Seahawks"],
+}
+
 
 @app.route("/")
 def dashboard():
     teams = pd.read_csv(TEAMS_CSV)
     teams["win_pct"] = (teams["wins"] / (teams["wins"] + teams["losses"] + teams["ties"])).round(3)
     teams["point_diff"] = teams["points_for"] - teams["points_against"]
-    teams = teams.sort_values(by="win_pct", ascending=False).reset_index(drop=True)
-    return render_template("dashboard.html", teams=teams.to_dict(orient="records"))
+    teams = teams.sort_values(by=["win_pct", "point_diff"], ascending=False)
+    divisions = [
+        {"name": name, "teams": teams[teams["team"].isin(members)].to_dict(orient="records")}
+        for name, members in DIVISIONS.items()
+    ]
+    return render_template("dashboard.html", divisions=divisions)
 
 
 @app.route("/optimizer", methods=["GET", "POST"])

@@ -165,3 +165,13 @@ footer.note {
   background: #fbe4e4;
   color: #b30808;
 }
+
+.division-block h2 {
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+
+.standings-table th:first-child,
+.standings-table td:first-child {
+  width: 34%;
+}

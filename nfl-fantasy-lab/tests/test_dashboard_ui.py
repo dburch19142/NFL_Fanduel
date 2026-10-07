@@ -58,11 +58,20 @@ def test_standings_dashboard_loads(page: Page, live_server: str):
     assert rows.count() == 32  # one row per NFL team
 
 
-def test_standings_sorted_by_win_pct_desc(page: Page, live_server: str):
+def test_standings_grouped_into_divisions_sorted_by_win_pct_desc(page: Page, live_server: str):
     page.goto(live_server + "/")
-    win_pct_cells = page.locator(".team-row td:nth-child(5)").all_inner_texts()
-    win_pcts = [float(v) for v in win_pct_cells]
-    assert win_pcts == sorted(win_pcts, reverse=True)
+    blocks = page.locator(".division-block")
+    assert blocks.count() == 8
+    assert blocks.locator("h2").all_inner_texts() == [
+        f"{conference} {region}"
+        for conference in ("AFC", "NFC")
+        for region in ("East", "North", "South", "West")
+    ]
+    for i in range(8):
+        win_pct_cells = blocks.nth(i).locator(".team-row td:nth-child(5)").all_inner_texts()
+        win_pcts = [float(v) for v in win_pct_cells]
+        assert len(win_pcts) == 4
+        assert win_pcts == sorted(win_pcts, reverse=True)
 
 
 def test_optimizer_generates_lineup_within_cap(page: Page, live_server: str, no_uploaded_pool):

@@ -29,6 +29,7 @@ from game_predictor import (
 from real_stats import latest_available_season
 
 LINEUP_COUNT = 1
+MAX_LINEUP_COUNT = 10
 
 app = Flask(__name__)
 app.secret_key = "dev-only-not-for-production"
@@ -67,6 +68,7 @@ def optimizer_page():
     error = None
     salary_cap = DEFAULT_SALARY_CAP
     must_include = ""
+    lineup_count = LINEUP_COUNT
     strategy = request.values.get("strategy", STRATEGY_MATCHUP)
     if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS):
         strategy = STRATEGY_MATCHUP
@@ -80,8 +82,13 @@ def optimizer_page():
             salary_cap = float(request.form.get("salary_cap", DEFAULT_SALARY_CAP))
             if salary_cap <= 0:
                 raise ValueError("Salary cap must be positive.")
+            try:
+                requested = int(request.form.get("lineup_count", LINEUP_COUNT))
+            except ValueError:
+                requested = LINEUP_COUNT
+            lineup_count = max(1, min(requested, MAX_LINEUP_COUNT))
             results = optimize_lineups(
-                salary_cap, players, count=LINEUP_COUNT,
+                salary_cap, players, count=lineup_count,
                 required_name=must_include or None,
             )
             lineups = [
@@ -106,7 +113,8 @@ def optimizer_page():
         salary_cap=salary_cap,
         pool_source=pool_source,
         player_count=len(players),
-        lineup_count=LINEUP_COUNT,
+        lineup_count=lineup_count,
+        max_lineup_count=MAX_LINEUP_COUNT,
         must_include=must_include,
         strategy=strategy,
         strategy_notes=strategy_notes,

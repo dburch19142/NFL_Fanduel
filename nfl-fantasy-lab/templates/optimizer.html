@@ -43,9 +43,11 @@
     </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
+    <label for="lineup_count">Lineups</label>
+    <input type="number" id="lineup_count" name="lineup_count" value="{{ lineup_count }}" min="1" max="{{ max_lineup_count }}" step="1">
     <label for="must_include">Must include (optional)</label>
     <input type="text" id="must_include" name="must_include" value="{{ must_include }}" placeholder="e.g. Caleb Williams">
-    <button type="submit" id="generate-btn">{{ "Generate Lineup" if lineup_count == 1 else "Generate " ~ lineup_count ~ " Lineups" }}</button>
+    <button type="submit" id="generate-btn">Generate</button>
   </form>
 
   {% if strategy_notes %}

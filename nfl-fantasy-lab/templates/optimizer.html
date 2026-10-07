@@ -36,12 +36,23 @@
   </details>
 
   <form method="post" id="optimizer-form">
+    <label for="strategy">Strategy</label>
+    <select id="strategy" name="strategy">
+      <option value="matchup" {{ "selected" if strategy == "matchup" }}>Full-slate matchup filters</option>
+      <option value="vegas" {{ "selected" if strategy == "vegas" }}>Top-3 Vegas games</option>
+    </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
     <label for="must_include">Must include (optional)</label>
     <input type="text" id="must_include" name="must_include" value="{{ must_include }}" placeholder="e.g. Caleb Williams">
     <button type="submit" id="generate-btn">{{ "Generate Lineup" if lineup_count == 1 else "Generate " ~ lineup_count ~ " Lineups" }}</button>
   </form>
+
+  {% if strategy_notes %}
+    <ul id="strategy-notes" class="hint">
+      {% for note in strategy_notes %}<li>{{ note }}</li>{% endfor %}
+    </ul>
+  {% endif %}
 
   {% if error %}
     <p id="error-message" class="error">{{ error }}</p>
@@ -81,16 +92,27 @@
 
   <footer class="note">
     <p>When you've uploaded a real FanDuel export, every QB/RB/WR/TE candidate also has to clear this
-       week's matchup rules before the optimizer will consider them: QB must rank top 15 at
-       the position in per-game passing yardage <em>and</em> passing touchdowns, and be facing a
-       bottom-10 pass defense; RB must rank top 15 in per-game rushing yardage <em>and</em> rushing
-       touchdowns, and be facing a defense that's bottom 10 in <em>both</em> rush yards allowed/game
-       and rush touchdowns allowed/game; WR must rank top 15 in per-game
-       receiving yards, targets, <em>and</em> touchdowns, and be facing a defense that's bottom 15
-       in <em>both</em> pass yards allowed/game and pass touchdowns allowed/game; TE must rank top 15
-       in per-game receiving yards <em>and</em> touchdowns, and face that same bottom-15 pass defense.
-       Anyone carrying any injury designation &mdash; including Questionable &mdash; is excluded outright.
-       These are strict, intersecting filters, so especially early in a season it's normal for them
-       to leave too few eligible players at a position to build a lineup at all.</p>
+       week's matchup rules before the optimizer will consider them: QB must be facing a bottom-10
+       pass defense (most pass yards allowed/game); RB must be facing a defense that's bottom 10 in
+       <em>both</em> rush yards allowed/game and rush touchdowns allowed/game; WR must see at least
+       25% of their team's own targets/game <em>and</em> be facing a defense that's bottom 15 in
+       <em>both</em> pass yards allowed/game and pass touchdowns allowed/game; TE must have scored
+       at least one receiving touchdown this season (a proxy for a TD-friendly role) <em>and</em>
+       face that same bottom-15 pass defense; DEF is only eligible when this week's
+       opponent offense is bottom 10 in <em>both</em> interceptions
+       thrown/game and sacks allowed/game &mdash; a turnover-prone offense with a poor line sets up easy
+       defensive scoring. Anyone carrying any injury designation &mdash; including Questionable &mdash;
+       is excluded outright. If too few WR, TE, or DEF clear their rule to fill the roster, that
+       position alone falls back to the full real slate rather than leaving the lineup unbuildable.
+       A lineup also never pairs a team defense with a QB/WR/TE from the team it's playing against
+       that week, since a defensive score comes directly at that offense's expense.</p>
+    <p>The <strong>Top-3 Vegas games</strong> strategy instead builds the whole lineup from the three
+       games on the slate with the highest over/under (47+ totals tend to produce big QB scores).
+       QB: the best runner among starters facing a bottom-10 pass defense. WR: the best 25%+
+       target-share WR on the QB's team, the best WR on the team he's playing, and a team's WR2 from
+       one of the other two games. RB: at least one from a team starting a backup QB or facing a
+       bottom-10 run defense. TE: only those targeted inside the 10. DEF: an opponent implied to
+       score under about 20, then preferring one facing a backup QB, a line that allows a lot of
+       sacks, and playing at home. The picks behind each rule are listed above the lineup.</p>
   </footer>
 {% endblock %}

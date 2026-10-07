@@ -18,6 +18,14 @@ POSITION_ALIASES = {
     "DEF": "DEF",
 }
 
+# FanDuel's team abbreviations that differ from nflverse's (which the
+# schedule, stats, and matchup filters all use). Without this, those teams'
+# players never match their opponent or eligibility data.
+TEAM_ALIASES = {
+    "JAC": "JAX",
+    "LAR": "LA",
+}
+
 COLUMN_ALIASES = {
     "position": ["position", "roster position"],
     "salary": ["salary"],
@@ -98,7 +106,7 @@ def load_fanduel_csv(file) -> pd.DataFrame:
     out["name"] = nickname.where(nickname != "", full_name)
 
     out["position"] = df[position_col].str.strip().str.upper().replace(POSITION_ALIASES)
-    out["team"] = df[team_col].str.strip().str.upper()
+    out["team"] = df[team_col].str.strip().str.upper().replace(TEAM_ALIASES)
     out["salary"] = pd.to_numeric(df[salary_col], errors="coerce")
     out["fppg"] = pd.to_numeric(df[fppg_col], errors="coerce") if fppg_col else 0.0
     out["injury_status"] = df[injury_col].fillna("").str.strip().str.upper() if injury_col else ""

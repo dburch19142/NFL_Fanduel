@@ -7,6 +7,17 @@ Maximizes total projected points subject to the salary cap.
 Also enforces a QB stack: whichever QB is picked must be paired with at
 least one WR or TE from the same team, since a passing touchdown scores
 for both the QB and his pass-catcher -- a standard DFS strategy.
+
+And a DEF anti-correlation rule: a lineup never rosters a team defense
+alongside a QB/WR/TE from the team it's playing against that week, since
+a defensive score (a sack, an interception, a defensive TD) comes directly
+at that offense's expense -- they're rooting against each other. Applies
+only when the player pool carries per-team "opponent" data (see
+player_pool.py); silently skipped otherwise.
+
+And, when the pool carries a "required_group" column (the Top-3 Vegas games
+strategy, see vegas_strategy.py), at least one player from each labeled
+group.
 """
 import pandas as pd
 import pulp
@@ -132,6 +143,30 @@ def _solve(
             (players["team"] == team) & (players["position"].isin(STACK_POSITIONS))
         ]
         prob += picks[q] <= pulp.lpSum(picks[i] for i in teammates)
+
+    # DEF anti-correlation: never roster a team defense alongside a QB/WR/TE
+    # from the team it's playing against this week. Needs "opponent" data
+    # per player (this week's opponent of that player's own team); skipped
+    # entirely if that column isn't present (e.g. matchup filters were
+    # unavailable, or this is the bundled sample data with no real schedule).
+    if "opponent" in players.columns:
+        def_idx = players.index[players["position"] == "DEF"]
+        for d in def_idx:
+            opponent = players.loc[d, "opponent"]
+            if pd.isna(opponent):
+                continue
+            against_idx = players.index[
+                (players["team"] == opponent) & (players["position"].isin(("QB",) + STACK_POSITIONS))
+            ]
+            for p in against_idx:
+                prob += picks[d] + picks[p] <= 1
+
+    # Strategy rules (see vegas_strategy.py): at least one pick from each
+    # labeled group. A group of one row is a hard lock on that player.
+    if "required_group" in players.columns:
+        for label in players["required_group"].dropna().unique():
+            idx = players.index[players["required_group"] == label]
+            prob += pulp.lpSum(picks[i] for i in idx) >= 1
 
     # Uniqueness: a lineup that picks every single player from an earlier
     # lineup is forbidden, forcing at least one swap versus each one already found.

@@ -20,6 +20,17 @@ def test_parses_valid_export():
     assert list(df["team"]) == ["KC", "KC"]
 
 
+def test_normalizes_fanduel_team_abbreviations_to_nflverse():
+    csv_text = (
+        "Position,Nickname,Salary,Team\n"
+        "QB,Trevor Lawrence,7900,JAC\n"
+        "QB,Matthew Stafford,7800,LAR\n"
+        "QB,Patrick Mahomes,8200,KC\n"
+    )
+    df = load_fanduel_csv(io.StringIO(csv_text))
+    assert list(df["team"]) == ["JAX", "LA", "KC"]
+
+
 def test_falls_back_to_first_last_name_when_no_nickname():
     csv_text = (
         "Position,First Name,Last Name,Salary,Team\n"

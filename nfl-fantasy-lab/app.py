@@ -16,7 +16,7 @@ from optimizer import (
     DEFAULT_SALARY_CAP,
 )
 from fanduel_import import FanDuelImportError
-from player_pool import build_player_pool, save_uploaded_csv
+from player_pool import build_player_pool, save_uploaded_csv, STRATEGY_MATCHUP, STRATEGY_VEGAS
 from game_predictor import (
     build_training_frame,
     current_season_form,
@@ -28,7 +28,7 @@ from game_predictor import (
 )
 from real_stats import latest_available_season
 
-LINEUP_COUNT = 10
+LINEUP_COUNT = 1
 
 app = Flask(__name__)
 app.secret_key = "dev-only-not-for-production"
@@ -52,8 +52,12 @@ def optimizer_page():
     error = None
     salary_cap = DEFAULT_SALARY_CAP
     must_include = ""
+    strategy = request.values.get("strategy", STRATEGY_MATCHUP)
+    if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS):
+        strategy = STRATEGY_MATCHUP
 
-    players, pool_source = build_player_pool()
+    players, pool_source = build_player_pool(strategy=strategy)
+    strategy_notes = players.attrs.get("strategy_notes", [])
 
     if request.method == "POST":
         must_include = request.form.get("must_include", "").strip()
@@ -89,6 +93,8 @@ def optimizer_page():
         player_count=len(players),
         lineup_count=LINEUP_COUNT,
         must_include=must_include,
+        strategy=strategy,
+        strategy_notes=strategy_notes,
     )
 
 
@@ -172,4 +178,4 @@ if __name__ == "__main__":
     # use_reloader=False: the reloader re-execs the process using the original
     # (possibly relative) launch command, which breaks once the chdir() above
     # has already moved the process into this file's directory.
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False, port=int(os.environ.get("PORT", 5000)))

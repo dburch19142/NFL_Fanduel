@@ -7,7 +7,7 @@ logic that function relies on, using data we control.
 """
 import pandas as pd
 
-from matchup_filters import _per_game, _top_n_keys
+from matchup_filters import _bottom_n_teams, _per_game
 
 
 def test_per_game_divides_by_games_played_not_just_summed():
@@ -24,25 +24,15 @@ def test_per_game_divides_by_games_played_not_just_summed():
     assert b["passing_yards"] == 150
 
 
-def test_top_n_keys_includes_everyone_tied_at_the_cutoff():
-    # Six players tied for what would be "10th place" if only the top 5
-    # distinct values counted -- a plain nlargest(5) would arbitrarily keep
-    # only some of the tied group; fair ranking keeps all of them.
+def test_bottom_n_teams_includes_everyone_tied_at_the_cutoff():
+    # Six teams tied for 2nd-worst -- a plain nlargest(2) would arbitrarily
+    # keep only some of that tied group; fair ranking keeps all of them.
     df = pd.DataFrame([
-        {"player_display_name": f"Player {i}", "team": "AAA", "rushing_yards": 100}
-        for i in range(6)
+        {"team": f"Team {i}", "rush_yds_allowed": 150} for i in range(6)
     ] + [
-        {"player_display_name": "Best Player", "team": "AAA", "rushing_yards": 200},
+        {"team": "Worst Team", "rush_yds_allowed": 200},
     ])
-    keys = _top_n_keys(df, "rushing_yards", 5)
-    # "Best Player" (rank 1) plus all 6 tied at rank 2 = 7 total, even
-    # though n=5.
-    assert len(keys) == 7
-
-
-def test_top_n_keys_normalizes_player_names():
-    df = pd.DataFrame([
-        {"player_display_name": "A.J. Brown", "team": "PHI", "receiving_yards": 100},
-    ])
-    keys = _top_n_keys(df, "receiving_yards", 10)
-    assert ("aj brown", "PHI") in keys
+    worst = _bottom_n_teams(df, "rush_yds_allowed", 2)
+    # "Worst Team" (rank 1) plus all 6 tied at rank 2 = 7 total, even
+    # though n=2.
+    assert len(worst) == 7

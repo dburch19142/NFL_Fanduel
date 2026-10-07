@@ -251,3 +251,50 @@ def test_dedupe_keeps_same_name_different_team_distinct():
     matches = deduped[deduped["name"] == "Same Name Guy"]
     assert len(matches) == 2
     assert set(matches["team"]) == {"AAA", "BBB"}
+
+
+def _synthetic_pool_with_opponents() -> pd.DataFrame:
+    """A small, fully synthetic, roster-fillable pool with an "opponent"
+    column, for testing the DEF anti-correlation rule in isolation.
+
+    The QB and his only viable stack partner (WR1) are both on team OPP,
+    and are effectively forced picks (the sole QB in the pool; the sole
+    WR/TE on his team, so the QB-stack rule requires WR1 specifically).
+    DEF1's opponent is OPP and scores far higher than DEF2, whose opponent
+    is unrelated -- so DEF1 would be the clear optimal pick on points alone,
+    unless the anti-correlation rule (DEF1 plays the same team as the
+    already-forced QB/WR1) correctly rules it out.
+    """
+    rows = [
+        {"name": "QB1", "position": "QB", "team": "OPP", "opponent": "DEF1TEAM", "salary": 6000, "projected_points": 30},
+        {"name": "WR1", "position": "WR", "team": "OPP", "opponent": "DEF1TEAM", "salary": 6000, "projected_points": 30},
+        {"name": "WR2", "position": "WR", "team": "X", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "WR3", "position": "WR", "team": "Y", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "WR4", "position": "WR", "team": "Z", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "RB1", "position": "RB", "team": "X", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "RB2", "position": "RB", "team": "Y", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "RB3", "position": "RB", "team": "Z", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "TE1", "position": "TE", "team": "X", "opponent": "Q", "salary": 4000, "projected_points": 10},
+        {"name": "DEF1", "position": "DEF", "team": "DEF1TEAM", "opponent": "OPP", "salary": 3000, "projected_points": 50},
+        {"name": "DEF2", "position": "DEF", "team": "DEF2TEAM", "opponent": "Q", "salary": 3000, "projected_points": 5},
+    ]
+    return pd.DataFrame(rows)
+
+
+def test_def_never_paired_with_a_qb_or_receiver_it_is_playing_against():
+    lineup = optimize_lineup(DEFAULT_SALARY_CAP, _synthetic_pool_with_opponents())
+    names = set(lineup["name"])
+    # QB1/WR1 are effectively forced (sole QB; sole same-team stack partner),
+    # so DEF1 -- their opponent -- must be excluded even though it scores far
+    # higher than DEF2, proving the anti-correlation rule is what's binding.
+    assert "QB1" in names
+    assert "WR1" in names
+    assert "DEF1" not in names
+    assert "DEF2" in names
+
+
+def test_def_correlation_rule_skipped_without_opponent_column():
+    # PLAYERS (data/players.csv) has no "opponent" column -- the rule must
+    # be a no-op rather than erroring when that data isn't available.
+    lineup = optimize_lineup(DEFAULT_SALARY_CAP, PLAYERS)
+    assert len(lineup) == sum(ROSTER_SLOTS.values()) + 1

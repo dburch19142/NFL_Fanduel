@@ -18,9 +18,10 @@ def _player(name, pos, team, salary=5000, pts=10.0):
     return {"name": name, "position": pos, "team": team, "salary": salary, "projected_points": pts}
 
 
-def _stat(name, pos, team, pass_attempts=0, rush=0.0, share=0.0, goal_line=0):
+def _stat(name, pos, team, pass_attempts=0, rush=0.0, share=0.0, goal_line=0, carries=0):
     return {"match_key": name.lower(), "position": pos, "team": team, "pass_attempts": pass_attempts,
-            "rushing_yards_pg": rush, "target_share": share, "goal_line_targets": goal_line}
+            "carries": carries, "rushing_yards_pg": rush, "target_share": share,
+            "goal_line_targets": goal_line}
 
 
 def _pool_and_stats():
@@ -38,6 +39,8 @@ def _pool_and_stats():
         ]
         stats += [
             _stat(f"{team} QB", "QB", team, pass_attempts=100, rush=10),
+            _stat(f"{team} RB1", "RB", team, carries=80, rush=70),
+            _stat(f"{team} RB2", "RB", team, carries=20, rush=15),
             _stat(f"{team} WR1", "WR", team, share=0.27),
             _stat(f"{team} WR2", "WR", team, share=0.20),
             _stat(f"{team} WR3", "WR", team, share=0.10),
@@ -46,7 +49,7 @@ def _pool_and_stats():
     return pd.DataFrame(players), pd.DataFrame(stats)
 
 
-def _run(pool=None, stats=None, bad_pass=("BBB", "AAA"), bad_rush=(), bad_sacks=()):
+def _run(pool=None, stats=None, bad_pass=("BBB", "AAA"), bad_sacks=()):
     base_pool, base_stats = _pool_and_stats()
     return apply_vegas_rules(
         base_pool if pool is None else pool,
@@ -54,7 +57,6 @@ def _run(pool=None, stats=None, bad_pass=("BBB", "AAA"), bad_rush=(), bad_sacks=
         base_stats if stats is None else stats,
         pass_yds_allowed={"AAA": 250, "BBB": 260, "CCC": 270, "DDD": 200, "EEE": 210, "FFF": 220},
         bad_pass_teams=set(bad_pass),
-        bad_rush_teams=set(bad_rush),
         bad_sack_teams=set(bad_sacks),
     )
 
@@ -135,15 +137,50 @@ def test_backup_qb_detected_when_season_leader_missing():
     pool = pd.concat([pool, pd.DataFrame([_player("DDD Backup", "QB", "DDD", 6000, 3)])])
     result, notes = _run(pool, stats)
     assert any("Starting a backup QB: DDD (DDD Backup)" in n for n in notes)
-    # DDD's RBs qualify for the RB rule because of the backup QB.
-    assert _group(result, "RB") == {"DDD RB1", "DDD RB2"}
     # CCC's defense faces that backup.
     assert _group(result, "DEF") == {"CCC Defense"}
 
 
-def test_rb_rule_includes_bad_rush_defense_matchups():
-    result, _ = _run(bad_rush=("FFF",))
-    assert _group(result, "RB") == {"EEE RB1", "EEE RB2"}
+def test_rb1_is_the_lead_back_on_teams_implied_for_27_plus():
+    result, notes = _run()
+    # BBB is implied for 27.5 and CCC for 29.0; nobody else reaches 27.
+    assert _group(result, "RB1") == {"BBB RB1", "CCC RB1"}
+    assert any("RB2 rule skipped" in n for n in notes)
+
+
+def test_rb1_falls_back_to_highest_implied_team():
+    odds = ODDS.assign(home_spread=0.0)  # every team implied for half its total, all under 27
+    pool, stats = _pool_and_stats()
+    result, notes = apply_vegas_rules(
+        pool, odds, stats, pass_yds_allowed={}, bad_pass_teams={"AAA", "BBB"}, bad_sack_teams=set(),
+    )
+    assert len(_group(result, "RB1")) == 1
+    assert _group(result, "RB1") <= {"AAA RB1", "BBB RB1"}
+    assert any("No team is implied for 27+" in n for n in notes)
+
+
+def test_rb2_is_a_cheap_fill_in_when_the_lead_back_is_out():
+    pool, stats = _pool_and_stats()
+    pool = pool[pool["name"] != "EEE RB1"]
+    result, _ = _run(pool, stats)
+    assert _group(result, "RB2") == {"EEE RB2"}
+
+
+def test_rb2_skips_fill_ins_priced_above_the_cap():
+    pool, stats = _pool_and_stats()
+    pool = pool[pool["name"] != "EEE RB1"]
+    pool.loc[pool["name"] == "EEE RB2", "salary"] = 7000
+    result, notes = _run(pool, stats)
+    assert _group(result, "RB2") == set()
+    assert any("RB2 rule skipped" in n for n in notes)
+
+
+def test_fill_in_on_a_high_scoring_team_counts_once():
+    pool, stats = _pool_and_stats()
+    pool = pool[pool["name"] != "CCC RB1"]
+    result, _ = _run(pool, stats)
+    assert _group(result, "RB2") == {"CCC RB2"}
+    assert _group(result, "RB1") == {"BBB RB1"}
 
 
 def test_te_limited_to_goal_line_targets():

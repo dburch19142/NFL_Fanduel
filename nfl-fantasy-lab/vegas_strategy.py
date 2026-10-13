@@ -13,8 +13,11 @@ slot by these rules:
   WR3:  at least one team's WR2 (second on his team in target share among
         players on the slate) from one of the two games the QB/WRs above
         didn't come from.
-  RB:   at least one RB from a team starting a backup QB or facing a
-        bottom-10 rush defense (rush yards allowed/game).
+  RB1:  at least one lead back (his team's best-projected RB) from a team
+        implied to score 27+ -- pay for the touchdown ceiling.
+  RB2:  at least one RB at $6,500 or less whose team's lead back (season
+        leader in carries) is off the slate -- a full workload at a
+        backup's price.
   TE:   only TEs targeted near the goal line (inside the 10) this season --
         TEs score mostly on touchdowns.
   FLEX: whoever the optimizer likes best.
@@ -26,7 +29,7 @@ slot by these rules:
 the (injury-filtered) slate, the team is starting a backup: its
 highest-salary QB on the slate.
 
-Picks (QB, WR1, WR2, DEF) and at-least-one groups (WR3, RB) are handed to
+Picks (QB, WR1, WR2, DEF) and at-least-one groups (WR3, RB1, RB2) are handed to
 the optimizer via a "required_group" column; see optimizer.py. When a rule
 can't be met (e.g. no WR on the QB's team has a 25% target share), it falls
 back to the closest thing and says so in the notes shown on the page.
@@ -43,7 +46,6 @@ import pandas as pd
 from espn_ingest import fetch_json
 from matchup_filters import (
     BOTTOM_N_PASS_DEFENSE,
-    BOTTOM_N_RUSH_DEFENSE,
     BOTTOM_N_DEF_MATCHUP,
     CACHE_DIR,
     MIN_WR_TARGET_SHARE,
@@ -60,6 +62,8 @@ PBP_URL = "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_
 TOP_GAME_COUNT = 3
 BIG_QB_TOTAL = 47.0
 LOW_IMPLIED_POINTS = 20.5  # "under about 20"
+HIGH_IMPLIED_POINTS = 27.0
+VALUE_RB_MAX_SALARY = 6500
 GOAL_LINE_YARDS = 10
 ODDS_CACHE_MAX_AGE_SECONDS = 60 * 60  # lines move; refresh hourly
 STATS_CACHE_MAX_AGE_SECONDS = 6 * 60 * 60
@@ -124,13 +128,12 @@ def apply_vegas_rules(
     player_stats: pd.DataFrame,
     pass_yds_allowed: dict[str, float],
     bad_pass_teams: set[str],
-    bad_rush_teams: set[str],
     bad_sack_teams: set[str],
 ) -> tuple[pd.DataFrame, list[str]]:
     """Restricts `pool` to the top-3 games and tags each rule's picks in a
     "required_group" column. Returns (pool, notes).
 
-    player_stats columns: match_key, team, position, pass_attempts,
+    player_stats columns: match_key, team, position, pass_attempts, carries,
     rushing_yards_pg, target_share, goal_line_targets.
     """
     notes: list[str] = []
@@ -157,7 +160,7 @@ def apply_vegas_rules(
     stats = player_stats.drop_duplicates(["match_key", "team", "position"])
     pool["match_key"] = pool["name"].apply(normalize_name)
     pool = pool.merge(stats, on=["match_key", "team", "position"], how="left")
-    for col in ("pass_attempts", "rushing_yards_pg", "target_share", "goal_line_targets"):
+    for col in ("pass_attempts", "carries", "rushing_yards_pg", "target_share", "goal_line_targets"):
         pool[col] = pool[col].fillna(0)
 
     # Starting QBs, and which teams are down to a backup.
@@ -232,16 +235,44 @@ def apply_vegas_rules(
             f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']})" for i in wr3_candidates
         ))
 
-    # RB: backup-QB team or a soft run defense
-    rb_mask = (pool["position"] == "RB") & (
-        pool["team"].isin(backup_teams) | pool["opponent"].isin(bad_rush_teams)
-    )
-    if rb_mask.any():
-        pool.loc[rb_mask, "required_group"] = "RB"
-        notes.append(f"At least one RB from a backup-QB team or facing a bottom-{BOTTOM_N_RUSH_DEFENSE} "
-                     "rush D: " + ", ".join(sorted(set(pool.loc[rb_mask, "team"]))))
+    # RB2: a cheap back whose team's lead back (season leader in carries)
+    # is off the slate. Tagged before RB1 so a fill-in isn't counted twice.
+    rb = pool["position"] == "RB"
+    rb_out_teams = set()
+    for team in opponent:
+        leaders = stats[(stats["team"] == team) & (stats["position"] == "RB") & (stats["carries"] > 0)]
+        if leaders.empty:
+            continue
+        leader_key = leaders.sort_values("carries").iloc[-1]["match_key"]
+        if leader_key not in set(pool.loc[rb & (pool["team"] == team), "match_key"]):
+            rb_out_teams.add(team)
+    rb2_mask = rb & pool["team"].isin(rb_out_teams) & (pool["salary"] <= VALUE_RB_MAX_SALARY)
+    if rb2_mask.any():
+        pool.loc[rb2_mask, "required_group"] = "RB2"
+        notes.append(f"RB2, at least one fill-in at ${VALUE_RB_MAX_SALARY:,} or less with the lead back "
+                     "out: " + ", ".join(
+                         f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']})" for i in pool.index[rb2_mask]
+                     ))
     else:
-        notes.append("No RB is on a backup-QB team or facing a bottom-10 rush D; RB rule skipped.")
+        notes.append(f"No team's lead back is out with a fill-in at ${VALUE_RB_MAX_SALARY:,} or less; "
+                     "RB2 rule skipped.")
+
+    # RB1: the lead back on a team implied for a big score
+    lead_backs = {
+        team: backs.sort_values(["projected_points", "salary"]).index[-1]
+        for team, backs in pool[rb & ~rb2_mask].groupby("team")
+    }
+    rb1 = [i for team, i in lead_backs.items() if implied[team] >= HIGH_IMPLIED_POINTS]
+    if not rb1 and lead_backs:
+        rb1 = [lead_backs[max(lead_backs, key=implied.get)]]
+        notes.append(f"No team is implied for {HIGH_IMPLIED_POINTS:g}+; RB1 is the lead back on the "
+                     "highest-implied team.")
+    if rb1:
+        pool.loc[rb1, "required_group"] = "RB1"
+        notes.append("RB1, at least one lead back on a high-scoring team: " + ", ".join(
+            f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']}, implied {implied[pool.loc[i, 'team']]:.1f})"
+            for i in rb1
+        ))
 
     # TE: goal-line targets only
     te = pool["position"] == "TE"
@@ -278,7 +309,7 @@ def apply_vegas_rules(
             f"({under} ~20)" + (f"; {', '.join(met)}" if met else "") + "."
         )
 
-    pool = pool.drop(columns=["match_key", "pass_attempts", "rushing_yards_pg",
+    pool = pool.drop(columns=["match_key", "pass_attempts", "carries", "rushing_yards_pg",
                               "target_share", "goal_line_targets"])
     return pool.reset_index(drop=True), notes
 
@@ -292,13 +323,16 @@ def get_player_season_stats(season: int, force_refresh: bool = False) -> pd.Data
     cache_file = f"{CACHE_DIR}/vegas_player_stats_{season}.csv"
     if not force_refresh and os.path.exists(cache_file):
         if time.time() - os.path.getmtime(cache_file) < STATS_CACHE_MAX_AGE_SECONDS:
-            return pd.read_csv(cache_file)
+            cached = pd.read_csv(cache_file)
+            if "carries" in cached.columns:  # caches written before the RB2 rule lack it
+                return cached
 
     weekly = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season))
     weekly = weekly[weekly["season_type"] == "REG"]
     stats = weekly.groupby(["player_id", "player_display_name", "position", "team"]).agg(
         games=("week", "nunique"),
         pass_attempts=("attempts", "sum"),
+        carries=("carries", "sum"),
         rushing_yards=("rushing_yards", "sum"),
         target_share=("target_share", "mean"),
         receiving_tds=("receiving_tds", "sum"),
@@ -317,7 +351,7 @@ def get_player_season_stats(season: int, force_refresh: bool = False) -> pd.Data
         stats["goal_line_targets"] = stats["receiving_tds"]
 
     stats["match_key"] = stats["player_display_name"].apply(normalize_name)
-    stats = stats[["match_key", "team", "position", "pass_attempts", "rushing_yards_pg",
+    stats = stats[["match_key", "team", "position", "pass_attempts", "carries", "rushing_yards_pg",
                    "target_share", "goal_line_targets"]]
     os.makedirs(CACHE_DIR, exist_ok=True)
     stats.to_csv(cache_file, index=False)
@@ -332,7 +366,7 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
             with open(cache_file) as f:
                 raw = json.load(f)
             raw["odds"] = pd.DataFrame(raw["odds"])
-            for key in ("bad_pass_teams", "bad_rush_teams", "bad_sack_teams"):
+            for key in ("bad_pass_teams", "bad_sack_teams"):
                 raw[key] = set(raw[key])
             return raw
 
@@ -343,7 +377,6 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
         "odds": odds,
         "pass_yds_allowed": allowed.set_index("team")["pass_yds_allowed"].to_dict(),
         "bad_pass_teams": _bottom_n_teams(allowed, "pass_yds_allowed", BOTTOM_N_PASS_DEFENSE),
-        "bad_rush_teams": _bottom_n_teams(allowed, "rush_yds_allowed", BOTTOM_N_RUSH_DEFENSE),
         "bad_sack_teams": get_offense_weakness(season)["sacks_allowed"],
     }
     os.makedirs(CACHE_DIR, exist_ok=True)
@@ -351,7 +384,7 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
         json.dump({
             **context,
             "odds": odds.to_dict(orient="records"),
-            **{k: sorted(context[k]) for k in ("bad_pass_teams", "bad_rush_teams", "bad_sack_teams")},
+            **{k: sorted(context[k]) for k in ("bad_pass_teams", "bad_sack_teams")},
         }, f)
     return context
 
@@ -364,7 +397,7 @@ def build_vegas_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     stats = get_player_season_stats(season)
     pool, notes = apply_vegas_rules(
         pool, context["odds"], stats, context["pass_yds_allowed"],
-        context["bad_pass_teams"], context["bad_rush_teams"], context["bad_sack_teams"],
+        context["bad_pass_teams"], context["bad_sack_teams"],
     )
     notes.insert(0, f"Week {week} lines from ESPN (DraftKings).")
     return pool, notes

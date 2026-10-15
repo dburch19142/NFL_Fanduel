@@ -1,0 +1,33 @@
+event_id,season,season_type,week,game_date,name,status,status_detail,period,clock,venue,home_team_id,home_abbr,home_score,away_team_id,away_abbr,away_score,updated_at
+401872656,2026,2,1,2026-09-10T00:20Z,New England Patriots at Seattle Seahawks,STATUS_FINAL,Final,4,0:00,Lumen Field,26,SEA,13,17,NE,10,2026-09-22T00:37:30+00:00
+401872657,2026,2,1,2026-09-11T00:35Z,San Francisco 49ers at Los Angeles Rams,STATUS_FINAL,Final,4,0:00,Melbourne Cricket Ground,14,LAR,7,25,SF,27,2026-09-22T00:37:30+00:00
+401872925,2026,2,1,2026-09-13T17:00Z,Tampa Bay Buccaneers at Cincinnati Bengals,STATUS_FINAL,Final,4,0:00,Paycor Stadium,4,CIN,33,27,TB,27,2026-09-22T00:37:30+00:00
+401872923,2026,2,1,2026-09-13T17:00Z,New Orleans Saints at Detroit Lions,STATUS_FINAL,Final/OT,5,0:00,Ford Field,8,DET,31,18,NO,30,2026-09-22T00:37:30+00:00
+401872924,2026,2,1,2026-09-13T17:00Z,New York Jets at Tennessee Titans,STATUS_FINAL,Final,4,0:00,Nissan Stadium,10,TEN,10,20,NYJ,23,2026-09-22T00:37:30+00:00
+401872659,2026,2,1,2026-09-13T17:00Z,Baltimore Ravens at Indianapolis Colts,STATUS_FINAL,Final,4,0:00,Lucas Oil Stadium,11,IND,23,33,BAL,41,2026-09-22T00:37:30+00:00
+401872658,2026,2,1,2026-09-13T17:00Z,Atlanta Falcons at Pittsburgh Steelers,STATUS_FINAL,Final,4,0:00,Acrisure Stadium,23,PIT,20,1,ATL,13,2026-09-22T00:37:30+00:00
+401872661,2026,2,1,2026-09-13T17:00Z,Chicago Bears at Carolina Panthers,STATUS_FINAL,Final,4,0:00,Bank of America Stadium,29,CAR,37,3,CHI,59,2026-09-22T00:37:30+00:00
+401872922,2026,2,1,2026-09-13T17:00Z,Cleveland Browns at Jacksonville Jaguars,STATUS_FINAL,Final,4,0:00,EverBank Stadium,30,JAX,34,5,CLE,10,2026-09-22T00:37:30+00:00
+401872660,2026,2,1,2026-09-13T17:00Z,Buffalo Bills at Houston Texans,STATUS_FINAL,Final,4,0:00,Reliant Stadium,34,HOU,31,2,BUF,36,2026-09-22T00:37:30+00:00
+401872928,2026,2,1,2026-09-13T20:25Z,Miami Dolphins at Las Vegas Raiders,STATUS_FINAL,Final,4,0:00,Allegiant Stadium,13,LV,27,15,MIA,13,2026-09-22T00:37:30+00:00
+401872927,2026,2,1,2026-09-13T20:25Z,Green Bay Packers at Minnesota Vikings,STATUS_FINAL,Final,4,0:00,U.S. Bank Stadium,16,MIN,39,9,GB,22,2026-09-22T00:37:30+00:00
+401872929,2026,2,1,2026-09-13T20:25Z,Washington Commanders at Philadelphia Eagles,STATUS_FINAL,Final,4,0:00,Lincoln Financial Field,21,PHI,24,28,WSH,22,2026-09-22T00:37:30+00:00
+401872926,2026,2,1,2026-09-13T20:25Z,Arizona Cardinals at Los Angeles Chargers,STATUS_FINAL,Final,4,0:00,SoFi Stadium,24,LAC,14,22,ARI,26,2026-09-22T00:37:30+00:00
+401872930,2026,2,1,2026-09-14T00:20Z,Dallas Cowboys at New York Giants,STATUS_FINAL,Final,4,0:00,MetLife Stadium,19,NYG,28,6,DAL,20,2026-09-22T00:37:30+00:00
+401872931,2026,2,1,2026-09-15T00:15Z,Denver Broncos at Kansas City Chiefs,STATUS_FINAL,Final,4,0:00,Arrowhead Stadium,12,KC,31,7,DEN,10,2026-09-22T00:37:30+00:00
+401872947,2026,2,2,2026-09-22T00:15Z,New York Giants at Los Angeles Rams,STATUS_IN_PROGRESS,6:37 - 1st Quarter,1,6:37,SoFi Stadium,14,LAR,0,19,NYG,0,2026-09-22T00:37:33+00:00
+401872932,2026,2,2,2026-09-18T00:15Z,Detroit Lions at Buffalo Bills,STATUS_FINAL,Final,4,0:00,Highmark Stadium,2,BUF,41,8,DET,31,2026-09-22T00:37:33+00:00
+401872933,2026,2,2,2026-09-20T17:00Z,Carolina Panthers at Atlanta Falcons,STATUS_FINAL,Final,4,0:00,Mercedes-Benz Stadium,1,ATL,3,29,CAR,34,2026-09-22T00:37:33+00:00
+401872937,2026,2,2,2026-09-20T17:00Z,Minnesota Vikings at Chicago Bears,STATUS_FINAL,Final,4,0:00,Soldier Field,3,CHI,3,16,MIN,9,2026-09-22T00:37:33+00:00
+401872939,2026,2,2,2026-09-20T17:00Z,Philadelphia Eagles at Tennessee Titans,STATUS_FINAL,Final,4,0:00,Nissan Stadium,10,TEN,20,21,PHI,24,2026-09-22T00:37:33+00:00
+401872946,2026,2,2,2026-09-20T17:00Z,Pittsburgh Steelers at New England Patriots,STATUS_FINAL,Final,4,0:00,Gillette Stadium,17,NE,20,23,PIT,3,2026-09-22T00:37:33+00:00
+401872936,2026,2,2,2026-09-20T17:00Z,Green Bay Packers at New York Jets,STATUS_FINAL,Final/OT,5,0:00,MetLife Stadium,20,NYJ,17,9,GB,20,2026-09-22T00:37:33+00:00
+401872935,2026,2,2,2026-09-20T17:00Z,Cleveland Browns at Tampa Bay Buccaneers,STATUS_FINAL,Final,4,0:00,Raymond James Stadium,27,TB,19,5,CLE,23,2026-09-22T00:37:33+00:00
+401872938,2026,2,2,2026-09-20T17:00Z,New Orleans Saints at Baltimore Ravens,STATUS_FINAL,Final,4,0:00,M&T Bank Stadium,33,BAL,17,18,NO,24,2026-09-22T00:37:33+00:00
+401872934,2026,2,2,2026-09-20T17:00Z,Cincinnati Bengals at Houston Texans,STATUS_FINAL,Final,4,0:00,Reliant Stadium,34,HOU,6,4,CIN,20,2026-09-22T00:37:33+00:00
+401872940,2026,2,2,2026-09-20T20:05Z,Jacksonville Jaguars at Denver Broncos,STATUS_FINAL,Final,4,0:00,Empower Field at Mile High,7,DEN,20,30,JAX,13,2026-09-22T00:37:33+00:00
+401872941,2026,2,2,2026-09-20T20:05Z,Las Vegas Raiders at Los Angeles Chargers,STATUS_FINAL,Final,4,0:00,SoFi Stadium,24,LAC,14,13,LV,26,2026-09-22T00:37:33+00:00
+401872944,2026,2,2,2026-09-20T20:25Z,Washington Commanders at Dallas Cowboys,STATUS_FINAL,Final,4,0:00,AT&T Stadium,6,DAL,37,28,WSH,20,2026-09-22T00:37:33+00:00
+401872943,2026,2,2,2026-09-20T20:25Z,Seattle Seahawks at Arizona Cardinals,STATUS_FINAL,Final,4,0:00,State Farm Stadium,22,ARI,7,26,SEA,31,2026-09-22T00:37:33+00:00
+401872942,2026,2,2,2026-09-20T20:25Z,Miami Dolphins at San Francisco 49ers,STATUS_FINAL,Final,4,0:00,Levi's Stadium,25,SF,35,15,MIA,13,2026-09-22T00:37:33+00:00
+401872945,2026,2,2,2026-09-21T00:20Z,Indianapolis Colts at Kansas City Chiefs,STATUS_FINAL,Final/OT,5,0:00,Arrowhead Stadium,12,KC,33,11,IND,30,2026-09-22T00:37:33+00:00

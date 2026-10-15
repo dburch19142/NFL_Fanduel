@@ -13,3 +13,5 @@ scikit-learn>=1.5.0
 # against modern pandas, so install it with --no-deps and rely on the
 # pandas/appdirs/fastparquet versions above instead:
 #   pip install --no-deps nfl_data_py
+
+anthropic>=1.0

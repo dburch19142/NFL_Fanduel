@@ -122,6 +122,26 @@ def _pick(pool: pd.DataFrame, mask: pd.Series, by: list[str]) -> int | None:
     return candidates.sort_values(by, ascending=False).index[0]
 
 
+def _starting_qbs(pool: pd.DataFrame, stats: pd.DataFrame, teams) -> tuple[dict[str, int], set[str]]:
+    """Each team's starting QB as a row index into `pool` (which needs a
+    "match_key" column), plus the teams down to a backup -- see the module
+    docstring."""
+    starters, backup_teams = {}, set()
+    for team in teams:
+        leaders = stats[(stats["team"] == team) & (stats["position"] == "QB")]
+        leader_key = leaders.sort_values("pass_attempts").iloc[-1]["match_key"] if len(leaders) else None
+        team_qbs = pool[(pool["team"] == team) & (pool["position"] == "QB")]
+        if team_qbs.empty:
+            continue
+        if leader_key is not None and leader_key in set(team_qbs["match_key"]):
+            starters[team] = team_qbs.index[team_qbs["match_key"] == leader_key][0]
+        else:
+            starters[team] = team_qbs.sort_values(["salary", "projected_points"]).index[-1]
+            if leader_key is not None:
+                backup_teams.add(team)
+    return starters, backup_teams
+
+
 def apply_vegas_rules(
     pool: pd.DataFrame,
     odds: pd.DataFrame,
@@ -129,9 +149,13 @@ def apply_vegas_rules(
     pass_yds_allowed: dict[str, float],
     bad_pass_teams: set[str],
     bad_sack_teams: set[str],
+    core_only: bool = False,
 ) -> tuple[pd.DataFrame, list[str]]:
     """Restricts `pool` to the top-3 games and tags each rule's picks in a
     "required_group" column. Returns (pool, notes).
+
+    With `core_only`, the WR3 and TE rules are skipped, leaving just the
+    picks the combined strategy takes from these games (see player_pool.py).
 
     player_stats columns: match_key, team, position, pass_attempts, carries,
     rushing_yards_pg, target_share, goal_line_targets.
@@ -164,19 +188,7 @@ def apply_vegas_rules(
         pool[col] = pool[col].fillna(0)
 
     # Starting QBs, and which teams are down to a backup.
-    starters, backup_teams = {}, set()
-    for team in opponent:
-        leaders = stats[(stats["team"] == team) & (stats["position"] == "QB")]
-        leader_key = leaders.sort_values("pass_attempts").iloc[-1]["match_key"] if len(leaders) else None
-        team_qbs = pool[(pool["team"] == team) & (pool["position"] == "QB")]
-        if team_qbs.empty:
-            continue
-        if leader_key is not None and leader_key in set(team_qbs["match_key"]):
-            starters[team] = team_qbs.index[team_qbs["match_key"] == leader_key][0]
-        else:
-            starters[team] = team_qbs.sort_values(["salary", "projected_points"]).index[-1]
-            if leader_key is not None:
-                backup_teams.add(team)
+    starters, backup_teams = _starting_qbs(pool, stats, opponent)
     if backup_teams:
         notes.append("Starting a backup QB: " + ", ".join(
             f"{t} ({pool.loc[starters[t], 'name']})" for t in sorted(backup_teams)
@@ -223,7 +235,7 @@ def apply_vegas_rules(
     # WR3: a team's WR2 from one of the other games
     other_teams = [t for t in opponent if t not in (qb_team, qb_opp)]
     wr3_candidates = []
-    for team in other_teams:
+    for team in ([] if core_only else other_teams):
         ranked = pool[wr & (pool["team"] == team)].sort_values(
             ["target_share", "projected_points"], ascending=False
         )
@@ -277,12 +289,12 @@ def apply_vegas_rules(
     # TE: goal-line targets only
     te = pool["position"] == "TE"
     goal_line_te = te & (pool["goal_line_targets"] > 0)
-    if goal_line_te.any():
+    if goal_line_te.any() and not core_only:
         pool = pool[~te | goal_line_te]
         notes.append(f"TEs limited to those targeted inside the {GOAL_LINE_YARDS}: " + ", ".join(
             pool.loc[pool["position"] == "TE", "name"]
         ))
-    else:
+    elif not core_only:
         notes.append(f"No TE has a target inside the {GOAL_LINE_YARDS} yet; TE rule skipped.")
 
     # DEF: can't face the QB's team or the WR2's team (anti-correlation), so
@@ -368,7 +380,8 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
             raw["odds"] = pd.DataFrame(raw["odds"])
             for key in ("bad_pass_teams", "bad_sack_teams"):
                 raw[key] = set(raw[key])
-            return raw
+            if "rush_yds_allowed" in raw:  # caches written before the Alpha Rule lack it
+                return raw
 
     scoreboard = fetch_json("scoreboard", {"week": week, "dates": season, "seasontype": 2})
     odds = parse_scoreboard_odds(scoreboard)
@@ -376,6 +389,7 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
     context = {
         "odds": odds,
         "pass_yds_allowed": allowed.set_index("team")["pass_yds_allowed"].to_dict(),
+        "rush_yds_allowed": allowed.set_index("team")["rush_yds_allowed"].to_dict(),
         "bad_pass_teams": _bottom_n_teams(allowed, "pass_yds_allowed", BOTTOM_N_PASS_DEFENSE),
         "bad_sack_teams": get_offense_weakness(season)["sacks_allowed"],
     }
@@ -389,7 +403,7 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
     return context
 
 
-def build_vegas_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+def build_vegas_pool(pool: pd.DataFrame, core_only: bool = False) -> tuple[pd.DataFrame, list[str]]:
     """Fetches this week's lines and stats, then applies apply_vegas_rules."""
     week_info = build_eligibility()
     season, week = week_info["season"], week_info["week"]
@@ -397,7 +411,7 @@ def build_vegas_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     stats = get_player_season_stats(season)
     pool, notes = apply_vegas_rules(
         pool, context["odds"], stats, context["pass_yds_allowed"],
-        context["bad_pass_teams"], context["bad_sack_teams"],
+        context["bad_pass_teams"], context["bad_sack_teams"], core_only=core_only,
     )
     notes.insert(0, f"Week {week} lines from ESPN (DraftKings).")
     return pool, notes

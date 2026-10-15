@@ -1,0 +1,1537 @@
+event_id,team_id,team_abbr,stat_name,label,value,display_value
+401872656,17,NE,firstDowns,1st Downs,19.0,19
+401872656,17,NE,firstDownsPassing,Passing 1st downs,9.0,9
+401872656,17,NE,firstDownsRushing,Rushing 1st downs,7.0,7
+401872656,17,NE,firstDownsPenalty,1st downs from penalties,3.0,3
+401872656,17,NE,thirdDownEff,3rd down efficiency,0.3125,5-16
+401872656,17,NE,fourthDownEff,4th down efficiency,1.0,2-2
+401872656,17,NE,totalOffensivePlays,Total Plays,67.0,67
+401872656,17,NE,totalYards,Total Yards,,277
+401872656,17,NE,yardsPerPlay,Yards per Play,4.1343283582,4.1
+401872656,17,NE,totalDrives,Total Drives,9.0,9
+401872656,17,NE,netPassingYards,Passing,168.0,168
+401872656,17,NE,completionAttempts,Comp/Att,,23/33
+401872656,17,NE,yardsPerPass,Yards per pass,4.666666666666667,4.7
+401872656,17,NE,sacksYardsLost,Sacks-Yards Lost,,3-10
+401872656,17,NE,rushingYards,Rushing,109.0,109
+401872656,17,NE,rushingAttempts,Rushing Attempts,31.0,31
+401872656,17,NE,yardsPerRushAttempt,Yards per rush,3.516,3.5
+401872656,17,NE,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872656,17,NE,totalPenaltiesYards,Penalties,,7-50
+401872656,17,NE,turnovers,Turnovers,,3
+401872656,17,NE,fumblesLost,Fumbles lost,0.0,0
+401872656,17,NE,interceptions,Interceptions thrown,3.0,3
+401872656,17,NE,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872656,17,NE,possessionTime,Possession,2057.0,34:17
+401872656,26,SEA,firstDowns,1st Downs,13.0,13
+401872656,26,SEA,firstDownsPassing,Passing 1st downs,9.0,9
+401872656,26,SEA,firstDownsRushing,Rushing 1st downs,4.0,4
+401872656,26,SEA,firstDownsPenalty,1st downs from penalties,0.0,0
+401872656,26,SEA,thirdDownEff,3rd down efficiency,0.1818181818,2-11
+401872656,26,SEA,fourthDownEff,4th down efficiency,1.0,1-1
+401872656,26,SEA,totalOffensivePlays,Total Plays,48.0,48
+401872656,26,SEA,totalYards,Total Yards,,285
+401872656,26,SEA,yardsPerPlay,Yards per Play,5.9375,5.9
+401872656,26,SEA,totalDrives,Total Drives,10.0,10
+401872656,26,SEA,netPassingYards,Passing,188.0,188
+401872656,26,SEA,completionAttempts,Comp/Att,,17/24
+401872656,26,SEA,yardsPerPass,Yards per pass,7.230769230769231,7.2
+401872656,26,SEA,sacksYardsLost,Sacks-Yards Lost,,2-12
+401872656,26,SEA,rushingYards,Rushing,97.0,97
+401872656,26,SEA,rushingAttempts,Rushing Attempts,22.0,22
+401872656,26,SEA,yardsPerRushAttempt,Yards per rush,4.409,4.4
+401872656,26,SEA,redZoneAttempts,Red Zone (Made-Att),0.0,0-2
+401872656,26,SEA,totalPenaltiesYards,Penalties,,10-98
+401872656,26,SEA,turnovers,Turnovers,,0
+401872656,26,SEA,fumblesLost,Fumbles lost,0.0,0
+401872656,26,SEA,interceptions,Interceptions thrown,0.0,0
+401872656,26,SEA,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872656,26,SEA,possessionTime,Possession,1543.0,25:43
+401872657,25,SF,firstDowns,1st Downs,23.0,23
+401872657,25,SF,firstDownsPassing,Passing 1st downs,12.0,12
+401872657,25,SF,firstDownsRushing,Rushing 1st downs,10.0,10
+401872657,25,SF,firstDownsPenalty,1st downs from penalties,1.0,1
+401872657,25,SF,thirdDownEff,3rd down efficiency,0.5833333333,7-12
+401872657,25,SF,fourthDownEff,4th down efficiency,,0-0
+401872657,25,SF,totalOffensivePlays,Total Plays,64.0,64
+401872657,25,SF,totalYards,Total Yards,,379
+401872657,25,SF,yardsPerPlay,Yards per Play,5.921875,5.9
+401872657,25,SF,totalDrives,Total Drives,9.0,9
+401872657,25,SF,netPassingYards,Passing,205.0,205
+401872657,25,SF,completionAttempts,Comp/Att,,25/34
+401872657,25,SF,yardsPerPass,Yards per pass,6.029411764705882,6.0
+401872657,25,SF,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872657,25,SF,rushingYards,Rushing,174.0,174
+401872657,25,SF,rushingAttempts,Rushing Attempts,30.0,30
+401872657,25,SF,yardsPerRushAttempt,Yards per rush,5.8,5.8
+401872657,25,SF,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872657,25,SF,totalPenaltiesYards,Penalties,,2-21
+401872657,25,SF,turnovers,Turnovers,,1
+401872657,25,SF,fumblesLost,Fumbles lost,0.0,0
+401872657,25,SF,interceptions,Interceptions thrown,1.0,1
+401872657,25,SF,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872657,25,SF,possessionTime,Possession,2030.0,33:50
+401872657,14,LAR,firstDowns,1st Downs,15.0,15
+401872657,14,LAR,firstDownsPassing,Passing 1st downs,6.0,6
+401872657,14,LAR,firstDownsRushing,Rushing 1st downs,7.0,7
+401872657,14,LAR,firstDownsPenalty,1st downs from penalties,2.0,2
+401872657,14,LAR,thirdDownEff,3rd down efficiency,0.2222222222,2-9
+401872657,14,LAR,fourthDownEff,4th down efficiency,0.3333333333,1-3
+401872657,14,LAR,totalOffensivePlays,Total Plays,57.0,57
+401872657,14,LAR,totalYards,Total Yards,,290
+401872657,14,LAR,yardsPerPlay,Yards per Play,5.0877192982,5.1
+401872657,14,LAR,totalDrives,Total Drives,10.0,10
+401872657,14,LAR,netPassingYards,Passing,168.0,168
+401872657,14,LAR,completionAttempts,Comp/Att,,17/28
+401872657,14,LAR,yardsPerPass,Yards per pass,6.0,6.0
+401872657,14,LAR,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872657,14,LAR,rushingYards,Rushing,122.0,122
+401872657,14,LAR,rushingAttempts,Rushing Attempts,29.0,29
+401872657,14,LAR,yardsPerRushAttempt,Yards per rush,4.207,4.2
+401872657,14,LAR,redZoneAttempts,Red Zone (Made-Att),0.3333333333333333,1-3
+401872657,14,LAR,totalPenaltiesYards,Penalties,,4-43
+401872657,14,LAR,turnovers,Turnovers,,2
+401872657,14,LAR,fumblesLost,Fumbles lost,1.0,1
+401872657,14,LAR,interceptions,Interceptions thrown,1.0,1
+401872657,14,LAR,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872657,14,LAR,possessionTime,Possession,1570.0,26:10
+401872925,27,TB,firstDowns,1st Downs,19.0,19
+401872925,27,TB,firstDownsPassing,Passing 1st downs,12.0,12
+401872925,27,TB,firstDownsRushing,Rushing 1st downs,5.0,5
+401872925,27,TB,firstDownsPenalty,1st downs from penalties,2.0,2
+401872925,27,TB,thirdDownEff,3rd down efficiency,0.5,5-10
+401872925,27,TB,fourthDownEff,4th down efficiency,,0-0
+401872925,27,TB,totalOffensivePlays,Total Plays,52.0,52
+401872925,27,TB,totalYards,Total Yards,,282
+401872925,27,TB,yardsPerPlay,Yards per Play,5.4230769231,5.4
+401872925,27,TB,totalDrives,Total Drives,9.0,9
+401872925,27,TB,netPassingYards,Passing,193.0,193
+401872925,27,TB,completionAttempts,Comp/Att,,23/28
+401872925,27,TB,yardsPerPass,Yards per pass,6.03125,6.0
+401872925,27,TB,sacksYardsLost,Sacks-Yards Lost,,4-23
+401872925,27,TB,rushingYards,Rushing,89.0,89
+401872925,27,TB,rushingAttempts,Rushing Attempts,20.0,20
+401872925,27,TB,yardsPerRushAttempt,Yards per rush,4.45,4.5
+401872925,27,TB,redZoneAttempts,Red Zone (Made-Att),0.5,2-4
+401872925,27,TB,totalPenaltiesYards,Penalties,,8-39
+401872925,27,TB,turnovers,Turnovers,,4
+401872925,27,TB,fumblesLost,Fumbles lost,4.0,4
+401872925,27,TB,interceptions,Interceptions thrown,0.0,0
+401872925,27,TB,defensiveTouchdowns,Defensive / Special Teams TDs,1.0,1
+401872925,27,TB,possessionTime,Possession,1715.0,28:35
+401872925,4,CIN,firstDowns,1st Downs,26.0,26
+401872925,4,CIN,firstDownsPassing,Passing 1st downs,14.0,14
+401872925,4,CIN,firstDownsRushing,Rushing 1st downs,10.0,10
+401872925,4,CIN,firstDownsPenalty,1st downs from penalties,2.0,2
+401872925,4,CIN,thirdDownEff,3rd down efficiency,0.5714285714,8-14
+401872925,4,CIN,fourthDownEff,4th down efficiency,,0-0
+401872925,4,CIN,totalOffensivePlays,Total Plays,63.0,63
+401872925,4,CIN,totalYards,Total Yards,,351
+401872925,4,CIN,yardsPerPlay,Yards per Play,5.5714285714,5.6
+401872925,4,CIN,totalDrives,Total Drives,9.0,9
+401872925,4,CIN,netPassingYards,Passing,245.0,245
+401872925,4,CIN,completionAttempts,Comp/Att,,25/35
+401872925,4,CIN,yardsPerPass,Yards per pass,6.805555555555555,6.8
+401872925,4,CIN,sacksYardsLost,Sacks-Yards Lost,,1-9
+401872925,4,CIN,rushingYards,Rushing,106.0,106
+401872925,4,CIN,rushingAttempts,Rushing Attempts,27.0,27
+401872925,4,CIN,yardsPerRushAttempt,Yards per rush,3.926,3.9
+401872925,4,CIN,redZoneAttempts,Red Zone (Made-Att),0.4,2-5
+401872925,4,CIN,totalPenaltiesYards,Penalties,,7-47
+401872925,4,CIN,turnovers,Turnovers,,1
+401872925,4,CIN,fumblesLost,Fumbles lost,0.0,0
+401872925,4,CIN,interceptions,Interceptions thrown,1.0,1
+401872925,4,CIN,defensiveTouchdowns,Defensive / Special Teams TDs,1.0,1
+401872925,4,CIN,possessionTime,Possession,1885.0,31:25
+401872923,18,NO,firstDowns,1st Downs,29.0,29
+401872923,18,NO,firstDownsPassing,Passing 1st downs,19.0,19
+401872923,18,NO,firstDownsRushing,Rushing 1st downs,7.0,7
+401872923,18,NO,firstDownsPenalty,1st downs from penalties,3.0,3
+401872923,18,NO,thirdDownEff,3rd down efficiency,0.4705882353,8-17
+401872923,18,NO,fourthDownEff,4th down efficiency,1.0,2-2
+401872923,18,NO,totalOffensivePlays,Total Plays,86.0,86
+401872923,18,NO,totalYards,Total Yards,,469
+401872923,18,NO,yardsPerPlay,Yards per Play,5.4534883721,5.5
+401872923,18,NO,totalDrives,Total Drives,14.0,14
+401872923,18,NO,netPassingYards,Passing,378.0,378
+401872923,18,NO,completionAttempts,Comp/Att,,35/56
+401872923,18,NO,yardsPerPass,Yards per pass,6.19672131147541,6.2
+401872923,18,NO,sacksYardsLost,Sacks-Yards Lost,,5-32
+401872923,18,NO,rushingYards,Rushing,91.0,91
+401872923,18,NO,rushingAttempts,Rushing Attempts,25.0,25
+401872923,18,NO,yardsPerRushAttempt,Yards per rush,3.64,3.6
+401872923,18,NO,redZoneAttempts,Red Zone (Made-Att),0.8,4-5
+401872923,18,NO,totalPenaltiesYards,Penalties,,6-53
+401872923,18,NO,turnovers,Turnovers,,3
+401872923,18,NO,fumblesLost,Fumbles lost,1.0,1
+401872923,18,NO,interceptions,Interceptions thrown,2.0,2
+401872923,18,NO,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872923,18,NO,possessionTime,Possession,1895.0,31:35
+401872923,8,DET,firstDowns,1st Downs,26.0,26
+401872923,8,DET,firstDownsPassing,Passing 1st downs,10.0,10
+401872923,8,DET,firstDownsRushing,Rushing 1st downs,14.0,14
+401872923,8,DET,firstDownsPenalty,1st downs from penalties,2.0,2
+401872923,8,DET,thirdDownEff,3rd down efficiency,0.3846153846,5-13
+401872923,8,DET,fourthDownEff,4th down efficiency,,0-0
+401872923,8,DET,totalOffensivePlays,Total Plays,73.0,73
+401872923,8,DET,totalYards,Total Yards,,369
+401872923,8,DET,yardsPerPlay,Yards per Play,5.0547945205,5.1
+401872923,8,DET,totalDrives,Total Drives,14.0,14
+401872923,8,DET,netPassingYards,Passing,204.0,204
+401872923,8,DET,completionAttempts,Comp/Att,,26/39
+401872923,8,DET,yardsPerPass,Yards per pass,5.1,5.1
+401872923,8,DET,sacksYardsLost,Sacks-Yards Lost,,1-2
+401872923,8,DET,rushingYards,Rushing,165.0,165
+401872923,8,DET,rushingAttempts,Rushing Attempts,33.0,33
+401872923,8,DET,yardsPerRushAttempt,Yards per rush,5.0,5.0
+401872923,8,DET,redZoneAttempts,Red Zone (Made-Att),0.8,4-5
+401872923,8,DET,totalPenaltiesYards,Penalties,,8-61
+401872923,8,DET,turnovers,Turnovers,,1
+401872923,8,DET,fumblesLost,Fumbles lost,1.0,1
+401872923,8,DET,interceptions,Interceptions thrown,0.0,0
+401872923,8,DET,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872923,8,DET,possessionTime,Possession,2211.0,36:51
+401872924,20,NYJ,firstDowns,1st Downs,19.0,19
+401872924,20,NYJ,firstDownsPassing,Passing 1st downs,7.0,7
+401872924,20,NYJ,firstDownsRushing,Rushing 1st downs,11.0,11
+401872924,20,NYJ,firstDownsPenalty,1st downs from penalties,1.0,1
+401872924,20,NYJ,thirdDownEff,3rd down efficiency,0.1666666667,2-12
+401872924,20,NYJ,fourthDownEff,4th down efficiency,1.0,2-2
+401872924,20,NYJ,totalOffensivePlays,Total Plays,63.0,63
+401872924,20,NYJ,totalYards,Total Yards,,367
+401872924,20,NYJ,yardsPerPlay,Yards per Play,5.8253968254,5.8
+401872924,20,NYJ,totalDrives,Total Drives,11.0,11
+401872924,20,NYJ,netPassingYards,Passing,215.0,215
+401872924,20,NYJ,completionAttempts,Comp/Att,,19/24
+401872924,20,NYJ,yardsPerPass,Yards per pass,8.958333333333334,9.0
+401872924,20,NYJ,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872924,20,NYJ,rushingYards,Rushing,152.0,152
+401872924,20,NYJ,rushingAttempts,Rushing Attempts,39.0,39
+401872924,20,NYJ,yardsPerRushAttempt,Yards per rush,3.897,3.9
+401872924,20,NYJ,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872924,20,NYJ,totalPenaltiesYards,Penalties,,8-48
+401872924,20,NYJ,turnovers,Turnovers,,0
+401872924,20,NYJ,fumblesLost,Fumbles lost,0.0,0
+401872924,20,NYJ,interceptions,Interceptions thrown,0.0,0
+401872924,20,NYJ,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872924,20,NYJ,possessionTime,Possession,2326.0,38:46
+401872924,10,TEN,firstDowns,1st Downs,11.0,11
+401872924,10,TEN,firstDownsPassing,Passing 1st downs,6.0,6
+401872924,10,TEN,firstDownsRushing,Rushing 1st downs,4.0,4
+401872924,10,TEN,firstDownsPenalty,1st downs from penalties,1.0,1
+401872924,10,TEN,thirdDownEff,3rd down efficiency,0.3333333333,4-12
+401872924,10,TEN,fourthDownEff,4th down efficiency,,0-0
+401872924,10,TEN,totalOffensivePlays,Total Plays,49.0,49
+401872924,10,TEN,totalYards,Total Yards,,195
+401872924,10,TEN,yardsPerPlay,Yards per Play,3.9795918367,4.0
+401872924,10,TEN,totalDrives,Total Drives,10.0,10
+401872924,10,TEN,netPassingYards,Passing,127.0,127
+401872924,10,TEN,completionAttempts,Comp/Att,,19/32
+401872924,10,TEN,yardsPerPass,Yards per pass,3.6285714285714286,3.6
+401872924,10,TEN,sacksYardsLost,Sacks-Yards Lost,,3-13
+401872924,10,TEN,rushingYards,Rushing,68.0,68
+401872924,10,TEN,rushingAttempts,Rushing Attempts,14.0,14
+401872924,10,TEN,yardsPerRushAttempt,Yards per rush,4.857,4.9
+401872924,10,TEN,redZoneAttempts,Red Zone (Made-Att),1.0,1-1
+401872924,10,TEN,totalPenaltiesYards,Penalties,,4-25
+401872924,10,TEN,turnovers,Turnovers,,1
+401872924,10,TEN,fumblesLost,Fumbles lost,1.0,1
+401872924,10,TEN,interceptions,Interceptions thrown,0.0,0
+401872924,10,TEN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872924,10,TEN,possessionTime,Possession,1274.0,21:14
+401872659,33,BAL,firstDowns,1st Downs,23.0,23
+401872659,33,BAL,firstDownsPassing,Passing 1st downs,11.0,11
+401872659,33,BAL,firstDownsRushing,Rushing 1st downs,12.0,12
+401872659,33,BAL,firstDownsPenalty,1st downs from penalties,0.0,0
+401872659,33,BAL,thirdDownEff,3rd down efficiency,0.3333333333,3-9
+401872659,33,BAL,fourthDownEff,4th down efficiency,0.0,0-1
+401872659,33,BAL,totalOffensivePlays,Total Plays,64.0,64
+401872659,33,BAL,totalYards,Total Yards,,506
+401872659,33,BAL,yardsPerPlay,Yards per Play,7.90625,7.9
+401872659,33,BAL,totalDrives,Total Drives,13.0,13
+401872659,33,BAL,netPassingYards,Passing,304.0,304
+401872659,33,BAL,completionAttempts,Comp/Att,,17/25
+401872659,33,BAL,yardsPerPass,Yards per pass,11.25925925925926,11.3
+401872659,33,BAL,sacksYardsLost,Sacks-Yards Lost,,2-20
+401872659,33,BAL,rushingYards,Rushing,202.0,202
+401872659,33,BAL,rushingAttempts,Rushing Attempts,37.0,37
+401872659,33,BAL,yardsPerRushAttempt,Yards per rush,5.459,5.5
+401872659,33,BAL,redZoneAttempts,Red Zone (Made-Att),0.75,3-4
+401872659,33,BAL,totalPenaltiesYards,Penalties,,10-86
+401872659,33,BAL,turnovers,Turnovers,,1
+401872659,33,BAL,fumblesLost,Fumbles lost,1.0,1
+401872659,33,BAL,interceptions,Interceptions thrown,0.0,0
+401872659,33,BAL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872659,33,BAL,possessionTime,Possession,2120.0,35:20
+401872659,11,IND,firstDowns,1st Downs,17.0,17
+401872659,11,IND,firstDownsPassing,Passing 1st downs,8.0,8
+401872659,11,IND,firstDownsRushing,Rushing 1st downs,8.0,8
+401872659,11,IND,firstDownsPenalty,1st downs from penalties,1.0,1
+401872659,11,IND,thirdDownEff,3rd down efficiency,0.3,3-10
+401872659,11,IND,fourthDownEff,4th down efficiency,0.0,0-1
+401872659,11,IND,totalOffensivePlays,Total Plays,53.0,53
+401872659,11,IND,totalYards,Total Yards,,251
+401872659,11,IND,yardsPerPlay,Yards per Play,4.7358490566,4.7
+401872659,11,IND,totalDrives,Total Drives,12.0,12
+401872659,11,IND,netPassingYards,Passing,149.0,149
+401872659,11,IND,completionAttempts,Comp/Att,,19/31
+401872659,11,IND,yardsPerPass,Yards per pass,4.515151515151516,4.5
+401872659,11,IND,sacksYardsLost,Sacks-Yards Lost,,2-17
+401872659,11,IND,rushingYards,Rushing,102.0,102
+401872659,11,IND,rushingAttempts,Rushing Attempts,20.0,20
+401872659,11,IND,yardsPerRushAttempt,Yards per rush,5.1,5.1
+401872659,11,IND,redZoneAttempts,Red Zone (Made-Att),1.0,3-3
+401872659,11,IND,totalPenaltiesYards,Penalties,,4-29
+401872659,11,IND,turnovers,Turnovers,,2
+401872659,11,IND,fumblesLost,Fumbles lost,1.0,1
+401872659,11,IND,interceptions,Interceptions thrown,1.0,1
+401872659,11,IND,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872659,11,IND,possessionTime,Possession,1480.0,24:40
+401872658,1,ATL,firstDowns,1st Downs,16.0,16
+401872658,1,ATL,firstDownsPassing,Passing 1st downs,4.0,4
+401872658,1,ATL,firstDownsRushing,Rushing 1st downs,9.0,9
+401872658,1,ATL,firstDownsPenalty,1st downs from penalties,3.0,3
+401872658,1,ATL,thirdDownEff,3rd down efficiency,0.1666666667,2-12
+401872658,1,ATL,fourthDownEff,4th down efficiency,,0-0
+401872658,1,ATL,totalOffensivePlays,Total Plays,57.0,57
+401872658,1,ATL,totalYards,Total Yards,,238
+401872658,1,ATL,yardsPerPlay,Yards per Play,4.1754385965,4.2
+401872658,1,ATL,totalDrives,Total Drives,13.0,13
+401872658,1,ATL,netPassingYards,Passing,118.0,118
+401872658,1,ATL,completionAttempts,Comp/Att,,12/22
+401872658,1,ATL,yardsPerPass,Yards per pass,4.538461538461538,4.5
+401872658,1,ATL,sacksYardsLost,Sacks-Yards Lost,,4-25
+401872658,1,ATL,rushingYards,Rushing,120.0,120
+401872658,1,ATL,rushingAttempts,Rushing Attempts,31.0,31
+401872658,1,ATL,yardsPerRushAttempt,Yards per rush,3.871,3.9
+401872658,1,ATL,redZoneAttempts,Red Zone (Made-Att),,0-0
+401872658,1,ATL,totalPenaltiesYards,Penalties,,9-96
+401872658,1,ATL,turnovers,Turnovers,,2
+401872658,1,ATL,fumblesLost,Fumbles lost,0.0,0
+401872658,1,ATL,interceptions,Interceptions thrown,2.0,2
+401872658,1,ATL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872658,1,ATL,possessionTime,Possession,1867.0,31:07
+401872658,23,PIT,firstDowns,1st Downs,15.0,15
+401872658,23,PIT,firstDownsPassing,Passing 1st downs,10.0,10
+401872658,23,PIT,firstDownsRushing,Rushing 1st downs,3.0,3
+401872658,23,PIT,firstDownsPenalty,1st downs from penalties,2.0,2
+401872658,23,PIT,thirdDownEff,3rd down efficiency,0.2307692308,3-13
+401872658,23,PIT,fourthDownEff,4th down efficiency,0.0,0-2
+401872658,23,PIT,totalOffensivePlays,Total Plays,64.0,64
+401872658,23,PIT,totalYards,Total Yards,,264
+401872658,23,PIT,yardsPerPlay,Yards per Play,4.125,4.1
+401872658,23,PIT,totalDrives,Total Drives,13.0,13
+401872658,23,PIT,netPassingYards,Passing,206.0,206
+401872658,23,PIT,completionAttempts,Comp/Att,,24/41
+401872658,23,PIT,yardsPerPass,Yards per pass,4.790697674418604,4.8
+401872658,23,PIT,sacksYardsLost,Sacks-Yards Lost,,2-15
+401872658,23,PIT,rushingYards,Rushing,58.0,58
+401872658,23,PIT,rushingAttempts,Rushing Attempts,21.0,21
+401872658,23,PIT,yardsPerRushAttempt,Yards per rush,2.762,2.8
+401872658,23,PIT,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872658,23,PIT,totalPenaltiesYards,Penalties,,7-52
+401872658,23,PIT,turnovers,Turnovers,,1
+401872658,23,PIT,fumblesLost,Fumbles lost,1.0,1
+401872658,23,PIT,interceptions,Interceptions thrown,0.0,0
+401872658,23,PIT,defensiveTouchdowns,Defensive / Special Teams TDs,1.0,1
+401872658,23,PIT,possessionTime,Possession,1733.0,28:53
+401872661,3,CHI,firstDowns,1st Downs,26.0,26
+401872661,3,CHI,firstDownsPassing,Passing 1st downs,13.0,13
+401872661,3,CHI,firstDownsRushing,Rushing 1st downs,11.0,11
+401872661,3,CHI,firstDownsPenalty,1st downs from penalties,2.0,2
+401872661,3,CHI,thirdDownEff,3rd down efficiency,0.7142857143,10-14
+401872661,3,CHI,fourthDownEff,4th down efficiency,0.0,0-1
+401872661,3,CHI,totalOffensivePlays,Total Plays,70.0,70
+401872661,3,CHI,totalYards,Total Yards,,552
+401872661,3,CHI,yardsPerPlay,Yards per Play,7.8857142857,7.9
+401872661,3,CHI,totalDrives,Total Drives,14.0,14
+401872661,3,CHI,netPassingYards,Passing,261.0,261
+401872661,3,CHI,completionAttempts,Comp/Att,,21/29
+401872661,3,CHI,yardsPerPass,Yards per pass,8.419354838709678,8.4
+401872661,3,CHI,sacksYardsLost,Sacks-Yards Lost,,2-8
+401872661,3,CHI,rushingYards,Rushing,291.0,291
+401872661,3,CHI,rushingAttempts,Rushing Attempts,39.0,39
+401872661,3,CHI,yardsPerRushAttempt,Yards per rush,7.462,7.5
+401872661,3,CHI,redZoneAttempts,Red Zone (Made-Att),1.0,4-4
+401872661,3,CHI,totalPenaltiesYards,Penalties,,12-57
+401872661,3,CHI,turnovers,Turnovers,,1
+401872661,3,CHI,fumblesLost,Fumbles lost,1.0,1
+401872661,3,CHI,interceptions,Interceptions thrown,0.0,0
+401872661,3,CHI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872661,3,CHI,possessionTime,Possession,2043.0,34:03
+401872661,29,CAR,firstDowns,1st Downs,24.0,24
+401872661,29,CAR,firstDownsPassing,Passing 1st downs,17.0,17
+401872661,29,CAR,firstDownsRushing,Rushing 1st downs,5.0,5
+401872661,29,CAR,firstDownsPenalty,1st downs from penalties,2.0,2
+401872661,29,CAR,thirdDownEff,3rd down efficiency,0.4444444444,4-9
+401872661,29,CAR,fourthDownEff,4th down efficiency,0.0,0-1
+401872661,29,CAR,totalOffensivePlays,Total Plays,62.0,62
+401872661,29,CAR,totalYards,Total Yards,,478
+401872661,29,CAR,yardsPerPlay,Yards per Play,7.7096774194,7.7
+401872661,29,CAR,totalDrives,Total Drives,13.0,13
+401872661,29,CAR,netPassingYards,Passing,353.0,353
+401872661,29,CAR,completionAttempts,Comp/Att,,23/38
+401872661,29,CAR,yardsPerPass,Yards per pass,8.825,8.8
+401872661,29,CAR,sacksYardsLost,Sacks-Yards Lost,,2-8
+401872661,29,CAR,rushingYards,Rushing,125.0,125
+401872661,29,CAR,rushingAttempts,Rushing Attempts,22.0,22
+401872661,29,CAR,yardsPerRushAttempt,Yards per rush,5.682,5.7
+401872661,29,CAR,redZoneAttempts,Red Zone (Made-Att),1.0,4-4
+401872661,29,CAR,totalPenaltiesYards,Penalties,,11-84
+401872661,29,CAR,turnovers,Turnovers,,3
+401872661,29,CAR,fumblesLost,Fumbles lost,2.0,2
+401872661,29,CAR,interceptions,Interceptions thrown,1.0,1
+401872661,29,CAR,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872661,29,CAR,possessionTime,Possession,1557.0,25:57
+401872922,5,CLE,firstDowns,1st Downs,14.0,14
+401872922,5,CLE,firstDownsPassing,Passing 1st downs,9.0,9
+401872922,5,CLE,firstDownsRushing,Rushing 1st downs,5.0,5
+401872922,5,CLE,firstDownsPenalty,1st downs from penalties,0.0,0
+401872922,5,CLE,thirdDownEff,3rd down efficiency,0.125,1-8
+401872922,5,CLE,fourthDownEff,4th down efficiency,0.5,1-2
+401872922,5,CLE,totalOffensivePlays,Total Plays,49.0,49
+401872922,5,CLE,totalYards,Total Yards,,272
+401872922,5,CLE,yardsPerPlay,Yards per Play,5.5510204082,5.6
+401872922,5,CLE,totalDrives,Total Drives,9.0,9
+401872922,5,CLE,netPassingYards,Passing,185.0,185
+401872922,5,CLE,completionAttempts,Comp/Att,,16/22
+401872922,5,CLE,yardsPerPass,Yards per pass,6.851851851851852,6.9
+401872922,5,CLE,sacksYardsLost,Sacks-Yards Lost,,5-20
+401872922,5,CLE,rushingYards,Rushing,87.0,87
+401872922,5,CLE,rushingAttempts,Rushing Attempts,22.0,22
+401872922,5,CLE,yardsPerRushAttempt,Yards per rush,3.955,4.0
+401872922,5,CLE,redZoneAttempts,Red Zone (Made-Att),0.0,0-2
+401872922,5,CLE,totalPenaltiesYards,Penalties,,11-75
+401872922,5,CLE,turnovers,Turnovers,,2
+401872922,5,CLE,fumblesLost,Fumbles lost,1.0,1
+401872922,5,CLE,interceptions,Interceptions thrown,1.0,1
+401872922,5,CLE,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872922,5,CLE,possessionTime,Possession,1569.0,26:09
+401872922,30,JAX,firstDowns,1st Downs,23.0,23
+401872922,30,JAX,firstDownsPassing,Passing 1st downs,13.0,13
+401872922,30,JAX,firstDownsRushing,Rushing 1st downs,8.0,8
+401872922,30,JAX,firstDownsPenalty,1st downs from penalties,2.0,2
+401872922,30,JAX,thirdDownEff,3rd down efficiency,0.5,5-10
+401872922,30,JAX,fourthDownEff,4th down efficiency,,0-0
+401872922,30,JAX,totalOffensivePlays,Total Plays,56.0,56
+401872922,30,JAX,totalYards,Total Yards,,360
+401872922,30,JAX,yardsPerPlay,Yards per Play,6.4285714286,6.4
+401872922,30,JAX,totalDrives,Total Drives,9.0,9
+401872922,30,JAX,netPassingYards,Passing,234.0,234
+401872922,30,JAX,completionAttempts,Comp/Att,,18/23
+401872922,30,JAX,yardsPerPass,Yards per pass,9.75,9.8
+401872922,30,JAX,sacksYardsLost,Sacks-Yards Lost,,1-11
+401872922,30,JAX,rushingYards,Rushing,126.0,126
+401872922,30,JAX,rushingAttempts,Rushing Attempts,32.0,32
+401872922,30,JAX,yardsPerRushAttempt,Yards per rush,3.938,3.9
+401872922,30,JAX,redZoneAttempts,Red Zone (Made-Att),1.0,2-2
+401872922,30,JAX,totalPenaltiesYards,Penalties,,4-25
+401872922,30,JAX,turnovers,Turnovers,,0
+401872922,30,JAX,fumblesLost,Fumbles lost,0.0,0
+401872922,30,JAX,interceptions,Interceptions thrown,0.0,0
+401872922,30,JAX,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872922,30,JAX,possessionTime,Possession,2031.0,33:51
+401872660,2,BUF,firstDowns,1st Downs,20.0,20
+401872660,2,BUF,firstDownsPassing,Passing 1st downs,13.0,13
+401872660,2,BUF,firstDownsRushing,Rushing 1st downs,5.0,5
+401872660,2,BUF,firstDownsPenalty,1st downs from penalties,2.0,2
+401872660,2,BUF,thirdDownEff,3rd down efficiency,0.3333333333,3-9
+401872660,2,BUF,fourthDownEff,4th down efficiency,0.0,0-1
+401872660,2,BUF,totalOffensivePlays,Total Plays,52.0,52
+401872660,2,BUF,totalYards,Total Yards,,409
+401872660,2,BUF,yardsPerPlay,Yards per Play,7.8653846154,7.9
+401872660,2,BUF,totalDrives,Total Drives,12.0,12
+401872660,2,BUF,netPassingYards,Passing,323.0,323
+401872660,2,BUF,completionAttempts,Comp/Att,,20/29
+401872660,2,BUF,yardsPerPass,Yards per pass,10.419354838709678,10.4
+401872660,2,BUF,sacksYardsLost,Sacks-Yards Lost,,2-11
+401872660,2,BUF,rushingYards,Rushing,86.0,86
+401872660,2,BUF,rushingAttempts,Rushing Attempts,21.0,21
+401872660,2,BUF,yardsPerRushAttempt,Yards per rush,4.095,4.1
+401872660,2,BUF,redZoneAttempts,Red Zone (Made-Att),0.3333333333333333,1-3
+401872660,2,BUF,totalPenaltiesYards,Penalties,,10-85
+401872660,2,BUF,turnovers,Turnovers,,0
+401872660,2,BUF,fumblesLost,Fumbles lost,0.0,0
+401872660,2,BUF,interceptions,Interceptions thrown,0.0,0
+401872660,2,BUF,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872660,2,BUF,possessionTime,Possession,1423.0,23:43
+401872660,34,HOU,firstDowns,1st Downs,26.0,26
+401872660,34,HOU,firstDownsPassing,Passing 1st downs,11.0,11
+401872660,34,HOU,firstDownsRushing,Rushing 1st downs,10.0,10
+401872660,34,HOU,firstDownsPenalty,1st downs from penalties,5.0,5
+401872660,34,HOU,thirdDownEff,3rd down efficiency,0.4375,7-16
+401872660,34,HOU,fourthDownEff,4th down efficiency,1.0,2-2
+401872660,34,HOU,totalOffensivePlays,Total Plays,73.0,73
+401872660,34,HOU,totalYards,Total Yards,,381
+401872660,34,HOU,yardsPerPlay,Yards per Play,5.2191780822,5.2
+401872660,34,HOU,totalDrives,Total Drives,11.0,11
+401872660,34,HOU,netPassingYards,Passing,257.0,257
+401872660,34,HOU,completionAttempts,Comp/Att,,26/38
+401872660,34,HOU,yardsPerPass,Yards per pass,6.2682926829268295,6.3
+401872660,34,HOU,sacksYardsLost,Sacks-Yards Lost,,3-17
+401872660,34,HOU,rushingYards,Rushing,124.0,124
+401872660,34,HOU,rushingAttempts,Rushing Attempts,32.0,32
+401872660,34,HOU,yardsPerRushAttempt,Yards per rush,3.875,3.9
+401872660,34,HOU,redZoneAttempts,Red Zone (Made-Att),0.8,4-5
+401872660,34,HOU,totalPenaltiesYards,Penalties,,7-106
+401872660,34,HOU,turnovers,Turnovers,,2
+401872660,34,HOU,fumblesLost,Fumbles lost,2.0,2
+401872660,34,HOU,interceptions,Interceptions thrown,0.0,0
+401872660,34,HOU,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872660,34,HOU,possessionTime,Possession,2177.0,36:17
+401872928,15,MIA,firstDowns,1st Downs,13.0,13
+401872928,15,MIA,firstDownsPassing,Passing 1st downs,7.0,7
+401872928,15,MIA,firstDownsRushing,Rushing 1st downs,4.0,4
+401872928,15,MIA,firstDownsPenalty,1st downs from penalties,2.0,2
+401872928,15,MIA,thirdDownEff,3rd down efficiency,0.2,2-10
+401872928,15,MIA,fourthDownEff,4th down efficiency,0.0,0-1
+401872928,15,MIA,totalOffensivePlays,Total Plays,50.0,50
+401872928,15,MIA,totalYards,Total Yards,,259
+401872928,15,MIA,yardsPerPlay,Yards per Play,5.18,5.2
+401872928,15,MIA,totalDrives,Total Drives,11.0,11
+401872928,15,MIA,netPassingYards,Passing,185.0,185
+401872928,15,MIA,completionAttempts,Comp/Att,,15/27
+401872928,15,MIA,yardsPerPass,Yards per pass,5.78125,5.8
+401872928,15,MIA,sacksYardsLost,Sacks-Yards Lost,,5-35
+401872928,15,MIA,rushingYards,Rushing,74.0,74
+401872928,15,MIA,rushingAttempts,Rushing Attempts,18.0,18
+401872928,15,MIA,yardsPerRushAttempt,Yards per rush,4.111,4.1
+401872928,15,MIA,redZoneAttempts,Red Zone (Made-Att),0.3333333333333333,1-3
+401872928,15,MIA,totalPenaltiesYards,Penalties,,8-61
+401872928,15,MIA,turnovers,Turnovers,,2
+401872928,15,MIA,fumblesLost,Fumbles lost,1.0,1
+401872928,15,MIA,interceptions,Interceptions thrown,1.0,1
+401872928,15,MIA,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872928,15,MIA,possessionTime,Possession,1507.0,25:07
+401872928,13,LV,firstDowns,1st Downs,21.0,21
+401872928,13,LV,firstDownsPassing,Passing 1st downs,10.0,10
+401872928,13,LV,firstDownsRushing,Rushing 1st downs,9.0,9
+401872928,13,LV,firstDownsPenalty,1st downs from penalties,2.0,2
+401872928,13,LV,thirdDownEff,3rd down efficiency,0.3846153846,5-13
+401872928,13,LV,fourthDownEff,4th down efficiency,1.0,1-1
+401872928,13,LV,totalOffensivePlays,Total Plays,67.0,67
+401872928,13,LV,totalYards,Total Yards,,290
+401872928,13,LV,yardsPerPlay,Yards per Play,4.328358209,4.3
+401872928,13,LV,totalDrives,Total Drives,11.0,11
+401872928,13,LV,netPassingYards,Passing,160.0,160
+401872928,13,LV,completionAttempts,Comp/Att,,21/30
+401872928,13,LV,yardsPerPass,Yards per pass,5.333333333333333,5.3
+401872928,13,LV,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872928,13,LV,rushingYards,Rushing,130.0,130
+401872928,13,LV,rushingAttempts,Rushing Attempts,37.0,37
+401872928,13,LV,yardsPerRushAttempt,Yards per rush,3.514,3.5
+401872928,13,LV,redZoneAttempts,Red Zone (Made-Att),0.75,3-4
+401872928,13,LV,totalPenaltiesYards,Penalties,,6-29
+401872928,13,LV,turnovers,Turnovers,,2
+401872928,13,LV,fumblesLost,Fumbles lost,0.0,0
+401872928,13,LV,interceptions,Interceptions thrown,2.0,2
+401872928,13,LV,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872928,13,LV,possessionTime,Possession,2093.0,34:53
+401872927,9,GB,firstDowns,1st Downs,19.0,19
+401872927,9,GB,firstDownsPassing,Passing 1st downs,16.0,16
+401872927,9,GB,firstDownsRushing,Rushing 1st downs,3.0,3
+401872927,9,GB,firstDownsPenalty,1st downs from penalties,0.0,0
+401872927,9,GB,thirdDownEff,3rd down efficiency,0.25,3-12
+401872927,9,GB,fourthDownEff,4th down efficiency,0.0,0-2
+401872927,9,GB,totalOffensivePlays,Total Plays,67.0,67
+401872927,9,GB,totalYards,Total Yards,,419
+401872927,9,GB,yardsPerPlay,Yards per Play,6.2537313433,6.3
+401872927,9,GB,totalDrives,Total Drives,12.0,12
+401872927,9,GB,netPassingYards,Passing,353.0,353
+401872927,9,GB,completionAttempts,Comp/Att,,21/42
+401872927,9,GB,yardsPerPass,Yards per pass,7.673913043478261,7.7
+401872927,9,GB,sacksYardsLost,Sacks-Yards Lost,,4-34
+401872927,9,GB,rushingYards,Rushing,66.0,66
+401872927,9,GB,rushingAttempts,Rushing Attempts,21.0,21
+401872927,9,GB,yardsPerRushAttempt,Yards per rush,3.143,3.1
+401872927,9,GB,redZoneAttempts,Red Zone (Made-Att),0.25,1-4
+401872927,9,GB,totalPenaltiesYards,Penalties,,12-98
+401872927,9,GB,turnovers,Turnovers,,2
+401872927,9,GB,fumblesLost,Fumbles lost,1.0,1
+401872927,9,GB,interceptions,Interceptions thrown,1.0,1
+401872927,9,GB,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872927,9,GB,possessionTime,Possession,1622.0,27:02
+401872927,16,MIN,firstDowns,1st Downs,19.0,19
+401872927,16,MIN,firstDownsPassing,Passing 1st downs,8.0,8
+401872927,16,MIN,firstDownsRushing,Rushing 1st downs,6.0,6
+401872927,16,MIN,firstDownsPenalty,1st downs from penalties,5.0,5
+401872927,16,MIN,thirdDownEff,3rd down efficiency,0.5333333333,8-15
+401872927,16,MIN,fourthDownEff,4th down efficiency,,0-0
+401872927,16,MIN,totalOffensivePlays,Total Plays,61.0,61
+401872927,16,MIN,totalYards,Total Yards,,239
+401872927,16,MIN,yardsPerPlay,Yards per Play,3.9180327869,3.9
+401872927,16,MIN,totalDrives,Total Drives,13.0,13
+401872927,16,MIN,netPassingYards,Passing,132.0,132
+401872927,16,MIN,completionAttempts,Comp/Att,,15/24
+401872927,16,MIN,yardsPerPass,Yards per pass,4.888888888888889,4.9
+401872927,16,MIN,sacksYardsLost,Sacks-Yards Lost,,3-19
+401872927,16,MIN,rushingYards,Rushing,107.0,107
+401872927,16,MIN,rushingAttempts,Rushing Attempts,34.0,34
+401872927,16,MIN,yardsPerRushAttempt,Yards per rush,3.147,3.1
+401872927,16,MIN,redZoneAttempts,Red Zone (Made-Att),1.0,4-4
+401872927,16,MIN,totalPenaltiesYards,Penalties,,3-15
+401872927,16,MIN,turnovers,Turnovers,,1
+401872927,16,MIN,fumblesLost,Fumbles lost,0.0,0
+401872927,16,MIN,interceptions,Interceptions thrown,1.0,1
+401872927,16,MIN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872927,16,MIN,possessionTime,Possession,1978.0,32:58
+401872929,28,WSH,firstDowns,1st Downs,20.0,20
+401872929,28,WSH,firstDownsPassing,Passing 1st downs,10.0,10
+401872929,28,WSH,firstDownsRushing,Rushing 1st downs,9.0,9
+401872929,28,WSH,firstDownsPenalty,1st downs from penalties,1.0,1
+401872929,28,WSH,thirdDownEff,3rd down efficiency,0.3333333333,5-15
+401872929,28,WSH,fourthDownEff,4th down efficiency,1.0,2-2
+401872929,28,WSH,totalOffensivePlays,Total Plays,67.0,67
+401872929,28,WSH,totalYards,Total Yards,,295
+401872929,28,WSH,yardsPerPlay,Yards per Play,4.4029850746,4.4
+401872929,28,WSH,totalDrives,Total Drives,12.0,12
+401872929,28,WSH,netPassingYards,Passing,163.0,163
+401872929,28,WSH,completionAttempts,Comp/Att,,18/34
+401872929,28,WSH,yardsPerPass,Yards per pass,4.6571428571428575,4.7
+401872929,28,WSH,sacksYardsLost,Sacks-Yards Lost,,1-1
+401872929,28,WSH,rushingYards,Rushing,132.0,132
+401872929,28,WSH,rushingAttempts,Rushing Attempts,32.0,32
+401872929,28,WSH,yardsPerRushAttempt,Yards per rush,4.125,4.1
+401872929,28,WSH,redZoneAttempts,Red Zone (Made-Att),1.0,3-3
+401872929,28,WSH,totalPenaltiesYards,Penalties,,6-45
+401872929,28,WSH,turnovers,Turnovers,,0
+401872929,28,WSH,fumblesLost,Fumbles lost,0.0,0
+401872929,28,WSH,interceptions,Interceptions thrown,0.0,0
+401872929,28,WSH,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872929,28,WSH,possessionTime,Possession,2000.0,33:20
+401872929,21,PHI,firstDowns,1st Downs,10.0,10
+401872929,21,PHI,firstDownsPassing,Passing 1st downs,6.0,6
+401872929,21,PHI,firstDownsRushing,Rushing 1st downs,4.0,4
+401872929,21,PHI,firstDownsPenalty,1st downs from penalties,0.0,0
+401872929,21,PHI,thirdDownEff,3rd down efficiency,0.4285714286,6-14
+401872929,21,PHI,fourthDownEff,4th down efficiency,,0-0
+401872929,21,PHI,totalOffensivePlays,Total Plays,53.0,53
+401872929,21,PHI,totalYards,Total Yards,,318
+401872929,21,PHI,yardsPerPlay,Yards per Play,6.0,6.0
+401872929,21,PHI,totalDrives,Total Drives,12.0,12
+401872929,21,PHI,netPassingYards,Passing,182.0,182
+401872929,21,PHI,completionAttempts,Comp/Att,,14/25
+401872929,21,PHI,yardsPerPass,Yards per pass,6.5,6.5
+401872929,21,PHI,sacksYardsLost,Sacks-Yards Lost,,3-21
+401872929,21,PHI,rushingYards,Rushing,136.0,136
+401872929,21,PHI,rushingAttempts,Rushing Attempts,25.0,25
+401872929,21,PHI,yardsPerRushAttempt,Yards per rush,5.44,5.4
+401872929,21,PHI,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872929,21,PHI,totalPenaltiesYards,Penalties,,5-40
+401872929,21,PHI,turnovers,Turnovers,,0
+401872929,21,PHI,fumblesLost,Fumbles lost,0.0,0
+401872929,21,PHI,interceptions,Interceptions thrown,0.0,0
+401872929,21,PHI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872929,21,PHI,possessionTime,Possession,1600.0,26:40
+401872926,22,ARI,firstDowns,1st Downs,23.0,23
+401872926,22,ARI,firstDownsPassing,Passing 1st downs,15.0,15
+401872926,22,ARI,firstDownsRushing,Rushing 1st downs,7.0,7
+401872926,22,ARI,firstDownsPenalty,1st downs from penalties,1.0,1
+401872926,22,ARI,thirdDownEff,3rd down efficiency,0.4285714286,6-14
+401872926,22,ARI,fourthDownEff,4th down efficiency,,0-0
+401872926,22,ARI,totalOffensivePlays,Total Plays,72.0,72
+401872926,22,ARI,totalYards,Total Yards,,393
+401872926,22,ARI,yardsPerPlay,Yards per Play,5.4583333333,5.5
+401872926,22,ARI,totalDrives,Total Drives,11.0,11
+401872926,22,ARI,netPassingYards,Passing,277.0,277
+401872926,22,ARI,completionAttempts,Comp/Att,,27/37
+401872926,22,ARI,yardsPerPass,Yards per pass,7.2894736842105265,7.3
+401872926,22,ARI,sacksYardsLost,Sacks-Yards Lost,,1-0
+401872926,22,ARI,rushingYards,Rushing,116.0,116
+401872926,22,ARI,rushingAttempts,Rushing Attempts,34.0,34
+401872926,22,ARI,yardsPerRushAttempt,Yards per rush,3.412,3.4
+401872926,22,ARI,redZoneAttempts,Red Zone (Made-Att),0.4,2-5
+401872926,22,ARI,totalPenaltiesYards,Penalties,,8-111
+401872926,22,ARI,turnovers,Turnovers,,0
+401872926,22,ARI,fumblesLost,Fumbles lost,0.0,0
+401872926,22,ARI,interceptions,Interceptions thrown,0.0,0
+401872926,22,ARI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872926,22,ARI,possessionTime,Possession,2251.0,37:31
+401872926,24,LAC,firstDowns,1st Downs,17.0,17
+401872926,24,LAC,firstDownsPassing,Passing 1st downs,9.0,9
+401872926,24,LAC,firstDownsRushing,Rushing 1st downs,6.0,6
+401872926,24,LAC,firstDownsPenalty,1st downs from penalties,2.0,2
+401872926,24,LAC,thirdDownEff,3rd down efficiency,0.25,2-8
+401872926,24,LAC,fourthDownEff,4th down efficiency,0.0,0-3
+401872926,24,LAC,totalOffensivePlays,Total Plays,51.0,51
+401872926,24,LAC,totalYards,Total Yards,,268
+401872926,24,LAC,yardsPerPlay,Yards per Play,5.2549019608,5.3
+401872926,24,LAC,totalDrives,Total Drives,10.0,10
+401872926,24,LAC,netPassingYards,Passing,187.0,187
+401872926,24,LAC,completionAttempts,Comp/Att,,17/27
+401872926,24,LAC,yardsPerPass,Yards per pass,6.233333333333333,6.2
+401872926,24,LAC,sacksYardsLost,Sacks-Yards Lost,,3-22
+401872926,24,LAC,rushingYards,Rushing,81.0,81
+401872926,24,LAC,rushingAttempts,Rushing Attempts,21.0,21
+401872926,24,LAC,yardsPerRushAttempt,Yards per rush,3.857,3.9
+401872926,24,LAC,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872926,24,LAC,totalPenaltiesYards,Penalties,,7-64
+401872926,24,LAC,turnovers,Turnovers,,2
+401872926,24,LAC,fumblesLost,Fumbles lost,1.0,1
+401872926,24,LAC,interceptions,Interceptions thrown,1.0,1
+401872926,24,LAC,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872926,24,LAC,possessionTime,Possession,1349.0,22:29
+401872930,6,DAL,firstDowns,1st Downs,21.0,21
+401872930,6,DAL,firstDownsPassing,Passing 1st downs,12.0,12
+401872930,6,DAL,firstDownsRushing,Rushing 1st downs,4.0,4
+401872930,6,DAL,firstDownsPenalty,1st downs from penalties,5.0,5
+401872930,6,DAL,thirdDownEff,3rd down efficiency,0.7272727273,8-11
+401872930,6,DAL,fourthDownEff,4th down efficiency,,0-0
+401872930,6,DAL,totalOffensivePlays,Total Plays,52.0,52
+401872930,6,DAL,totalYards,Total Yards,,244
+401872930,6,DAL,yardsPerPlay,Yards per Play,4.6923076923,4.7
+401872930,6,DAL,totalDrives,Total Drives,7.0,7
+401872930,6,DAL,netPassingYards,Passing,175.0,175
+401872930,6,DAL,completionAttempts,Comp/Att,,22/34
+401872930,6,DAL,yardsPerPass,Yards per pass,5.147058823529412,5.1
+401872930,6,DAL,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872930,6,DAL,rushingYards,Rushing,69.0,69
+401872930,6,DAL,rushingAttempts,Rushing Attempts,18.0,18
+401872930,6,DAL,yardsPerRushAttempt,Yards per rush,3.833,3.8
+401872930,6,DAL,redZoneAttempts,Red Zone (Made-Att),1.0,3-3
+401872930,6,DAL,totalPenaltiesYards,Penalties,,9-90
+401872930,6,DAL,turnovers,Turnovers,,1
+401872930,6,DAL,fumblesLost,Fumbles lost,0.0,0
+401872930,6,DAL,interceptions,Interceptions thrown,1.0,1
+401872930,6,DAL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872930,6,DAL,possessionTime,Possession,1400.0,23:20
+401872930,19,NYG,firstDowns,1st Downs,29.0,29
+401872930,19,NYG,firstDownsPassing,Passing 1st downs,14.0,14
+401872930,19,NYG,firstDownsRushing,Rushing 1st downs,11.0,11
+401872930,19,NYG,firstDownsPenalty,1st downs from penalties,4.0,4
+401872930,19,NYG,thirdDownEff,3rd down efficiency,0.8181818182,9-11
+401872930,19,NYG,fourthDownEff,4th down efficiency,,0-0
+401872930,19,NYG,totalOffensivePlays,Total Plays,68.0,68
+401872930,19,NYG,totalYards,Total Yards,,394
+401872930,19,NYG,yardsPerPlay,Yards per Play,5.7941176471,5.8
+401872930,19,NYG,totalDrives,Total Drives,7.0,7
+401872930,19,NYG,netPassingYards,Passing,229.0,229
+401872930,19,NYG,completionAttempts,Comp/Att,,23/29
+401872930,19,NYG,yardsPerPass,Yards per pass,7.387096774193548,7.4
+401872930,19,NYG,sacksYardsLost,Sacks-Yards Lost,,2-1
+401872930,19,NYG,rushingYards,Rushing,165.0,165
+401872930,19,NYG,rushingAttempts,Rushing Attempts,37.0,37
+401872930,19,NYG,yardsPerRushAttempt,Yards per rush,4.459,4.5
+401872930,19,NYG,redZoneAttempts,Red Zone (Made-Att),1.0,4-4
+401872930,19,NYG,totalPenaltiesYards,Penalties,,10-114
+401872930,19,NYG,turnovers,Turnovers,,1
+401872930,19,NYG,fumblesLost,Fumbles lost,1.0,1
+401872930,19,NYG,interceptions,Interceptions thrown,0.0,0
+401872930,19,NYG,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872930,19,NYG,possessionTime,Possession,2200.0,36:40
+401872931,7,DEN,firstDowns,1st Downs,9.0,9
+401872931,7,DEN,firstDownsPassing,Passing 1st downs,6.0,6
+401872931,7,DEN,firstDownsRushing,Rushing 1st downs,2.0,2
+401872931,7,DEN,firstDownsPenalty,1st downs from penalties,1.0,1
+401872931,7,DEN,thirdDownEff,3rd down efficiency,0.1666666667,2-12
+401872931,7,DEN,fourthDownEff,4th down efficiency,0.0,0-1
+401872931,7,DEN,totalOffensivePlays,Total Plays,47.0,47
+401872931,7,DEN,totalYards,Total Yards,,176
+401872931,7,DEN,yardsPerPlay,Yards per Play,3.7446808511,3.7
+401872931,7,DEN,totalDrives,Total Drives,12.0,12
+401872931,7,DEN,netPassingYards,Passing,115.0,115
+401872931,7,DEN,completionAttempts,Comp/Att,,17/28
+401872931,7,DEN,yardsPerPass,Yards per pass,3.59375,3.6
+401872931,7,DEN,sacksYardsLost,Sacks-Yards Lost,,4-16
+401872931,7,DEN,rushingYards,Rushing,61.0,61
+401872931,7,DEN,rushingAttempts,Rushing Attempts,15.0,15
+401872931,7,DEN,yardsPerRushAttempt,Yards per rush,4.067,4.1
+401872931,7,DEN,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872931,7,DEN,totalPenaltiesYards,Penalties,,7-52
+401872931,7,DEN,turnovers,Turnovers,,2
+401872931,7,DEN,fumblesLost,Fumbles lost,1.0,1
+401872931,7,DEN,interceptions,Interceptions thrown,1.0,1
+401872931,7,DEN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872931,7,DEN,possessionTime,Possession,1578.0,26:18
+401872931,12,KC,firstDowns,1st Downs,19.0,19
+401872931,12,KC,firstDownsPassing,Passing 1st downs,7.0,7
+401872931,12,KC,firstDownsRushing,Rushing 1st downs,11.0,11
+401872931,12,KC,firstDownsPenalty,1st downs from penalties,1.0,1
+401872931,12,KC,thirdDownEff,3rd down efficiency,0.5294117647,9-17
+401872931,12,KC,fourthDownEff,4th down efficiency,0.6666666667,2-3
+401872931,12,KC,totalOffensivePlays,Total Plays,67.0,67
+401872931,12,KC,totalYards,Total Yards,,392
+401872931,12,KC,yardsPerPlay,Yards per Play,5.8507462687,5.9
+401872931,12,KC,totalDrives,Total Drives,12.0,12
+401872931,12,KC,netPassingYards,Passing,172.0,172
+401872931,12,KC,completionAttempts,Comp/Att,,15/27
+401872931,12,KC,yardsPerPass,Yards per pass,5.931034482758621,5.9
+401872931,12,KC,sacksYardsLost,Sacks-Yards Lost,,2-12
+401872931,12,KC,rushingYards,Rushing,220.0,220
+401872931,12,KC,rushingAttempts,Rushing Attempts,38.0,38
+401872931,12,KC,yardsPerRushAttempt,Yards per rush,5.789,5.8
+401872931,12,KC,redZoneAttempts,Red Zone (Made-Att),0.6,3-5
+401872931,12,KC,totalPenaltiesYards,Penalties,,7-60
+401872931,12,KC,turnovers,Turnovers,,1
+401872931,12,KC,fumblesLost,Fumbles lost,0.0,0
+401872931,12,KC,interceptions,Interceptions thrown,1.0,1
+401872931,12,KC,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872931,12,KC,possessionTime,Possession,2022.0,33:42
+401872947,19,NYG,firstDowns,1st Downs,4.0,4
+401872947,19,NYG,firstDownsPassing,Passing 1st downs,2.0,2
+401872947,19,NYG,firstDownsRushing,Rushing 1st downs,1.0,1
+401872947,19,NYG,firstDownsPenalty,1st downs from penalties,1.0,1
+401872947,19,NYG,thirdDownEff,3rd down efficiency,0.6666666667,2-3
+401872947,19,NYG,fourthDownEff,4th down efficiency,,0-0
+401872947,19,NYG,totalOffensivePlays,Total Plays,13.0,13
+401872947,19,NYG,totalYards,Total Yards,,42
+401872947,19,NYG,yardsPerPlay,Yards per Play,3.2307692308,3.2
+401872947,19,NYG,totalDrives,Total Drives,2.0,2
+401872947,19,NYG,netPassingYards,Passing,21.0,21
+401872947,19,NYG,completionAttempts,Comp/Att,,4/7
+401872947,19,NYG,yardsPerPass,Yards per pass,3.0,3.0
+401872947,19,NYG,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872947,19,NYG,rushingYards,Rushing,21.0,21
+401872947,19,NYG,rushingAttempts,Rushing Attempts,6.0,6
+401872947,19,NYG,yardsPerRushAttempt,Yards per rush,3.5,3.5
+401872947,19,NYG,redZoneAttempts,Red Zone (Made-Att),,0-0
+401872947,19,NYG,totalPenaltiesYards,Penalties,,1-10
+401872947,19,NYG,turnovers,Turnovers,,0
+401872947,19,NYG,fumblesLost,Fumbles lost,0.0,0
+401872947,19,NYG,interceptions,Interceptions thrown,0.0,0
+401872947,19,NYG,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872947,19,NYG,possessionTime,Possession,422.0, 7:02
+401872947,14,LAR,firstDowns,1st Downs,0.0,0
+401872947,14,LAR,firstDownsPassing,Passing 1st downs,0.0,0
+401872947,14,LAR,firstDownsRushing,Rushing 1st downs,0.0,0
+401872947,14,LAR,firstDownsPenalty,1st downs from penalties,0.0,0
+401872947,14,LAR,thirdDownEff,3rd down efficiency,0.0,0-1
+401872947,14,LAR,fourthDownEff,4th down efficiency,,0-0
+401872947,14,LAR,totalOffensivePlays,Total Plays,3.0,3
+401872947,14,LAR,totalYards,Total Yards,,5
+401872947,14,LAR,yardsPerPlay,Yards per Play,1.6666666667,1.7
+401872947,14,LAR,totalDrives,Total Drives,1.0,1
+401872947,14,LAR,netPassingYards,Passing,2.0,2
+401872947,14,LAR,completionAttempts,Comp/Att,,1/2
+401872947,14,LAR,yardsPerPass,Yards per pass,1.0,1.0
+401872947,14,LAR,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872947,14,LAR,rushingYards,Rushing,3.0,3
+401872947,14,LAR,rushingAttempts,Rushing Attempts,1.0,1
+401872947,14,LAR,yardsPerRushAttempt,Yards per rush,3.0,3.0
+401872947,14,LAR,redZoneAttempts,Red Zone (Made-Att),,0-0
+401872947,14,LAR,totalPenaltiesYards,Penalties,,1-5
+401872947,14,LAR,turnovers,Turnovers,,0
+401872947,14,LAR,fumblesLost,Fumbles lost,0.0,0
+401872947,14,LAR,interceptions,Interceptions thrown,0.0,0
+401872947,14,LAR,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872947,14,LAR,possessionTime,Possession,81.0, 1:21
+401872932,8,DET,firstDowns,1st Downs,24.0,24
+401872932,8,DET,firstDownsPassing,Passing 1st downs,19.0,19
+401872932,8,DET,firstDownsRushing,Rushing 1st downs,2.0,2
+401872932,8,DET,firstDownsPenalty,1st downs from penalties,3.0,3
+401872932,8,DET,thirdDownEff,3rd down efficiency,0.3636363636,4-11
+401872932,8,DET,fourthDownEff,4th down efficiency,1.0,2-2
+401872932,8,DET,totalOffensivePlays,Total Plays,62.0,62
+401872932,8,DET,totalYards,Total Yards,,355
+401872932,8,DET,yardsPerPlay,Yards per Play,5.7258064516,5.7
+401872932,8,DET,totalDrives,Total Drives,9.0,9
+401872932,8,DET,netPassingYards,Passing,289.0,289
+401872932,8,DET,completionAttempts,Comp/Att,,26/38
+401872932,8,DET,yardsPerPass,Yards per pass,6.880952380952381,6.9
+401872932,8,DET,sacksYardsLost,Sacks-Yards Lost,,4-38
+401872932,8,DET,rushingYards,Rushing,66.0,66
+401872932,8,DET,rushingAttempts,Rushing Attempts,20.0,20
+401872932,8,DET,yardsPerRushAttempt,Yards per rush,3.3,3.3
+401872932,8,DET,redZoneAttempts,Red Zone (Made-Att),0.75,3-4
+401872932,8,DET,totalPenaltiesYards,Penalties,,10-58
+401872932,8,DET,turnovers,Turnovers,,0
+401872932,8,DET,fumblesLost,Fumbles lost,0.0,0
+401872932,8,DET,interceptions,Interceptions thrown,0.0,0
+401872932,8,DET,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872932,8,DET,possessionTime,Possession,1575.0,26:15
+401872932,2,BUF,firstDowns,1st Downs,34.0,34
+401872932,2,BUF,firstDownsPassing,Passing 1st downs,14.0,14
+401872932,2,BUF,firstDownsRushing,Rushing 1st downs,15.0,15
+401872932,2,BUF,firstDownsPenalty,1st downs from penalties,5.0,5
+401872932,2,BUF,thirdDownEff,3rd down efficiency,0.75,9-12
+401872932,2,BUF,fourthDownEff,4th down efficiency,,0-0
+401872932,2,BUF,totalOffensivePlays,Total Plays,69.0,69
+401872932,2,BUF,totalYards,Total Yards,,446
+401872932,2,BUF,yardsPerPlay,Yards per Play,6.4637681159,6.5
+401872932,2,BUF,totalDrives,Total Drives,9.0,9
+401872932,2,BUF,netPassingYards,Passing,243.0,243
+401872932,2,BUF,completionAttempts,Comp/Att,,20/31
+401872932,2,BUF,yardsPerPass,Yards per pass,7.363636363636363,7.4
+401872932,2,BUF,sacksYardsLost,Sacks-Yards Lost,,2-5
+401872932,2,BUF,rushingYards,Rushing,203.0,203
+401872932,2,BUF,rushingAttempts,Rushing Attempts,36.0,36
+401872932,2,BUF,yardsPerRushAttempt,Yards per rush,5.639,5.6
+401872932,2,BUF,redZoneAttempts,Red Zone (Made-Att),1.0,5-5
+401872932,2,BUF,totalPenaltiesYards,Penalties,,5-46
+401872932,2,BUF,turnovers,Turnovers,,0
+401872932,2,BUF,fumblesLost,Fumbles lost,0.0,0
+401872932,2,BUF,interceptions,Interceptions thrown,0.0,0
+401872932,2,BUF,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872932,2,BUF,possessionTime,Possession,2025.0,33:45
+401872933,29,CAR,firstDowns,1st Downs,18.0,18
+401872933,29,CAR,firstDownsPassing,Passing 1st downs,12.0,12
+401872933,29,CAR,firstDownsRushing,Rushing 1st downs,5.0,5
+401872933,29,CAR,firstDownsPenalty,1st downs from penalties,1.0,1
+401872933,29,CAR,thirdDownEff,3rd down efficiency,0.4285714286,6-14
+401872933,29,CAR,fourthDownEff,4th down efficiency,0.5,1-2
+401872933,29,CAR,totalOffensivePlays,Total Plays,60.0,60
+401872933,29,CAR,totalYards,Total Yards,,340
+401872933,29,CAR,yardsPerPlay,Yards per Play,5.6666666667,5.7
+401872933,29,CAR,totalDrives,Total Drives,11.0,11
+401872933,29,CAR,netPassingYards,Passing,272.0,272
+401872933,29,CAR,completionAttempts,Comp/Att,,23/36
+401872933,29,CAR,yardsPerPass,Yards per pass,7.157894736842105,7.2
+401872933,29,CAR,sacksYardsLost,Sacks-Yards Lost,,2-15
+401872933,29,CAR,rushingYards,Rushing,68.0,68
+401872933,29,CAR,rushingAttempts,Rushing Attempts,22.0,22
+401872933,29,CAR,yardsPerRushAttempt,Yards per rush,3.091,3.1
+401872933,29,CAR,redZoneAttempts,Red Zone (Made-Att),0.5,3-6
+401872933,29,CAR,totalPenaltiesYards,Penalties,,9-63
+401872933,29,CAR,turnovers,Turnovers,,0
+401872933,29,CAR,fumblesLost,Fumbles lost,0.0,0
+401872933,29,CAR,interceptions,Interceptions thrown,0.0,0
+401872933,29,CAR,defensiveTouchdowns,Defensive / Special Teams TDs,1.0,1
+401872933,29,CAR,possessionTime,Possession,1771.0,29:31
+401872933,1,ATL,firstDowns,1st Downs,17.0,17
+401872933,1,ATL,firstDownsPassing,Passing 1st downs,10.0,10
+401872933,1,ATL,firstDownsRushing,Rushing 1st downs,7.0,7
+401872933,1,ATL,firstDownsPenalty,1st downs from penalties,0.0,0
+401872933,1,ATL,thirdDownEff,3rd down efficiency,0.3076923077,4-13
+401872933,1,ATL,fourthDownEff,4th down efficiency,0.5,1-2
+401872933,1,ATL,totalOffensivePlays,Total Plays,67.0,67
+401872933,1,ATL,totalYards,Total Yards,,286
+401872933,1,ATL,yardsPerPlay,Yards per Play,4.2686567164,4.3
+401872933,1,ATL,totalDrives,Total Drives,12.0,12
+401872933,1,ATL,netPassingYards,Passing,129.0,129
+401872933,1,ATL,completionAttempts,Comp/Att,,18/32
+401872933,1,ATL,yardsPerPass,Yards per pass,3.6857142857142855,3.7
+401872933,1,ATL,sacksYardsLost,Sacks-Yards Lost,,3-16
+401872933,1,ATL,rushingYards,Rushing,157.0,157
+401872933,1,ATL,rushingAttempts,Rushing Attempts,32.0,32
+401872933,1,ATL,yardsPerRushAttempt,Yards per rush,4.906,4.9
+401872933,1,ATL,redZoneAttempts,Red Zone (Made-Att),,0-0
+401872933,1,ATL,totalPenaltiesYards,Penalties,,6-39
+401872933,1,ATL,turnovers,Turnovers,,5
+401872933,1,ATL,fumblesLost,Fumbles lost,2.0,2
+401872933,1,ATL,interceptions,Interceptions thrown,3.0,3
+401872933,1,ATL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872933,1,ATL,possessionTime,Possession,1829.0,30:29
+401872937,16,MIN,firstDowns,1st Downs,11.0,11
+401872937,16,MIN,firstDownsPassing,Passing 1st downs,6.0,6
+401872937,16,MIN,firstDownsRushing,Rushing 1st downs,4.0,4
+401872937,16,MIN,firstDownsPenalty,1st downs from penalties,1.0,1
+401872937,16,MIN,thirdDownEff,3rd down efficiency,0.2307692308,3-13
+401872937,16,MIN,fourthDownEff,4th down efficiency,1.0,1-1
+401872937,16,MIN,totalOffensivePlays,Total Plays,51.0,51
+401872937,16,MIN,totalYards,Total Yards,,246
+401872937,16,MIN,yardsPerPlay,Yards per Play,4.8235294118,4.8
+401872937,16,MIN,totalDrives,Total Drives,9.0,9
+401872937,16,MIN,netPassingYards,Passing,127.0,127
+401872937,16,MIN,completionAttempts,Comp/Att,,11/20
+401872937,16,MIN,yardsPerPass,Yards per pass,5.521739130434782,5.5
+401872937,16,MIN,sacksYardsLost,Sacks-Yards Lost,,3-16
+401872937,16,MIN,rushingYards,Rushing,119.0,119
+401872937,16,MIN,rushingAttempts,Rushing Attempts,28.0,28
+401872937,16,MIN,yardsPerRushAttempt,Yards per rush,4.25,4.3
+401872937,16,MIN,redZoneAttempts,Red Zone (Made-Att),0.0,0-1
+401872937,16,MIN,totalPenaltiesYards,Penalties,,3-25
+401872937,16,MIN,turnovers,Turnovers,,0
+401872937,16,MIN,fumblesLost,Fumbles lost,0.0,0
+401872937,16,MIN,interceptions,Interceptions thrown,0.0,0
+401872937,16,MIN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872937,16,MIN,possessionTime,Possession,1639.0,27:19
+401872937,3,CHI,firstDowns,1st Downs,17.0,17
+401872937,3,CHI,firstDownsPassing,Passing 1st downs,7.0,7
+401872937,3,CHI,firstDownsRushing,Rushing 1st downs,9.0,9
+401872937,3,CHI,firstDownsPenalty,1st downs from penalties,1.0,1
+401872937,3,CHI,thirdDownEff,3rd down efficiency,0.3333333333,5-15
+401872937,3,CHI,fourthDownEff,4th down efficiency,0.6666666667,2-3
+401872937,3,CHI,totalOffensivePlays,Total Plays,70.0,70
+401872937,3,CHI,totalYards,Total Yards,,297
+401872937,3,CHI,yardsPerPlay,Yards per Play,4.2428571429,4.2
+401872937,3,CHI,totalDrives,Total Drives,10.0,10
+401872937,3,CHI,netPassingYards,Passing,163.0,163
+401872937,3,CHI,completionAttempts,Comp/Att,,20/35
+401872937,3,CHI,yardsPerPass,Yards per pass,4.17948717948718,4.2
+401872937,3,CHI,sacksYardsLost,Sacks-Yards Lost,,4-29
+401872937,3,CHI,rushingYards,Rushing,134.0,134
+401872937,3,CHI,rushingAttempts,Rushing Attempts,31.0,31
+401872937,3,CHI,yardsPerRushAttempt,Yards per rush,4.323,4.3
+401872937,3,CHI,redZoneAttempts,Red Zone (Made-Att),0.0,0-3
+401872937,3,CHI,totalPenaltiesYards,Penalties,,8-58
+401872937,3,CHI,turnovers,Turnovers,,2
+401872937,3,CHI,fumblesLost,Fumbles lost,1.0,1
+401872937,3,CHI,interceptions,Interceptions thrown,1.0,1
+401872937,3,CHI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872937,3,CHI,possessionTime,Possession,1961.0,32:41
+401872939,21,PHI,firstDowns,1st Downs,23.0,23
+401872939,21,PHI,firstDownsPassing,Passing 1st downs,16.0,16
+401872939,21,PHI,firstDownsRushing,Rushing 1st downs,5.0,5
+401872939,21,PHI,firstDownsPenalty,1st downs from penalties,2.0,2
+401872939,21,PHI,thirdDownEff,3rd down efficiency,0.6111111111,11-18
+401872939,21,PHI,fourthDownEff,4th down efficiency,1.0,1-1
+401872939,21,PHI,totalOffensivePlays,Total Plays,72.0,72
+401872939,21,PHI,totalYards,Total Yards,,341
+401872939,21,PHI,yardsPerPlay,Yards per Play,4.7361111111,4.7
+401872939,21,PHI,totalDrives,Total Drives,8.0,8
+401872939,21,PHI,netPassingYards,Passing,252.0,252
+401872939,21,PHI,completionAttempts,Comp/Att,,26/37
+401872939,21,PHI,yardsPerPass,Yards per pass,6.3,6.3
+401872939,21,PHI,sacksYardsLost,Sacks-Yards Lost,,3-12
+401872939,21,PHI,rushingYards,Rushing,89.0,89
+401872939,21,PHI,rushingAttempts,Rushing Attempts,32.0,32
+401872939,21,PHI,yardsPerRushAttempt,Yards per rush,2.781,2.8
+401872939,21,PHI,redZoneAttempts,Red Zone (Made-Att),0.75,3-4
+401872939,21,PHI,totalPenaltiesYards,Penalties,,4-35
+401872939,21,PHI,turnovers,Turnovers,,2
+401872939,21,PHI,fumblesLost,Fumbles lost,0.0,0
+401872939,21,PHI,interceptions,Interceptions thrown,2.0,2
+401872939,21,PHI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872939,21,PHI,possessionTime,Possession,2185.0,36:25
+401872939,10,TEN,firstDowns,1st Downs,14.0,14
+401872939,10,TEN,firstDownsPassing,Passing 1st downs,7.0,7
+401872939,10,TEN,firstDownsRushing,Rushing 1st downs,7.0,7
+401872939,10,TEN,firstDownsPenalty,1st downs from penalties,0.0,0
+401872939,10,TEN,thirdDownEff,3rd down efficiency,0.4615384615,6-13
+401872939,10,TEN,fourthDownEff,4th down efficiency,1.0,1-1
+401872939,10,TEN,totalOffensivePlays,Total Plays,51.0,51
+401872939,10,TEN,totalYards,Total Yards,,291
+401872939,10,TEN,yardsPerPlay,Yards per Play,5.7058823529,5.7
+401872939,10,TEN,totalDrives,Total Drives,9.0,9
+401872939,10,TEN,netPassingYards,Passing,169.0,169
+401872939,10,TEN,completionAttempts,Comp/Att,,13/20
+401872939,10,TEN,yardsPerPass,Yards per pass,7.681818181818182,7.7
+401872939,10,TEN,sacksYardsLost,Sacks-Yards Lost,,2-14
+401872939,10,TEN,rushingYards,Rushing,122.0,122
+401872939,10,TEN,rushingAttempts,Rushing Attempts,29.0,29
+401872939,10,TEN,yardsPerRushAttempt,Yards per rush,4.207,4.2
+401872939,10,TEN,redZoneAttempts,Red Zone (Made-Att),0.5,2-4
+401872939,10,TEN,totalPenaltiesYards,Penalties,,7-45
+401872939,10,TEN,turnovers,Turnovers,,0
+401872939,10,TEN,fumblesLost,Fumbles lost,0.0,0
+401872939,10,TEN,interceptions,Interceptions thrown,0.0,0
+401872939,10,TEN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872939,10,TEN,possessionTime,Possession,1415.0,23:35
+401872946,23,PIT,firstDowns,1st Downs,16.0,16
+401872946,23,PIT,firstDownsPassing,Passing 1st downs,10.0,10
+401872946,23,PIT,firstDownsRushing,Rushing 1st downs,4.0,4
+401872946,23,PIT,firstDownsPenalty,1st downs from penalties,2.0,2
+401872946,23,PIT,thirdDownEff,3rd down efficiency,0.1666666667,2-12
+401872946,23,PIT,fourthDownEff,4th down efficiency,1.0,1-1
+401872946,23,PIT,totalOffensivePlays,Total Plays,67.0,67
+401872946,23,PIT,totalYards,Total Yards,,235
+401872946,23,PIT,yardsPerPlay,Yards per Play,3.5074626866,3.5
+401872946,23,PIT,totalDrives,Total Drives,12.0,12
+401872946,23,PIT,netPassingYards,Passing,144.0,144
+401872946,23,PIT,completionAttempts,Comp/Att,,23/40
+401872946,23,PIT,yardsPerPass,Yards per pass,3.272727272727273,3.3
+401872946,23,PIT,sacksYardsLost,Sacks-Yards Lost,,4-43
+401872946,23,PIT,rushingYards,Rushing,91.0,91
+401872946,23,PIT,rushingAttempts,Rushing Attempts,23.0,23
+401872946,23,PIT,yardsPerRushAttempt,Yards per rush,3.957,4.0
+401872946,23,PIT,redZoneAttempts,Red Zone (Made-Att),0.0,0-1
+401872946,23,PIT,totalPenaltiesYards,Penalties,,5-59
+401872946,23,PIT,turnovers,Turnovers,,2
+401872946,23,PIT,fumblesLost,Fumbles lost,1.0,1
+401872946,23,PIT,interceptions,Interceptions thrown,1.0,1
+401872946,23,PIT,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872946,23,PIT,possessionTime,Possession,1967.0,32:47
+401872946,17,NE,firstDowns,1st Downs,15.0,15
+401872946,17,NE,firstDownsPassing,Passing 1st downs,6.0,6
+401872946,17,NE,firstDownsRushing,Rushing 1st downs,7.0,7
+401872946,17,NE,firstDownsPenalty,1st downs from penalties,2.0,2
+401872946,17,NE,thirdDownEff,3rd down efficiency,0.3333333333,4-12
+401872946,17,NE,fourthDownEff,4th down efficiency,,0-0
+401872946,17,NE,totalOffensivePlays,Total Plays,53.0,53
+401872946,17,NE,totalYards,Total Yards,,327
+401872946,17,NE,yardsPerPlay,Yards per Play,6.1698113208,6.2
+401872946,17,NE,totalDrives,Total Drives,11.0,11
+401872946,17,NE,netPassingYards,Passing,191.0,191
+401872946,17,NE,completionAttempts,Comp/Att,,14/22
+401872946,17,NE,yardsPerPass,Yards per pass,7.64,7.6
+401872946,17,NE,sacksYardsLost,Sacks-Yards Lost,,3-17
+401872946,17,NE,rushingYards,Rushing,136.0,136
+401872946,17,NE,rushingAttempts,Rushing Attempts,28.0,28
+401872946,17,NE,yardsPerRushAttempt,Yards per rush,4.857,4.9
+401872946,17,NE,redZoneAttempts,Red Zone (Made-Att),0.0,0-1
+401872946,17,NE,totalPenaltiesYards,Penalties,,6-31
+401872946,17,NE,turnovers,Turnovers,,2
+401872946,17,NE,fumblesLost,Fumbles lost,1.0,1
+401872946,17,NE,interceptions,Interceptions thrown,1.0,1
+401872946,17,NE,defensiveTouchdowns,Defensive / Special Teams TDs,1.0,1
+401872946,17,NE,possessionTime,Possession,1633.0,27:13
+401872936,9,GB,firstDowns,1st Downs,16.0,16
+401872936,9,GB,firstDownsPassing,Passing 1st downs,8.0,8
+401872936,9,GB,firstDownsRushing,Rushing 1st downs,4.0,4
+401872936,9,GB,firstDownsPenalty,1st downs from penalties,4.0,4
+401872936,9,GB,thirdDownEff,3rd down efficiency,0.1111111111,1-9
+401872936,9,GB,fourthDownEff,4th down efficiency,0.0,0-1
+401872936,9,GB,totalOffensivePlays,Total Plays,50.0,50
+401872936,9,GB,totalYards,Total Yards,,199
+401872936,9,GB,yardsPerPlay,Yards per Play,3.98,4.0
+401872936,9,GB,totalDrives,Total Drives,12.0,12
+401872936,9,GB,netPassingYards,Passing,136.0,136
+401872936,9,GB,completionAttempts,Comp/Att,,16/29
+401872936,9,GB,yardsPerPass,Yards per pass,4.25,4.3
+401872936,9,GB,sacksYardsLost,Sacks-Yards Lost,,3-9
+401872936,9,GB,rushingYards,Rushing,63.0,63
+401872936,9,GB,rushingAttempts,Rushing Attempts,18.0,18
+401872936,9,GB,yardsPerRushAttempt,Yards per rush,3.5,3.5
+401872936,9,GB,redZoneAttempts,Red Zone (Made-Att),0.5,2-4
+401872936,9,GB,totalPenaltiesYards,Penalties,,14-133
+401872936,9,GB,turnovers,Turnovers,,1
+401872936,9,GB,fumblesLost,Fumbles lost,1.0,1
+401872936,9,GB,interceptions,Interceptions thrown,0.0,0
+401872936,9,GB,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872936,9,GB,possessionTime,Possession,1617.0,26:57
+401872936,20,NYJ,firstDowns,1st Downs,21.0,21
+401872936,20,NYJ,firstDownsPassing,Passing 1st downs,11.0,11
+401872936,20,NYJ,firstDownsRushing,Rushing 1st downs,6.0,6
+401872936,20,NYJ,firstDownsPenalty,1st downs from penalties,4.0,4
+401872936,20,NYJ,thirdDownEff,3rd down efficiency,0.4210526316,8-19
+401872936,20,NYJ,fourthDownEff,4th down efficiency,0.0,0-1
+401872936,20,NYJ,totalOffensivePlays,Total Plays,72.0,72
+401872936,20,NYJ,totalYards,Total Yards,,285
+401872936,20,NYJ,yardsPerPlay,Yards per Play,3.9583333333,4.0
+401872936,20,NYJ,totalDrives,Total Drives,12.0,12
+401872936,20,NYJ,netPassingYards,Passing,218.0,218
+401872936,20,NYJ,completionAttempts,Comp/Att,,27/41
+401872936,20,NYJ,yardsPerPass,Yards per pass,4.844444444444444,4.8
+401872936,20,NYJ,sacksYardsLost,Sacks-Yards Lost,,4-29
+401872936,20,NYJ,rushingYards,Rushing,67.0,67
+401872936,20,NYJ,rushingAttempts,Rushing Attempts,27.0,27
+401872936,20,NYJ,yardsPerRushAttempt,Yards per rush,2.481,2.5
+401872936,20,NYJ,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872936,20,NYJ,totalPenaltiesYards,Penalties,,13-156
+401872936,20,NYJ,turnovers,Turnovers,,0
+401872936,20,NYJ,fumblesLost,Fumbles lost,0.0,0
+401872936,20,NYJ,interceptions,Interceptions thrown,0.0,0
+401872936,20,NYJ,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872936,20,NYJ,possessionTime,Possession,2260.0,37:40
+401872935,5,CLE,firstDowns,1st Downs,15.0,15
+401872935,5,CLE,firstDownsPassing,Passing 1st downs,10.0,10
+401872935,5,CLE,firstDownsRushing,Rushing 1st downs,3.0,3
+401872935,5,CLE,firstDownsPenalty,1st downs from penalties,2.0,2
+401872935,5,CLE,thirdDownEff,3rd down efficiency,0.3846153846,5-13
+401872935,5,CLE,fourthDownEff,4th down efficiency,0.0,0-1
+401872935,5,CLE,totalOffensivePlays,Total Plays,55.0,55
+401872935,5,CLE,totalYards,Total Yards,,267
+401872935,5,CLE,yardsPerPlay,Yards per Play,4.8545454545,4.9
+401872935,5,CLE,totalDrives,Total Drives,12.0,12
+401872935,5,CLE,netPassingYards,Passing,223.0,223
+401872935,5,CLE,completionAttempts,Comp/Att,,24/30
+401872935,5,CLE,yardsPerPass,Yards per pass,6.96875,7.0
+401872935,5,CLE,sacksYardsLost,Sacks-Yards Lost,,2-15
+401872935,5,CLE,rushingYards,Rushing,44.0,44
+401872935,5,CLE,rushingAttempts,Rushing Attempts,23.0,23
+401872935,5,CLE,yardsPerRushAttempt,Yards per rush,1.913,1.9
+401872935,5,CLE,redZoneAttempts,Red Zone (Made-Att),0.3333333333333333,1-3
+401872935,5,CLE,totalPenaltiesYards,Penalties,,6-50
+401872935,5,CLE,turnovers,Turnovers,,0
+401872935,5,CLE,fumblesLost,Fumbles lost,0.0,0
+401872935,5,CLE,interceptions,Interceptions thrown,0.0,0
+401872935,5,CLE,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872935,5,CLE,possessionTime,Possession,1762.0,29:22
+401872935,27,TB,firstDowns,1st Downs,17.0,17
+401872935,27,TB,firstDownsPassing,Passing 1st downs,7.0,7
+401872935,27,TB,firstDownsRushing,Rushing 1st downs,9.0,9
+401872935,27,TB,firstDownsPenalty,1st downs from penalties,1.0,1
+401872935,27,TB,thirdDownEff,3rd down efficiency,0.4375,7-16
+401872935,27,TB,fourthDownEff,4th down efficiency,0.0,0-1
+401872935,27,TB,totalOffensivePlays,Total Plays,62.0,62
+401872935,27,TB,totalYards,Total Yards,,313
+401872935,27,TB,yardsPerPlay,Yards per Play,5.0483870968,5.0
+401872935,27,TB,totalDrives,Total Drives,11.0,11
+401872935,27,TB,netPassingYards,Passing,176.0,176
+401872935,27,TB,completionAttempts,Comp/Att,,21/34
+401872935,27,TB,yardsPerPass,Yards per pass,4.756756756756757,4.8
+401872935,27,TB,sacksYardsLost,Sacks-Yards Lost,,3-6
+401872935,27,TB,rushingYards,Rushing,137.0,137
+401872935,27,TB,rushingAttempts,Rushing Attempts,25.0,25
+401872935,27,TB,yardsPerRushAttempt,Yards per rush,5.48,5.5
+401872935,27,TB,redZoneAttempts,Red Zone (Made-Att),0.25,1-4
+401872935,27,TB,totalPenaltiesYards,Penalties,,6-62
+401872935,27,TB,turnovers,Turnovers,,1
+401872935,27,TB,fumblesLost,Fumbles lost,0.0,0
+401872935,27,TB,interceptions,Interceptions thrown,1.0,1
+401872935,27,TB,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872935,27,TB,possessionTime,Possession,1838.0,30:38
+401872938,18,NO,firstDowns,1st Downs,19.0,19
+401872938,18,NO,firstDownsPassing,Passing 1st downs,11.0,11
+401872938,18,NO,firstDownsRushing,Rushing 1st downs,6.0,6
+401872938,18,NO,firstDownsPenalty,1st downs from penalties,2.0,2
+401872938,18,NO,thirdDownEff,3rd down efficiency,0.5333333333,8-15
+401872938,18,NO,fourthDownEff,4th down efficiency,1.0,2-2
+401872938,18,NO,totalOffensivePlays,Total Plays,64.0,64
+401872938,18,NO,totalYards,Total Yards,,298
+401872938,18,NO,yardsPerPlay,Yards per Play,4.65625,4.7
+401872938,18,NO,totalDrives,Total Drives,9.0,9
+401872938,18,NO,netPassingYards,Passing,233.0,233
+401872938,18,NO,completionAttempts,Comp/Att,,27/34
+401872938,18,NO,yardsPerPass,Yards per pass,6.297297297297297,6.3
+401872938,18,NO,sacksYardsLost,Sacks-Yards Lost,,3-19
+401872938,18,NO,rushingYards,Rushing,65.0,65
+401872938,18,NO,rushingAttempts,Rushing Attempts,27.0,27
+401872938,18,NO,yardsPerRushAttempt,Yards per rush,2.407,2.4
+401872938,18,NO,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872938,18,NO,totalPenaltiesYards,Penalties,,5-35
+401872938,18,NO,turnovers,Turnovers,,0
+401872938,18,NO,fumblesLost,Fumbles lost,0.0,0
+401872938,18,NO,interceptions,Interceptions thrown,0.0,0
+401872938,18,NO,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872938,18,NO,possessionTime,Possession,1965.0,32:45
+401872938,33,BAL,firstDowns,1st Downs,19.0,19
+401872938,33,BAL,firstDownsPassing,Passing 1st downs,11.0,11
+401872938,33,BAL,firstDownsRushing,Rushing 1st downs,8.0,8
+401872938,33,BAL,firstDownsPenalty,1st downs from penalties,0.0,0
+401872938,33,BAL,thirdDownEff,3rd down efficiency,0.4444444444,4-9
+401872938,33,BAL,fourthDownEff,4th down efficiency,,0-0
+401872938,33,BAL,totalOffensivePlays,Total Plays,56.0,56
+401872938,33,BAL,totalYards,Total Yards,,312
+401872938,33,BAL,yardsPerPlay,Yards per Play,5.5714285714,5.6
+401872938,33,BAL,totalDrives,Total Drives,8.0,8
+401872938,33,BAL,netPassingYards,Passing,204.0,204
+401872938,33,BAL,completionAttempts,Comp/Att,,21/31
+401872938,33,BAL,yardsPerPass,Yards per pass,6.0,6.0
+401872938,33,BAL,sacksYardsLost,Sacks-Yards Lost,,3-31
+401872938,33,BAL,rushingYards,Rushing,108.0,108
+401872938,33,BAL,rushingAttempts,Rushing Attempts,22.0,22
+401872938,33,BAL,yardsPerRushAttempt,Yards per rush,4.909,4.9
+401872938,33,BAL,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872938,33,BAL,totalPenaltiesYards,Penalties,,7-34
+401872938,33,BAL,turnovers,Turnovers,,1
+401872938,33,BAL,fumblesLost,Fumbles lost,0.0,0
+401872938,33,BAL,interceptions,Interceptions thrown,1.0,1
+401872938,33,BAL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872938,33,BAL,possessionTime,Possession,1635.0,27:15
+401872934,4,CIN,firstDowns,1st Downs,12.0,12
+401872934,4,CIN,firstDownsPassing,Passing 1st downs,9.0,9
+401872934,4,CIN,firstDownsRushing,Rushing 1st downs,3.0,3
+401872934,4,CIN,firstDownsPenalty,1st downs from penalties,0.0,0
+401872934,4,CIN,thirdDownEff,3rd down efficiency,0.3333333333,5-15
+401872934,4,CIN,fourthDownEff,4th down efficiency,,0-0
+401872934,4,CIN,totalOffensivePlays,Total Plays,59.0,59
+401872934,4,CIN,totalYards,Total Yards,,267
+401872934,4,CIN,yardsPerPlay,Yards per Play,4.5254237288,4.5
+401872934,4,CIN,totalDrives,Total Drives,13.0,13
+401872934,4,CIN,netPassingYards,Passing,182.0,182
+401872934,4,CIN,completionAttempts,Comp/Att,,20/31
+401872934,4,CIN,yardsPerPass,Yards per pass,5.055555555555555,5.1
+401872934,4,CIN,sacksYardsLost,Sacks-Yards Lost,,5-25
+401872934,4,CIN,rushingYards,Rushing,85.0,85
+401872934,4,CIN,rushingAttempts,Rushing Attempts,23.0,23
+401872934,4,CIN,yardsPerRushAttempt,Yards per rush,3.696,3.7
+401872934,4,CIN,redZoneAttempts,Red Zone (Made-Att),1.0,1-1
+401872934,4,CIN,totalPenaltiesYards,Penalties,,12-78
+401872934,4,CIN,turnovers,Turnovers,,0
+401872934,4,CIN,fumblesLost,Fumbles lost,0.0,0
+401872934,4,CIN,interceptions,Interceptions thrown,0.0,0
+401872934,4,CIN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872934,4,CIN,possessionTime,Possession,1849.0,30:49
+401872934,34,HOU,firstDowns,1st Downs,22.0,22
+401872934,34,HOU,firstDownsPassing,Passing 1st downs,15.0,15
+401872934,34,HOU,firstDownsRushing,Rushing 1st downs,3.0,3
+401872934,34,HOU,firstDownsPenalty,1st downs from penalties,4.0,4
+401872934,34,HOU,thirdDownEff,3rd down efficiency,0.2941176471,5-17
+401872934,34,HOU,fourthDownEff,4th down efficiency,0.0,0-4
+401872934,34,HOU,totalOffensivePlays,Total Plays,78.0,78
+401872934,34,HOU,totalYards,Total Yards,,374
+401872934,34,HOU,yardsPerPlay,Yards per Play,4.7948717949,4.8
+401872934,34,HOU,totalDrives,Total Drives,13.0,13
+401872934,34,HOU,netPassingYards,Passing,314.0,314
+401872934,34,HOU,completionAttempts,Comp/Att,,30/56
+401872934,34,HOU,yardsPerPass,Yards per pass,5.233333333333333,5.2
+401872934,34,HOU,sacksYardsLost,Sacks-Yards Lost,,4-39
+401872934,34,HOU,rushingYards,Rushing,60.0,60
+401872934,34,HOU,rushingAttempts,Rushing Attempts,18.0,18
+401872934,34,HOU,yardsPerRushAttempt,Yards per rush,3.333,3.3
+401872934,34,HOU,redZoneAttempts,Red Zone (Made-Att),0.0,0-4
+401872934,34,HOU,totalPenaltiesYards,Penalties,,9-83
+401872934,34,HOU,turnovers,Turnovers,,0
+401872934,34,HOU,fumblesLost,Fumbles lost,0.0,0
+401872934,34,HOU,interceptions,Interceptions thrown,0.0,0
+401872934,34,HOU,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872934,34,HOU,possessionTime,Possession,1751.0,29:11
+401872940,30,JAX,firstDowns,1st Downs,21.0,21
+401872940,30,JAX,firstDownsPassing,Passing 1st downs,8.0,8
+401872940,30,JAX,firstDownsRushing,Rushing 1st downs,9.0,9
+401872940,30,JAX,firstDownsPenalty,1st downs from penalties,4.0,4
+401872940,30,JAX,thirdDownEff,3rd down efficiency,0.4166666667,5-12
+401872940,30,JAX,fourthDownEff,4th down efficiency,,0-0
+401872940,30,JAX,totalOffensivePlays,Total Plays,55.0,55
+401872940,30,JAX,totalYards,Total Yards,,268
+401872940,30,JAX,yardsPerPlay,Yards per Play,4.8727272727,4.9
+401872940,30,JAX,totalDrives,Total Drives,9.0,9
+401872940,30,JAX,netPassingYards,Passing,173.0,173
+401872940,30,JAX,completionAttempts,Comp/Att,,17/29
+401872940,30,JAX,yardsPerPass,Yards per pass,5.580645161290323,5.6
+401872940,30,JAX,sacksYardsLost,Sacks-Yards Lost,,2-16
+401872940,30,JAX,rushingYards,Rushing,95.0,95
+401872940,30,JAX,rushingAttempts,Rushing Attempts,24.0,24
+401872940,30,JAX,yardsPerRushAttempt,Yards per rush,3.958,4.0
+401872940,30,JAX,redZoneAttempts,Red Zone (Made-Att),0.5,1-2
+401872940,30,JAX,totalPenaltiesYards,Penalties,,4-40
+401872940,30,JAX,turnovers,Turnovers,,1
+401872940,30,JAX,fumblesLost,Fumbles lost,0.0,0
+401872940,30,JAX,interceptions,Interceptions thrown,1.0,1
+401872940,30,JAX,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872940,30,JAX,possessionTime,Possession,1723.0,28:43
+401872940,7,DEN,firstDowns,1st Downs,22.0,22
+401872940,7,DEN,firstDownsPassing,Passing 1st downs,13.0,13
+401872940,7,DEN,firstDownsRushing,Rushing 1st downs,7.0,7
+401872940,7,DEN,firstDownsPenalty,1st downs from penalties,2.0,2
+401872940,7,DEN,thirdDownEff,3rd down efficiency,0.3636363636,4-11
+401872940,7,DEN,fourthDownEff,4th down efficiency,,0-0
+401872940,7,DEN,totalOffensivePlays,Total Plays,59.0,59
+401872940,7,DEN,totalYards,Total Yards,,392
+401872940,7,DEN,yardsPerPlay,Yards per Play,6.6440677966,6.6
+401872940,7,DEN,totalDrives,Total Drives,9.0,9
+401872940,7,DEN,netPassingYards,Passing,288.0,288
+401872940,7,DEN,completionAttempts,Comp/Att,,22/31
+401872940,7,DEN,yardsPerPass,Yards per pass,9.290322580645162,9.3
+401872940,7,DEN,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872940,7,DEN,rushingYards,Rushing,104.0,104
+401872940,7,DEN,rushingAttempts,Rushing Attempts,28.0,28
+401872940,7,DEN,yardsPerRushAttempt,Yards per rush,3.714,3.7
+401872940,7,DEN,redZoneAttempts,Red Zone (Made-Att),0.4,2-5
+401872940,7,DEN,totalPenaltiesYards,Penalties,,10-53
+401872940,7,DEN,turnovers,Turnovers,,1
+401872940,7,DEN,fumblesLost,Fumbles lost,0.0,0
+401872940,7,DEN,interceptions,Interceptions thrown,1.0,1
+401872940,7,DEN,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872940,7,DEN,possessionTime,Possession,1877.0,31:17
+401872941,13,LV,firstDowns,1st Downs,14.0,14
+401872941,13,LV,firstDownsPassing,Passing 1st downs,11.0,11
+401872941,13,LV,firstDownsRushing,Rushing 1st downs,2.0,2
+401872941,13,LV,firstDownsPenalty,1st downs from penalties,1.0,1
+401872941,13,LV,thirdDownEff,3rd down efficiency,0.2857142857,4-14
+401872941,13,LV,fourthDownEff,4th down efficiency,0.5,1-2
+401872941,13,LV,totalOffensivePlays,Total Plays,60.0,60
+401872941,13,LV,totalYards,Total Yards,,305
+401872941,13,LV,yardsPerPlay,Yards per Play,5.0833333333,5.1
+401872941,13,LV,totalDrives,Total Drives,13.0,13
+401872941,13,LV,netPassingYards,Passing,248.0,248
+401872941,13,LV,completionAttempts,Comp/Att,,19/29
+401872941,13,LV,yardsPerPass,Yards per pass,8.0,8.0
+401872941,13,LV,sacksYardsLost,Sacks-Yards Lost,,2-5
+401872941,13,LV,rushingYards,Rushing,57.0,57
+401872941,13,LV,rushingAttempts,Rushing Attempts,29.0,29
+401872941,13,LV,yardsPerRushAttempt,Yards per rush,1.966,2.0
+401872941,13,LV,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872941,13,LV,totalPenaltiesYards,Penalties,,6-42
+401872941,13,LV,turnovers,Turnovers,,1
+401872941,13,LV,fumblesLost,Fumbles lost,0.0,0
+401872941,13,LV,interceptions,Interceptions thrown,1.0,1
+401872941,13,LV,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872941,13,LV,possessionTime,Possession,1663.0,27:43
+401872941,24,LAC,firstDowns,1st Downs,17.0,17
+401872941,24,LAC,firstDownsPassing,Passing 1st downs,8.0,8
+401872941,24,LAC,firstDownsRushing,Rushing 1st downs,7.0,7
+401872941,24,LAC,firstDownsPenalty,1st downs from penalties,2.0,2
+401872941,24,LAC,thirdDownEff,3rd down efficiency,0.3571428571,5-14
+401872941,24,LAC,fourthDownEff,4th down efficiency,,0-0
+401872941,24,LAC,totalOffensivePlays,Total Plays,62.0,62
+401872941,24,LAC,totalYards,Total Yards,,310
+401872941,24,LAC,yardsPerPlay,Yards per Play,5.0,5.0
+401872941,24,LAC,totalDrives,Total Drives,13.0,13
+401872941,24,LAC,netPassingYards,Passing,183.0,183
+401872941,24,LAC,completionAttempts,Comp/Att,,15/27
+401872941,24,LAC,yardsPerPass,Yards per pass,6.1,6.1
+401872941,24,LAC,sacksYardsLost,Sacks-Yards Lost,,3-9
+401872941,24,LAC,rushingYards,Rushing,127.0,127
+401872941,24,LAC,rushingAttempts,Rushing Attempts,32.0,32
+401872941,24,LAC,yardsPerRushAttempt,Yards per rush,3.969,4.0
+401872941,24,LAC,redZoneAttempts,Red Zone (Made-Att),1.0,2-2
+401872941,24,LAC,totalPenaltiesYards,Penalties,,8-45
+401872941,24,LAC,turnovers,Turnovers,,3
+401872941,24,LAC,fumblesLost,Fumbles lost,1.0,1
+401872941,24,LAC,interceptions,Interceptions thrown,2.0,2
+401872941,24,LAC,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872941,24,LAC,possessionTime,Possession,1937.0,32:17
+401872944,28,WSH,firstDowns,1st Downs,24.0,24
+401872944,28,WSH,firstDownsPassing,Passing 1st downs,11.0,11
+401872944,28,WSH,firstDownsRushing,Rushing 1st downs,11.0,11
+401872944,28,WSH,firstDownsPenalty,1st downs from penalties,2.0,2
+401872944,28,WSH,thirdDownEff,3rd down efficiency,0.5714285714,8-14
+401872944,28,WSH,fourthDownEff,4th down efficiency,,0-0
+401872944,28,WSH,totalOffensivePlays,Total Plays,67.0,67
+401872944,28,WSH,totalYards,Total Yards,,389
+401872944,28,WSH,yardsPerPlay,Yards per Play,5.8059701493,5.8
+401872944,28,WSH,totalDrives,Total Drives,9.0,9
+401872944,28,WSH,netPassingYards,Passing,207.0,207
+401872944,28,WSH,completionAttempts,Comp/Att,,23/35
+401872944,28,WSH,yardsPerPass,Yards per pass,5.914285714285715,5.9
+401872944,28,WSH,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872944,28,WSH,rushingYards,Rushing,182.0,182
+401872944,28,WSH,rushingAttempts,Rushing Attempts,32.0,32
+401872944,28,WSH,yardsPerRushAttempt,Yards per rush,5.688,5.7
+401872944,28,WSH,redZoneAttempts,Red Zone (Made-Att),0.3333333333333333,1-3
+401872944,28,WSH,totalPenaltiesYards,Penalties,,5-38
+401872944,28,WSH,turnovers,Turnovers,,1
+401872944,28,WSH,fumblesLost,Fumbles lost,1.0,1
+401872944,28,WSH,interceptions,Interceptions thrown,0.0,0
+401872944,28,WSH,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872944,28,WSH,possessionTime,Possession,1889.0,31:29
+401872944,6,DAL,firstDowns,1st Downs,20.0,20
+401872944,6,DAL,firstDownsPassing,Passing 1st downs,16.0,16
+401872944,6,DAL,firstDownsRushing,Rushing 1st downs,3.0,3
+401872944,6,DAL,firstDownsPenalty,1st downs from penalties,1.0,1
+401872944,6,DAL,thirdDownEff,3rd down efficiency,0.6363636364,7-11
+401872944,6,DAL,fourthDownEff,4th down efficiency,,0-0
+401872944,6,DAL,totalOffensivePlays,Total Plays,54.0,54
+401872944,6,DAL,totalYards,Total Yards,,332
+401872944,6,DAL,yardsPerPlay,Yards per Play,6.1481481481,6.1
+401872944,6,DAL,totalDrives,Total Drives,8.0,8
+401872944,6,DAL,netPassingYards,Passing,266.0,266
+401872944,6,DAL,completionAttempts,Comp/Att,,26/31
+401872944,6,DAL,yardsPerPass,Yards per pass,8.06060606060606,8.1
+401872944,6,DAL,sacksYardsLost,Sacks-Yards Lost,,2-13
+401872944,6,DAL,rushingYards,Rushing,66.0,66
+401872944,6,DAL,rushingAttempts,Rushing Attempts,21.0,21
+401872944,6,DAL,yardsPerRushAttempt,Yards per rush,3.143,3.1
+401872944,6,DAL,redZoneAttempts,Red Zone (Made-Att),0.75,3-4
+401872944,6,DAL,totalPenaltiesYards,Penalties,,5-32
+401872944,6,DAL,turnovers,Turnovers,,0
+401872944,6,DAL,fumblesLost,Fumbles lost,0.0,0
+401872944,6,DAL,interceptions,Interceptions thrown,0.0,0
+401872944,6,DAL,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872944,6,DAL,possessionTime,Possession,1711.0,28:31
+401872943,26,SEA,firstDowns,1st Downs,23.0,23
+401872943,26,SEA,firstDownsPassing,Passing 1st downs,12.0,12
+401872943,26,SEA,firstDownsRushing,Rushing 1st downs,9.0,9
+401872943,26,SEA,firstDownsPenalty,1st downs from penalties,2.0,2
+401872943,26,SEA,thirdDownEff,3rd down efficiency,0.4615384615,6-13
+401872943,26,SEA,fourthDownEff,4th down efficiency,0.3333333333,1-3
+401872943,26,SEA,totalOffensivePlays,Total Plays,67.0,67
+401872943,26,SEA,totalYards,Total Yards,,381
+401872943,26,SEA,yardsPerPlay,Yards per Play,5.6865671642,5.7
+401872943,26,SEA,totalDrives,Total Drives,10.0,10
+401872943,26,SEA,netPassingYards,Passing,219.0,219
+401872943,26,SEA,completionAttempts,Comp/Att,,19/26
+401872943,26,SEA,yardsPerPass,Yards per pass,8.11111111111111,8.1
+401872943,26,SEA,sacksYardsLost,Sacks-Yards Lost,,1-16
+401872943,26,SEA,rushingYards,Rushing,162.0,162
+401872943,26,SEA,rushingAttempts,Rushing Attempts,40.0,40
+401872943,26,SEA,yardsPerRushAttempt,Yards per rush,4.05,4.1
+401872943,26,SEA,redZoneAttempts,Red Zone (Made-Att),0.6,3-5
+401872943,26,SEA,totalPenaltiesYards,Penalties,,3-26
+401872943,26,SEA,turnovers,Turnovers,,1
+401872943,26,SEA,fumblesLost,Fumbles lost,1.0,1
+401872943,26,SEA,interceptions,Interceptions thrown,0.0,0
+401872943,26,SEA,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872943,26,SEA,possessionTime,Possession,2193.0,36:33
+401872943,22,ARI,firstDowns,1st Downs,10.0,10
+401872943,22,ARI,firstDownsPassing,Passing 1st downs,4.0,4
+401872943,22,ARI,firstDownsRushing,Rushing 1st downs,4.0,4
+401872943,22,ARI,firstDownsPenalty,1st downs from penalties,2.0,2
+401872943,22,ARI,thirdDownEff,3rd down efficiency,0.25,3-12
+401872943,22,ARI,fourthDownEff,4th down efficiency,1.0,1-1
+401872943,22,ARI,totalOffensivePlays,Total Plays,47.0,47
+401872943,22,ARI,totalYards,Total Yards,,151
+401872943,22,ARI,yardsPerPlay,Yards per Play,3.2127659574,3.2
+401872943,22,ARI,totalDrives,Total Drives,10.0,10
+401872943,22,ARI,netPassingYards,Passing,81.0,81
+401872943,22,ARI,completionAttempts,Comp/Att,,17/28
+401872943,22,ARI,yardsPerPass,Yards per pass,2.7,2.7
+401872943,22,ARI,sacksYardsLost,Sacks-Yards Lost,,2-14
+401872943,22,ARI,rushingYards,Rushing,70.0,70
+401872943,22,ARI,rushingAttempts,Rushing Attempts,17.0,17
+401872943,22,ARI,yardsPerRushAttempt,Yards per rush,4.118,4.1
+401872943,22,ARI,redZoneAttempts,Red Zone (Made-Att),1.0,1-1
+401872943,22,ARI,totalPenaltiesYards,Penalties,,6-48
+401872943,22,ARI,turnovers,Turnovers,,1
+401872943,22,ARI,fumblesLost,Fumbles lost,0.0,0
+401872943,22,ARI,interceptions,Interceptions thrown,1.0,1
+401872943,22,ARI,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872943,22,ARI,possessionTime,Possession,1407.0,23:27
+401872942,15,MIA,firstDowns,1st Downs,13.0,13
+401872942,15,MIA,firstDownsPassing,Passing 1st downs,8.0,8
+401872942,15,MIA,firstDownsRushing,Rushing 1st downs,4.0,4
+401872942,15,MIA,firstDownsPenalty,1st downs from penalties,1.0,1
+401872942,15,MIA,thirdDownEff,3rd down efficiency,0.4666666667,7-15
+401872942,15,MIA,fourthDownEff,4th down efficiency,0.5,1-2
+401872942,15,MIA,totalOffensivePlays,Total Plays,56.0,56
+401872942,15,MIA,totalYards,Total Yards,,284
+401872942,15,MIA,yardsPerPlay,Yards per Play,5.0714285714,5.1
+401872942,15,MIA,totalDrives,Total Drives,8.0,8
+401872942,15,MIA,netPassingYards,Passing,182.0,182
+401872942,15,MIA,completionAttempts,Comp/Att,,14/23
+401872942,15,MIA,yardsPerPass,Yards per pass,6.7407407407407405,6.7
+401872942,15,MIA,sacksYardsLost,Sacks-Yards Lost,,4-15
+401872942,15,MIA,rushingYards,Rushing,102.0,102
+401872942,15,MIA,rushingAttempts,Rushing Attempts,29.0,29
+401872942,15,MIA,yardsPerRushAttempt,Yards per rush,3.517,3.5
+401872942,15,MIA,redZoneAttempts,Red Zone (Made-Att),0.0,0-2
+401872942,15,MIA,totalPenaltiesYards,Penalties,,7-50
+401872942,15,MIA,turnovers,Turnovers,,0
+401872942,15,MIA,fumblesLost,Fumbles lost,0.0,0
+401872942,15,MIA,interceptions,Interceptions thrown,0.0,0
+401872942,15,MIA,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872942,15,MIA,possessionTime,Possession,1813.0,30:13
+401872942,25,SF,firstDowns,1st Downs,23.0,23
+401872942,25,SF,firstDownsPassing,Passing 1st downs,16.0,16
+401872942,25,SF,firstDownsRushing,Rushing 1st downs,6.0,6
+401872942,25,SF,firstDownsPenalty,1st downs from penalties,1.0,1
+401872942,25,SF,thirdDownEff,3rd down efficiency,0.7142857143,5-7
+401872942,25,SF,fourthDownEff,4th down efficiency,,0-0
+401872942,25,SF,totalOffensivePlays,Total Plays,49.0,49
+401872942,25,SF,totalYards,Total Yards,,382
+401872942,25,SF,yardsPerPlay,Yards per Play,7.7959183673,7.8
+401872942,25,SF,totalDrives,Total Drives,8.0,8
+401872942,25,SF,netPassingYards,Passing,287.0,287
+401872942,25,SF,completionAttempts,Comp/Att,,20/22
+401872942,25,SF,yardsPerPass,Yards per pass,13.045454545454545,13.0
+401872942,25,SF,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872942,25,SF,rushingYards,Rushing,95.0,95
+401872942,25,SF,rushingAttempts,Rushing Attempts,27.0,27
+401872942,25,SF,yardsPerRushAttempt,Yards per rush,3.519,3.5
+401872942,25,SF,redZoneAttempts,Red Zone (Made-Att),1.0,5-5
+401872942,25,SF,totalPenaltiesYards,Penalties,,7-78
+401872942,25,SF,turnovers,Turnovers,,0
+401872942,25,SF,fumblesLost,Fumbles lost,0.0,0
+401872942,25,SF,interceptions,Interceptions thrown,0.0,0
+401872942,25,SF,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872942,25,SF,possessionTime,Possession,1787.0,29:47
+401872945,11,IND,firstDowns,1st Downs,24.0,24
+401872945,11,IND,firstDownsPassing,Passing 1st downs,12.0,12
+401872945,11,IND,firstDownsRushing,Rushing 1st downs,9.0,9
+401872945,11,IND,firstDownsPenalty,1st downs from penalties,3.0,3
+401872945,11,IND,thirdDownEff,3rd down efficiency,0.4166666667,5-12
+401872945,11,IND,fourthDownEff,4th down efficiency,1.0,2-2
+401872945,11,IND,totalOffensivePlays,Total Plays,63.0,63
+401872945,11,IND,totalYards,Total Yards,,329
+401872945,11,IND,yardsPerPlay,Yards per Play,5.2222222222,5.2
+401872945,11,IND,totalDrives,Total Drives,10.0,10
+401872945,11,IND,netPassingYards,Passing,210.0,210
+401872945,11,IND,completionAttempts,Comp/Att,,22/31
+401872945,11,IND,yardsPerPass,Yards per pass,6.774193548387097,6.8
+401872945,11,IND,sacksYardsLost,Sacks-Yards Lost,,0-0
+401872945,11,IND,rushingYards,Rushing,119.0,119
+401872945,11,IND,rushingAttempts,Rushing Attempts,32.0,32
+401872945,11,IND,yardsPerRushAttempt,Yards per rush,3.719,3.7
+401872945,11,IND,redZoneAttempts,Red Zone (Made-Att),0.6666666666666666,2-3
+401872945,11,IND,totalPenaltiesYards,Penalties,,5-30
+401872945,11,IND,turnovers,Turnovers,,1
+401872945,11,IND,fumblesLost,Fumbles lost,0.0,0
+401872945,11,IND,interceptions,Interceptions thrown,1.0,1
+401872945,11,IND,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872945,11,IND,possessionTime,Possession,1980.0,33:00
+401872945,12,KC,firstDowns,1st Downs,29.0,29
+401872945,12,KC,firstDownsPassing,Passing 1st downs,19.0,19
+401872945,12,KC,firstDownsRushing,Rushing 1st downs,10.0,10
+401872945,12,KC,firstDownsPenalty,1st downs from penalties,0.0,0
+401872945,12,KC,thirdDownEff,3rd down efficiency,0.3846153846,5-13
+401872945,12,KC,fourthDownEff,4th down efficiency,1.0,2-2
+401872945,12,KC,totalOffensivePlays,Total Plays,78.0,78
+401872945,12,KC,totalYards,Total Yards,,523
+401872945,12,KC,yardsPerPlay,Yards per Play,6.7051282051,6.7
+401872945,12,KC,totalDrives,Total Drives,11.0,11
+401872945,12,KC,netPassingYards,Passing,371.0,371
+401872945,12,KC,completionAttempts,Comp/Att,,32/47
+401872945,12,KC,yardsPerPass,Yards per pass,7.571428571428571,7.6
+401872945,12,KC,sacksYardsLost,Sacks-Yards Lost,,2-11
+401872945,12,KC,rushingYards,Rushing,152.0,152
+401872945,12,KC,rushingAttempts,Rushing Attempts,29.0,29
+401872945,12,KC,yardsPerRushAttempt,Yards per rush,5.241,5.2
+401872945,12,KC,redZoneAttempts,Red Zone (Made-Att),0.6,3-5
+401872945,12,KC,totalPenaltiesYards,Penalties,,8-86
+401872945,12,KC,turnovers,Turnovers,,0
+401872945,12,KC,fumblesLost,Fumbles lost,0.0,0
+401872945,12,KC,interceptions,Interceptions thrown,0.0,0
+401872945,12,KC,defensiveTouchdowns,Defensive / Special Teams TDs,0.0,0
+401872945,12,KC,possessionTime,Possession,2220.0,37:00

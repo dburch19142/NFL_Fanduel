@@ -16,11 +16,14 @@ from matchup_filters import (
 )
 from optimizer import PLAYERS_CSV, ROSTER_SLOTS
 from vegas_strategy import build_vegas_pool
+from alpha_rule import build_alpha_pool
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
 
 STRATEGY_MATCHUP = "matchup"
 STRATEGY_VEGAS = "vegas"
+STRATEGY_COMBINED = "combined"
+STRATEGY_ALPHA = "alpha"
 
 # Positions allowed to fall back to the full real slate (ignoring the
 # matchup-eligibility rule) when too few players clear it to fill the
@@ -28,6 +31,23 @@ STRATEGY_VEGAS = "vegas"
 # picks respectively, so the strict rule stays in force for them even when
 # thin, per how this was scoped when added.
 RELAXABLE_POSITIONS = ("WR", "TE", "DEF")
+
+
+def _matchup_eligible_mask(pool: pd.DataFrame, result: dict) -> pd.Series:
+    """True for each row of `pool` that clears this week's matchup rule for
+    its position (`result` is build_eligibility's). DEF is matched by team
+    alone; everyone else by normalized name + team."""
+    eligible = result["eligible"]
+    eligible_def_teams = result["eligible_def_teams"]
+    teams = pool["team"].str.upper()
+    keys = list(zip(pool["name"].apply(normalize_name), teams))
+    return pd.Series(
+        [
+            (team in eligible_def_teams) if pos == "DEF" else (key in eligible.get(pos, set()))
+            for key, pos, team in zip(keys, pool["position"], teams)
+        ],
+        index=pool.index,
+    )
 
 
 def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
@@ -53,17 +73,8 @@ def _apply_matchup_eligibility(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     except Exception:
         return pool, "matchup filters unavailable this run"
 
-    eligible = result["eligible"]
-    eligible_def_teams = result["eligible_def_teams"]
     teams = pool["team"].str.upper()
-    keys = list(zip(pool["name"].apply(normalize_name), teams))
-    eligible_mask = pd.Series(
-        [
-            (team in eligible_def_teams) if pos == "DEF" else (key in eligible.get(pos, set()))
-            for key, pos, team in zip(keys, pool["position"], teams)
-        ],
-        index=pool.index,
-    )
+    eligible_mask = _matchup_eligible_mask(pool, result)
 
     relaxed_positions = [
         pos for pos in RELAXABLE_POSITIONS
@@ -138,6 +149,60 @@ def _apply_vegas_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return restricted, "Top-3 Vegas games strategy, no injury designation"
 
 
+def _apply_combined_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Full slate with a Vegas stack: the Top-3 Vegas games rules pick the
+    QB, his WR1 stack, the WR2 bring-back, RB1, RB2 and DEF (see
+    vegas_strategy.py); every other slot comes from players in any game who
+    clear the matchup filters (see matchup_filters.py). As with the matchup
+    strategy alone, WR and TE fall back to the full slate when too few
+    qualify to fill the roster. Falls back to the matchup filters by
+    themselves if lines or stats can't be fetched."""
+    try:
+        vegas, notes = build_vegas_pool(pool, core_only=True)
+        result = build_eligibility()
+    except Exception as exc:
+        pool, note = _apply_matchup_eligibility(pool)
+        return pool, f"Combined strategy unavailable ({exc}); using {note}"
+
+    key = ["name", "team", "position"]
+    picks = vegas.loc[vegas["required_group"].notna(), key + ["required_group"]]
+    combined = pool.merge(picks.drop_duplicates(key), on=key, how="left")
+    is_pick = combined["required_group"].notna()
+    usable = is_pick | _matchup_eligible_mask(combined, result)
+
+    relaxed_positions = [
+        pos for pos in RELAXABLE_POSITIONS
+        if int(((combined["position"] == pos) & usable).sum()) < ROSTER_SLOTS[pos]
+    ]
+    keep = usable | combined["position"].isin(relaxed_positions)
+    combined = combined[keep].copy()
+    combined["opponent"] = combined["team"].str.upper().map(result["matchups"])
+    combined = combined.reset_index(drop=True)
+
+    others = combined[combined["required_group"].isna()]
+    notes.append("Other slots, matchup-eligible players from any game: " + ", ".join(
+        f"{int((others['position'] == pos).sum())} {pos}" for pos in ("RB", "WR", "TE")
+    ) + ".")
+    if relaxed_positions:
+        notes.append(f"{'/'.join(relaxed_positions)} matchup rule relaxed this week (too few eligible).")
+    combined.attrs["strategy_notes"] = notes
+    return combined, "combined strategy (Top-3 Vegas games picks + full-slate matchup filters), no injury designation"
+
+
+def _apply_alpha_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Alpha Rule strategy (see alpha_rule.py). The rule-by-rule picks are
+    attached as pool.attrs["strategy_notes"] for the page to show. Falls
+    back to the full-slate matchup filters if lines or stats can't be
+    fetched."""
+    try:
+        restricted, notes = build_alpha_pool(pool)
+    except Exception as exc:
+        pool, note = _apply_matchup_eligibility(pool)
+        return pool, f"Alpha Rule unavailable ({exc}); using {note}"
+    restricted.attrs["strategy_notes"] = notes
+    return restricted, "Alpha Rule (1pm and 4pm games), no injury designation"
+
+
 def build_player_pool(
     force_refresh_stats: bool = False, strategy: str = STRATEGY_MATCHUP
 ) -> tuple[pd.DataFrame, str]:
@@ -146,7 +211,9 @@ def build_player_pool(
     players_df has columns: name, position, team, salary, projected_points.
     Falls back to the bundled sample data if no FanDuel export has been uploaded.
     `strategy` picks the lineup rules for an uploaded pool: STRATEGY_MATCHUP
-    (full-slate matchup filters) or STRATEGY_VEGAS (top-3 Vegas games).
+    (full-slate matchup filters), STRATEGY_VEGAS (top-3 Vegas games),
+    STRATEGY_COMBINED (Vegas picks, matchup filters for the other slots), or
+    STRATEGY_ALPHA (the Alpha Rule, 1pm and 4pm games only).
     """
     if not has_uploaded_pool():
         sample = pd.read_csv(PLAYERS_CSV)
@@ -182,6 +249,10 @@ def build_player_pool(
 
     if strategy == STRATEGY_VEGAS:
         pool, eligibility_note = _apply_vegas_strategy(pool)
+    elif strategy == STRATEGY_COMBINED:
+        pool, eligibility_note = _apply_combined_strategy(pool)
+    elif strategy == STRATEGY_ALPHA:
+        pool, eligibility_note = _apply_alpha_strategy(pool)
     else:
         pool, eligibility_note = _apply_matchup_eligibility(pool)
 

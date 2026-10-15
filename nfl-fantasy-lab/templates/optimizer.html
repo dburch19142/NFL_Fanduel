@@ -40,6 +40,8 @@
     <select id="strategy" name="strategy">
       <option value="matchup" {{ "selected" if strategy == "matchup" }}>Full-slate matchup filters</option>
       <option value="vegas" {{ "selected" if strategy == "vegas" }}>Top-3 Vegas games</option>
+      <option value="combined" {{ "selected" if strategy == "combined" }}>Combined (Vegas picks + matchup filters)</option>
+      <option value="alpha" {{ "selected" if strategy == "alpha" }}>Alpha Rule</option>
     </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
@@ -116,5 +118,15 @@
        and at least one back at $6,500 or less whose team's lead back is out. TE: only those targeted inside the 10. DEF: an opponent implied to
        score under about 20, then preferring one facing a backup QB, a line that allows a lot of
        sacks, and playing at home. The picks behind each rule are listed above the lineup.</p>
+    <p>The <strong>Combined</strong> strategy uses every game on the slate. The Top-3 Vegas games
+       rules pick the QB, his WR stack, the opposing WR, both RB rules and the DEF; every other
+       slot comes from players in any game who clear the matchup rules above.</p>
+    <p>The <strong>Alpha Rule</strong> uses only the games kicking off at 1pm and 4pm ET. QB: the
+       starter on the team implied to score more in the game with the highest over/under. WR: his
+       WR1, the WR1 of the team he's playing, and the WR1 of the team implied to score more in the
+       game with the second-highest over/under. RB: the lead backs facing the worst and
+       second-worst rush defenses (most rush yards allowed/game), or one facing a team whose QB1
+       is out. DEF: the one facing the offense implied to score the fewest points. TE and FLEX are
+       the optimizer's choice from those games.</p>
   </footer>
 {% endblock %}

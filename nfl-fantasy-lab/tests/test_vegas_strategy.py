@@ -215,3 +215,75 @@ def test_vegas_strategy_falls_back_to_matchup_filters(monkeypatch):
     result, note = player_pool._apply_vegas_strategy(pool)
     assert "Top-3 Vegas games strategy unavailable (odds unavailable)" in note
     assert len(result) == len(pool)
+
+
+def test_core_only_skips_the_wr3_and_te_rules():
+    pool, stats = _pool_and_stats()
+    result, notes = apply_vegas_rules(
+        pool, ODDS, stats,
+        pass_yds_allowed={"AAA": 250, "BBB": 260, "CCC": 270, "DDD": 200, "EEE": 210, "FFF": 220},
+        bad_pass_teams={"AAA", "BBB"}, bad_sack_teams=set(), core_only=True,
+    )
+    assert set(result["required_group"].dropna()) == {"QB", "WR1", "WR2", "RB1", "DEF"}
+    assert "CCC TE" in set(result["name"])  # no goal-line target, but the TE rule is off
+    assert not any(n.startswith(("WR3", "TEs limited")) for n in notes)
+
+
+def _combined(monkeypatch, eligible):
+    pool, stats = _pool_and_stats()
+
+    def _vegas(p, core_only=False):
+        return apply_vegas_rules(
+            p, ODDS, stats,
+            pass_yds_allowed={"AAA": 250, "BBB": 260, "CCC": 270, "DDD": 200, "EEE": 210, "FFF": 220},
+            bad_pass_teams={"AAA", "BBB"}, bad_sack_teams=set(), core_only=core_only,
+        )
+
+    monkeypatch.setattr(player_pool, "build_vegas_pool", _vegas)
+    monkeypatch.setattr(player_pool, "build_eligibility", lambda *a, **k: {
+        "season": 2026, "week": 5,
+        "eligible": {"QB": set(), "RB": set(), "WR": set(), "TE": set(), **eligible},
+        "eligible_def_teams": set(),
+        "matchups": {"AAA": "BBB", "BBB": "AAA", "CCC": "DDD", "DDD": "CCC",
+                     "EEE": "FFF", "FFF": "EEE", "GGG": "HHH", "HHH": "GGG"},
+    })
+    return player_pool._apply_combined_strategy(pool)
+
+
+def test_combined_keeps_vegas_picks_and_matchup_eligible_players_from_any_game(monkeypatch):
+    result, note = _combined(monkeypatch, {
+        "RB": {("ggg rb1", "GGG"), ("hhh rb1", "HHH")},
+        "WR": {("ggg wr1", "GGG")},
+        "TE": {("hhh te", "HHH")},
+    })
+    assert note.startswith("combined strategy")
+    picks = result[result["required_group"].notna()]
+    assert set(picks["required_group"]) == {"QB", "WR1", "WR2", "RB1", "DEF"}
+    # GGG @ HHH isn't a top-3 game, but its matchup-eligible players are in.
+    others = set(result.loc[result["required_group"].isna(), "name"])
+    assert others == {"GGG RB1", "HHH RB1", "GGG WR1", "HHH TE"}
+    assert result.loc[result["name"] == "GGG RB1", "opponent"].item() == "HHH"
+
+    lineup = optimize_lineup(60000, result)
+    # The third WR and the TE can only come from the game outside the top 3.
+    assert {"GGG WR1", "HHH TE"} <= set(lineup["name"])
+
+
+def test_combined_relaxes_wr_and_te_when_too_few_qualify(monkeypatch):
+    result, _ = _combined(monkeypatch, {"RB": {("ggg rb1", "GGG")}})
+    # Only the two Vegas WR picks qualify and no TE does, so both positions open up.
+    assert (result["position"] == "WR").sum() == 24
+    assert (result["position"] == "TE").sum() == 8
+    assert any("WR/TE matchup rule relaxed" in n for n in result.attrs["strategy_notes"])
+
+
+def test_combined_falls_back_to_matchup_filters(monkeypatch):
+    def _boom(*args, **kwargs):
+        raise RuntimeError("odds unavailable")
+
+    monkeypatch.setattr(player_pool, "build_vegas_pool", _boom)
+    monkeypatch.setattr(player_pool, "build_eligibility", _boom)
+    pool, _ = _pool_and_stats()
+    result, note = player_pool._apply_combined_strategy(pool)
+    assert "Combined strategy unavailable (odds unavailable)" in note
+    assert len(result) == len(pool)

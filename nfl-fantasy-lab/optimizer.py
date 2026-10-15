@@ -16,8 +16,8 @@ only when the player pool carries per-team "opponent" data (see
 player_pool.py); silently skipped otherwise.
 
 And, when the pool carries a "required_group" column (the Top-3 Vegas games
-strategy, see vegas_strategy.py), at least one player from each labeled
-group.
+strategy, see vegas_strategy.py, or the Alpha Rule, see alpha_rule.py), at
+least one player from each labeled group.
 """
 import pandas as pd
 import pulp

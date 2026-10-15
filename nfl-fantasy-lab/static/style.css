@@ -175,3 +175,47 @@ footer.note {
 .standings-table td:first-child {
   width: 34%;
 }
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.chat-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  line-height: 1.45;
+  max-width: 85%;
+}
+
+.chat-user {
+  align-self: flex-end;
+  background: #013369;
+  color: #fff;
+}
+
+.chat-assistant {
+  align-self: flex-start;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.chat-error {
+  align-self: flex-start;
+  background: #fdecea;
+  color: #8a1c12;
+}
+
+.chat-meta {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #667;
+}
+
+.chat-form input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+}

@@ -1,6 +1,8 @@
 import os
 
-from flask import Flask, render_template, request, redirect, url_for, flash
+import uuid
+
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 
 import pandas as pd
 
@@ -16,7 +18,14 @@ from optimizer import (
     DEFAULT_SALARY_CAP,
 )
 from fanduel_import import FanDuelImportError
-from player_pool import build_player_pool, save_uploaded_csv, STRATEGY_MATCHUP, STRATEGY_VEGAS
+from player_pool import (
+    build_player_pool,
+    save_uploaded_csv,
+    STRATEGY_ALPHA,
+    STRATEGY_COMBINED,
+    STRATEGY_MATCHUP,
+    STRATEGY_VEGAS,
+)
 from game_predictor import (
     build_training_frame,
     current_season_form,
@@ -27,6 +36,7 @@ from game_predictor import (
     train_model,
 )
 from real_stats import latest_available_season
+from fantasy_assistant import FantasyAssistant, friendly_error
 
 LINEUP_COUNT = 1
 MAX_LINEUP_COUNT = 10
@@ -70,7 +80,7 @@ def optimizer_page():
     must_include = ""
     lineup_count = LINEUP_COUNT
     strategy = request.values.get("strategy", STRATEGY_MATCHUP)
-    if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS):
+    if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA):
         strategy = STRATEGY_MATCHUP
 
     players, pool_source = build_player_pool(strategy=strategy)
@@ -195,6 +205,36 @@ def upload_fanduel_csv():
         flash(str(exc), "error")
 
     return redirect(url_for("optimizer_page"))
+
+# One assistant (and its conversation history) per browser session. In-memory
+# only: restarting the app starts every conversation over.
+_assistants: dict[str, FantasyAssistant] = {}
+
+
+@app.route("/assistant")
+def assistant_page():
+    return render_template("assistant.html")
+
+
+@app.route("/assistant/ask", methods=["POST"])
+def assistant_ask():
+    question = ((request.get_json(silent=True) or {}).get("question") or "").strip()
+    if not question:
+        return jsonify(error="Type a question first."), 400
+    key = session.setdefault("assistant_id", uuid.uuid4().hex)
+    try:
+        assistant = _assistants.get(key) or FantasyAssistant()
+        _assistants[key] = assistant
+        result = assistant.ask(question)
+    except Exception as exc:
+        return jsonify(error=friendly_error(exc)), 502
+    return jsonify(answer=result.text, tools=[c["name"] for c in result.tool_calls])
+
+
+@app.route("/assistant/reset", methods=["POST"])
+def assistant_reset():
+    _assistants.pop(session.get("assistant_id", ""), None)
+    return jsonify(ok=True)
 
 
 if __name__ == "__main__":

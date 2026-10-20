@@ -121,12 +121,17 @@
     <p>The <strong>Combined</strong> strategy uses every game on the slate. The Top-3 Vegas games
        rules pick the QB, his WR stack, the opposing WR, both RB rules and the DEF; every other
        slot comes from players in any game who clear the matchup rules above.</p>
-    <p>The <strong>Alpha Rule</strong> uses only the games kicking off at 1pm and 4pm ET. QB: the
-       starter on the team implied to score more in the game with the highest over/under. WR: his
-       WR1, the WR1 of the team he's playing, and the WR1 of the team implied to score more in the
-       game with the second-highest over/under. RB: the lead backs facing the worst and
-       second-worst rush defenses (most rush yards allowed/game), or one facing a team whose QB1
-       is out. DEF: the one facing the offense implied to score the fewest points. TE and FLEX are
-       the optimizer's choice from those games.</p>
+    <p>The <strong>Alpha Rule</strong> uses only the three games with the highest over/under among
+       those kicking off Sunday at 1pm and 4pm ET. QB: the starter on the team implied to score
+       more in the game with the highest over/under. WR: his WR1 and the WR1 of the team he's
+       playing; a WR1 facing a top-10 pass defense gives way to his team's WR2. RB1: the fill-in
+       for an injured lead back. RB2 (and RB1 when no lead back is out): a lead back on a team
+       that's favored or implied for 24+, preferring one facing a team whose QB1 and/or WR1 is
+       out, then the weaker rush defense. WR3: from the second or third game, never a team
+       starting a backup QB; the WR1 or WR2, whichever role the defense has given up more to,
+       with an 18%+ target share. TE: on a team implied for 23+, with targets inside the 10,
+       ranked by target share and how many points the defense allows TEs. DEF: the one facing
+       the offense implied to score the fewest points, never one facing a player the rules
+       picked. No more than four players come from one game; FLEX is the optimizer's choice.</p>
   </footer>
 {% endblock %}

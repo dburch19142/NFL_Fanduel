@@ -200,7 +200,7 @@ def _apply_alpha_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
         pool, note = _apply_matchup_eligibility(pool)
         return pool, f"Alpha Rule unavailable ({exc}); using {note}"
     restricted.attrs["strategy_notes"] = notes
-    return restricted, "Alpha Rule (1pm and 4pm games), no injury designation"
+    return restricted, "Alpha Rule (top-3 Sunday 1pm and 4pm games), no injury designation"
 
 
 def build_player_pool(
@@ -213,7 +213,7 @@ def build_player_pool(
     `strategy` picks the lineup rules for an uploaded pool: STRATEGY_MATCHUP
     (full-slate matchup filters), STRATEGY_VEGAS (top-3 Vegas games),
     STRATEGY_COMBINED (Vegas picks, matchup filters for the other slots), or
-    STRATEGY_ALPHA (the Alpha Rule, 1pm and 4pm games only).
+    STRATEGY_ALPHA (the Alpha Rule, top-3 Sunday 1pm and 4pm games only).
     """
     if not has_uploaded_pool():
         sample = pd.read_csv(PLAYERS_CSV)

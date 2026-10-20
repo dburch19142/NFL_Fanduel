@@ -17,7 +17,9 @@ player_pool.py); silently skipped otherwise.
 
 And, when the pool carries a "required_group" column (the Top-3 Vegas games
 strategy, see vegas_strategy.py, or the Alpha Rule, see alpha_rule.py), at
-least one player from each labeled group.
+least one player from each labeled group. When it also carries a
+"max_from_game" column (the Alpha Rule), no more than that many players
+from any one game.
 """
 import pandas as pd
 import pulp
@@ -160,6 +162,19 @@ def _solve(
             ]
             for p in against_idx:
                 prob += picks[d] + picks[p] <= 1
+
+    # Per-game cap (the Alpha Rule, see alpha_rule.py): no more than
+    # "max_from_game" picks from any one game, a game being the
+    # {team, opponent} pair.
+    if "max_from_game" in players.columns and "opponent" in players.columns:
+        cap = int(players["max_from_game"].max())
+        game = [
+            "|".join(sorted((team, opp))) if pd.notna(opp) else None
+            for team, opp in zip(players["team"], players["opponent"])
+        ]
+        game = pd.Series(game, index=players.index)
+        for g in game.dropna().unique():
+            prob += pulp.lpSum(picks[i] for i in players.index[game == g]) <= cap
 
     # Strategy rules (see vegas_strategy.py): at least one pick from each
     # labeled group. A group of one row is a hard lock on that player.

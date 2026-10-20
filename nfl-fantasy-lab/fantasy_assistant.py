@@ -63,7 +63,7 @@ projected points.
 Strategies
 matchup: full slate filtered by defensive matchups (the default). vegas: players from the \
 top three Vegas games by total. combined: the Vegas picks plus matchup filters for the \
-other slots. alpha: the Alpha Rule, 1pm and 4pm ET games only. If the user names no \
+other slots. alpha: the Alpha Rule, the three highest over/under Sunday 1pm and 4pm ET games only. If the user names no \
 strategy, use matchup. Tool results include strategy_notes and pool_source; mention them \
 when they explain a pick or a missing player.
 

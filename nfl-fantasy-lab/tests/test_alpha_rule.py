@@ -253,6 +253,27 @@ def test_lineup_has_at_most_four_players_from_one_game():
     assert len(lineup[lineup["team"].isin(["AAA", "BBB"])]) == 4
 
 
+def test_flex_is_a_wr2_rb2_or_te_from_the_second_or_third_game():
+    result, notes = _run()
+    flex = result[result["required_group"] == "FLEX"]
+    allowed = {f"{t} {role}" for t in ("CCC", "DDD", "EEE", "FFF") for role in ("WR2", "RB2", "TE")}
+    assert len(flex) > 0
+    assert set(flex["name"]) <= allowed
+    assert any(n.startswith("FLEX, one of") and "from the second and third games" in n for n in notes)
+    lineup = optimize_lineup(60000, result)
+    assert len(set(lineup["name"]) & set(flex["name"])) == 1
+
+
+def test_flex_leaves_out_players_facing_the_def_and_over_budget():
+    pool, stats = _pool_and_stats()
+    pool.loc[pool["name"] == "EEE RB2", "salary"] = 30000
+    result, _ = _run(pool, stats)
+    flex = set(result.loc[result["required_group"] == "FLEX", "name"])
+    def_opp = result.loc[result["required_group"] == "DEF", "opponent"].iloc[0]  # DDD
+    assert not any(name.startswith(def_opp) for name in flex)
+    assert "EEE RB2" not in flex
+
+
 def test_rule_picks_leave_room_under_the_cap():
     pool, stats = _pool_and_stats()
     pool.loc[pool["name"] == "FFF RB1", "salary"] = 20000  # top-ranked RB, unaffordable
@@ -306,7 +327,8 @@ def test_wr3_skipped_with_only_one_afternoon_game():
 def test_optimizer_builds_a_lineup_from_the_alpha_picks():
     result, _ = _run()
     lineup = optimize_lineup(60000, result)
-    assert set(result.loc[result["required_group"].notna(), "name"]) <= set(lineup["name"])
+    locks = result["required_group"].notna() & (result["required_group"] != "FLEX")
+    assert set(result.loc[locks, "name"]) <= set(lineup["name"])
 
 
 def test_alpha_strategy_falls_back_to_matchup_filters(monkeypatch):

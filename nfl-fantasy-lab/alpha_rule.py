@@ -28,7 +28,10 @@ these rules, in this order:
         Vegas-implied score); ties go to the better-projected defense. Never
         one facing any QB, RB, WR or TE the rules picked; the players it
         faces are then dropped from the pool so FLEX can't face it either.
-  FLEX: whoever the optimizer likes best from these games.
+  FLEX: a WR2, RB2 or TE from the second- or third-highest over/under
+        game -- on each of those teams, its WR2, its second-best-projected
+        RB and its top TE by target share -- whichever of them the optimizer
+        likes best.
 
 No more than four lineup players come from any one game; the rules skip a
 candidate whose game is full, and the optimizer enforces it for FLEX (see
@@ -36,8 +39,8 @@ optimizer.py).
 
 The rules also stay under the salary cap: each RB, WR3, TE and DEF pick
 must leave enough to fill every slot still open at its cheapest salary on
-the slate, or the rule moves to its next-ranked candidate (and the notes
-say so). Picks are made in the order above, so a tight cap squeezes the
+the slate (for FLEX, the cheapest FLEX candidate), or the rule moves to its
+next-ranked candidate (and the notes say so). Picks are made in the order above, so a tight cap squeezes the
 later ones first.
 
 A team's "point total" is its Vegas-implied score (see
@@ -198,6 +201,9 @@ def apply_alpha_rule(
         # The team implied to score more; a pick'em goes to the home team.
         return max((game["home"], game["away"]), key=implied.get)
 
+    # Teams in the second and third games: where WR3 and FLEX come from.
+    later_teams = [t for g in games.iloc[1:].itertuples() for t in (g.home, g.away)]
+
     pool = pool[pool["team"].isin(opponent)].copy()
     pool["opponent"] = pool["team"].map(opponent)
     pool["required_group"] = None
@@ -224,7 +230,7 @@ def apply_alpha_rule(
     if rb_out_teams:
         notes.append("Lead back out: " + ", ".join(sorted(rb_out_teams)) + ".")
 
-    def tag(i: int, label: str) -> None:
+    def tag(i: int | list[int], label: str) -> None:
         pool.loc[i, "required_group"] = label
 
     def open_spot(team: str) -> bool:
@@ -236,7 +242,22 @@ def apply_alpha_rule(
         return pd.isna(pool.loc[i, "required_group"])
 
     cheapest = pool.groupby("position")["salary"].min().to_dict()
-    cheapest["FLEX"] = min(cheapest.get(p, 0) for p in FLEX_ELIGIBLE)
+    cheapest["ANY_FLEX"] = min(cheapest.get(p, 0) for p in FLEX_ELIGIBLE)
+
+    def flex_candidates() -> list[int]:
+        # Each second- or third-game team's WR2, RB2 and top TE not already
+        # picked by a rule.
+        out = []
+        for team in later_teams:
+            on_team = pool[pool["team"] == team]
+            wrs = on_team[on_team["position"] == "WR"].sort_values(
+                ["target_share", "projected_points"], ascending=False)
+            rbs = on_team[on_team["position"] == "RB"].sort_values(
+                ["projected_points", "salary"], ascending=False)
+            tes = on_team[on_team["position"] == "TE"].sort_values(
+                ["target_share", "projected_points"], ascending=False)
+            out += list(wrs.index[1:2]) + list(rbs.index[1:2]) + list(tes.index[:1])
+        return [i for i in out if untagged(i)]
 
     def def_reserve(picked_teams: set[str]) -> float:
         # The cheapest DEF the DEF rule could still take: one facing none of
@@ -252,6 +273,8 @@ def apply_alpha_rule(
         picked = pool["required_group"].notna()
         spent = pool.loc[picked, "salary"].sum()
         picked_teams = set(pool.loc[picked & pool["position"].isin(OFFENSE), "team"])
+        flex_pool = [i for i in flex_candidates() if i not in ranked]
+        cheapest["FLEX"] = pool.loc[flex_pool, "salary"].min() if flex_pool else cheapest["ANY_FLEX"]
         reserve = sum(cheapest.get(p, 0) for p in still_open if p != "DEF")
         for n, i in enumerate(ranked):
             own = def_reserve(picked_teams | {pool.loc[i, "team"]}) if "DEF" in still_open else 0
@@ -368,7 +391,7 @@ def apply_alpha_rule(
 
     # WR3: the role the defense handles worse, from the second or third game.
     if len(games) > 1:
-        wr3_teams = [t for g in games.iloc[1:].itertuples() for t in (g.home, g.away)]
+        wr3_teams = later_teams
         skipped = sorted(t for t in wr3_teams if t in backup_teams)
         if skipped:
             notes.append(f"WR3 passes over {', '.join(skipped)}: starting a backup QB.")
@@ -453,6 +476,25 @@ def apply_alpha_rule(
         # FLEX (or anyone else the optimizer adds) can't face the DEF either.
         facing = pool["position"].isin(OFFENSE) & (pool["team"] == faced) & pool["required_group"].isna()
         pool = pool[~facing]
+
+    # FLEX: a WR2, RB2 or TE from the second or third game, in a game with
+    # room left and at a salary that still fits; the optimizer picks among them.
+    left = salary_cap - pool.loc[pool["required_group"].notna(), "salary"].sum()
+    flex = [i for i in flex_candidates()
+            if open_spot(pool.loc[i, "team"]) and pool.loc[i, "salary"] <= left]
+    if flex:
+        tag(flex, "FLEX")
+        which = "the only WR2, RB2 or TE" if len(flex) == 1 else f"one of {len(flex)} WR2s, RB2s and TEs"
+        notes.append(f"FLEX, {which} from the second and third games "
+                     f"at ${left:,.0f} or less: " + ", ".join(
+                         f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']} {pool.loc[i, 'position']})"
+                         for i in pool.loc[flex].sort_values("projected_points", ascending=False).index
+                     ) + ".")
+    elif later_teams:
+        notes.append(f"No WR2, RB2 or TE from the second or third game fits under the cap and the "
+                     f"per-game limit; FLEX is the optimizer's choice.")
+    else:
+        notes.append("Only one game; FLEX is the optimizer's choice.")
 
     pool["max_from_game"] = MAX_FROM_GAME
     pool = pool.drop(columns=["match_key"] + stat_cols)

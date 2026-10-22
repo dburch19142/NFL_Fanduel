@@ -42,6 +42,7 @@
       <option value="vegas" {{ "selected" if strategy == "vegas" }}>Top-3 Vegas games</option>
       <option value="combined" {{ "selected" if strategy == "combined" }}>Combined (Vegas picks + matchup filters)</option>
       <option value="alpha" {{ "selected" if strategy == "alpha" }}>Alpha Rule</option>
+      <option value="beta" {{ "selected" if strategy == "beta" }}>Beta (rushing matchups)</option>
     </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
@@ -134,5 +135,11 @@
        the offense implied to score the fewest points, never one facing a player the rules
        picked. FLEX: the optimizer's pick of the WR2s, RB2s and TEs from the second and third
        games. No more than four players come from one game.</p>
+    <p>The <strong>Beta</strong> strategy takes its running backs only from teams with a top-10
+       rushing offense (rushing yards per game) playing a bottom-10 rushing defense (most rushing
+       yards allowed per game) on Sunday at 1pm or 4pm ET; that covers both RB slots and an RB in
+       FLEX. Every other slot comes from players in any game who clear the matchup rules above.
+       If the qualifying teams have fewer than two healthy RBs, the RBs fall back to the matchup
+       rules.</p>
   </footer>
 {% endblock %}

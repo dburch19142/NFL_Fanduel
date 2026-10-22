@@ -15,8 +15,9 @@ from matchup_filters import (
     BOTTOM_N_PASS_DEFENSE_WR_TE,
 )
 from optimizer import PLAYERS_CSV, ROSTER_SLOTS
-from vegas_strategy import build_vegas_pool
+from vegas_strategy import _load_week_context, build_vegas_pool
 from alpha_rule import build_alpha_pool
+from beta_strategy import beta_notes, beta_rb_mask, load_rushing_ranks, qualifying_teams
 from nfl_data import apply_injury_report
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
@@ -25,6 +26,7 @@ STRATEGY_MATCHUP = "matchup"
 STRATEGY_VEGAS = "vegas"
 STRATEGY_COMBINED = "combined"
 STRATEGY_ALPHA = "alpha"
+STRATEGY_BETA = "beta"
 
 # Positions allowed to fall back to the full real slate (ignoring the
 # matchup-eligibility rule) when too few players clear it to fill the
@@ -204,6 +206,48 @@ def _apply_alpha_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return restricted, "Alpha Rule (top-3 Sunday 1pm and 4pm games), no injury designation"
 
 
+def _apply_beta_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Beta strategy (see beta_strategy.py): RBs only from teams with a
+    top-10 rushing offense facing a bottom-10 rushing defense on Sunday at
+    1pm or 4pm; every other position by the matchup filters, relaxed for
+    WR/TE/DEF when too few qualify, as in the matchup strategy. Falls back to
+    the matchup filters alone if lines or stats can't be fetched, and to
+    matchup-eligible RBs when the rule leaves fewer than two."""
+    try:
+        result = build_eligibility()
+        odds = _load_week_context(result["season"], result["week"])["odds"]
+        qualifying = qualifying_teams(load_rushing_ranks(result["season"]), odds)
+    except Exception as exc:
+        pool, note = _apply_matchup_eligibility(pool)
+        return pool, f"Beta strategy unavailable ({exc}); using {note}"
+
+    notes = beta_notes(qualifying)
+    beta_rb = beta_rb_mask(pool, {q["team"] for q in qualifying})
+    matchup = _matchup_eligible_mask(pool, result)
+    if int(beta_rb.sum()) >= ROSTER_SLOTS["RB"]:
+        rb_ok = beta_rb
+        notes.append("RBs on those teams: " + ", ".join(pool.loc[beta_rb, "name"]) + ".")
+    else:
+        rb_ok = (pool["position"] == "RB") & (beta_rb | matchup)
+        notes.append(f"Only {int(beta_rb.sum())} RB(s) on qualifying teams after injuries; "
+                     "RBs fall back to the matchup filters this week.")
+
+    others = pool["position"] != "RB"
+    usable = rb_ok | (others & matchup)
+    relaxed_positions = [
+        pos for pos in RELAXABLE_POSITIONS
+        if int(((pool["position"] == pos) & usable).sum()) < ROSTER_SLOTS[pos]
+    ]
+    keep = usable | pool["position"].isin(relaxed_positions)
+    filtered = pool[keep].copy()
+    filtered["opponent"] = filtered["team"].str.upper().map(result["matchups"])
+    filtered = filtered.reset_index(drop=True)
+    if relaxed_positions:
+        notes.append(f"{'/'.join(relaxed_positions)} matchup rule relaxed this week (too few eligible).")
+    filtered.attrs["strategy_notes"] = notes
+    return filtered, "Beta strategy (rushing matchup RBs + full-slate matchup filters), no injury designation"
+
+
 def build_player_pool(
     force_refresh_stats: bool = False, strategy: str = STRATEGY_MATCHUP
 ) -> tuple[pd.DataFrame, str]:
@@ -216,7 +260,9 @@ def build_player_pool(
     `strategy` picks the lineup rules for an uploaded pool: STRATEGY_MATCHUP
     (full-slate matchup filters), STRATEGY_VEGAS (top-3 Vegas games),
     STRATEGY_COMBINED (Vegas picks, matchup filters for the other slots), or
-    STRATEGY_ALPHA (the Alpha Rule, top-3 Sunday 1pm and 4pm games only).
+    STRATEGY_ALPHA (the Alpha Rule, top-3 Sunday 1pm and 4pm games only), or
+    STRATEGY_BETA (RBs from top-10 rush offenses facing bottom-10 rush
+    defenses on Sunday afternoon, matchup filters for the rest).
     """
     if not has_uploaded_pool():
         sample, injury_note, removed = apply_injury_report(pd.read_csv(PLAYERS_CSV))
@@ -261,6 +307,8 @@ def build_player_pool(
         pool, eligibility_note = _apply_combined_strategy(pool)
     elif strategy == STRATEGY_ALPHA:
         pool, eligibility_note = _apply_alpha_strategy(pool)
+    elif strategy == STRATEGY_BETA:
+        pool, eligibility_note = _apply_beta_strategy(pool)
     else:
         pool, eligibility_note = _apply_matchup_eligibility(pool)
 

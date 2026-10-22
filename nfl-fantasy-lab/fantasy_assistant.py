@@ -28,6 +28,7 @@ from optimizer import (
 )
 from player_pool import (
     STRATEGY_ALPHA,
+    STRATEGY_BETA,
     STRATEGY_COMBINED,
     STRATEGY_MATCHUP,
     STRATEGY_VEGAS,
@@ -43,7 +44,7 @@ MAX_TOOL_ROUNDS = 10
 MAX_LINEUPS = 10
 TEAMS_CSV = "data/teams.csv"
 
-STRATEGIES = [STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA]
+STRATEGIES = [STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA, STRATEGY_BETA]
 # The NFL Assistant tools offered to Claude, when nfl-assistant is available.
 NFL_TOOLS = ["get_injuries", "get_depth_chart", "get_player", "get_games", "get_top_totals", "get_team_leaders"]
 MAX_LISTED_EXCLUSIONS = 40
@@ -81,7 +82,9 @@ projected points.
 Strategies
 matchup: full slate filtered by defensive matchups (the default). vegas: players from the \
 top three Vegas games by total. combined: the Vegas picks plus matchup filters for the \
-other slots. alpha: the Alpha Rule, the three highest over/under Sunday 1pm and 4pm ET games only. If the user names no \
+other slots. alpha: the Alpha Rule, the three highest over/under Sunday 1pm and 4pm ET games only. \
+beta: RBs only from teams with a top-10 rushing offense facing a bottom-10 rushing defense \
+on Sunday at 1pm or 4pm ET, matchup filters for every other slot. If the user names no \
 strategy, use matchup. Tool results include strategy_notes and pool_source; mention them \
 when they explain a pick or a missing player.
 

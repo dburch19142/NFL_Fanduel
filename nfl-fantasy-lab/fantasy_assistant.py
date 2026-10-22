@@ -1,5 +1,7 @@
 """FanDuel assistant: Claude answers questions about this week's slate by
-calling the same player-pool, optimizer and standings code the web pages use.
+calling the same player-pool, optimizer and standings code the web pages use,
+plus the NFL Assistant's injury, depth chart, schedule and stats tools when
+nfl-assistant is installed alongside (see nfl_data.py).
 
 Claude never sees a projection or salary it didn't get from a tool, so its
 lineups are the optimizer's lineups and its numbers are the pool's numbers.
@@ -15,6 +17,8 @@ from typing import Callable
 
 import anthropic
 import pandas as pd
+
+import nfl_data
 
 from optimizer import (
     DEFAULT_SALARY_CAP,
@@ -40,6 +44,10 @@ MAX_LINEUPS = 10
 TEAMS_CSV = "data/teams.csv"
 
 STRATEGIES = [STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA]
+# The NFL Assistant tools offered to Claude, when nfl-assistant is available.
+NFL_TOOLS = ["get_injuries", "get_depth_chart", "get_player", "get_games", "get_top_totals", "get_team_leaders"]
+MAX_LISTED_EXCLUSIONS = 40
+
 POOL_COLUMNS = ["name", "position", "team", "salary", "projected_points", "opponent", "required_group"]
 
 SYSTEM_PROMPT = """\
@@ -52,6 +60,16 @@ is out of date. For anything about this slate, call the tools and use only what 
 return; never fill a gap from memory. If a player isn't in the pool, say so and use \
 find_player to explain why (not on the slate, or filtered out by the strategy). General \
 football or DFS knowledge (what a stack is, why you'd fade a defense) needs no tool.
+
+Injuries, depth charts, schedule and stats
+Every pool already has this week's injury report applied: anyone Out, Doubtful, \
+Questionable or on injured reserve is removed, and tool results list them under \
+removed_by_injury_report. When a player is missing, check there first. If the \
+get_injuries, get_depth_chart, get_player, get_games, get_top_totals and \
+get_team_leaders tools are available, use them to explain a pick (who replaces an \
+injured starter, recent production, the Vegas total) and say how old the data is from \
+data_freshness when it is stale. If pool_source says the live injury report is \
+unavailable, warn that only the FanDuel export's injury column was applied.
 
 Lineups
 Always build lineups with build_lineups. Never assemble or edit a lineup by hand, because \
@@ -172,14 +190,21 @@ class FantasyTools:
 
     def _context(self, strategy: str) -> dict:
         players, source = self.pool(strategy)
-        return {
+        removed = list(players.attrs.get("injury_exclusions", []))
+        context = {
             "strategy": strategy,
             "pool_source": source,
             "strategy_notes": list(players.attrs.get("strategy_notes", [])),
             "pool_size": len(players),
+            "removed_by_injury_report": removed[:MAX_LISTED_EXCLUSIONS],
         }
+        if len(removed) > MAX_LISTED_EXCLUSIONS:
+            context["removed_by_injury_report_total"] = len(removed)
+        return context
 
     def run(self, name: str, args: dict) -> dict:
+        if name in NFL_TOOLS:
+            return nfl_data.run_tool(name, args)
         handler = getattr(self, f"_tool_{name}", None)
         if handler is None:
             raise ToolError(f"Unknown tool {name!r}.")
@@ -250,6 +275,9 @@ class FantasyTools:
                 continue
             hits = players[players["name"].apply(normalize_name) == target]
             in_pools[strategy] = _records(hits) or "not in this pool"
+            for removed in players.attrs.get("injury_exclusions", []):
+                if normalize_name(removed["name"]) == target:
+                    result["removed_by_injury_report"] = removed
         result["strategy_pools"] = in_pools
         return result
 
@@ -273,6 +301,7 @@ class FantasyAssistant:
     def __init__(self, client: anthropic.Anthropic | None = None, tools: FantasyTools | None = None):
         self.client = client or anthropic.Anthropic()
         self.tools = tools or FantasyTools()
+        self.tool_specs = TOOLS + nfl_data.nfl_tool_schemas(NFL_TOOLS)
         self.messages: list[dict] = []
 
     def _request(self):
@@ -280,7 +309,7 @@ class FantasyAssistant:
             model=MODEL,
             max_tokens=16000,
             system=SYSTEM_PROMPT.format(today=date.today().isoformat()),
-            tools=TOOLS,
+            tools=self.tool_specs,
             messages=self.messages,
             output_config={"effort": EFFORT},
             # On a safety decline, rerun on Anthropic's recommended fallback model.

@@ -15,3 +15,8 @@ scikit-learn>=1.5.0
 #   pip install --no-deps nfl_data_py
 
 anthropic>=1.0
+
+# Live injuries, depth charts, schedule and stats come from the NFL Assistant
+# (../nfl-assistant, see nfl_data.py), which reads its database through these.
+SQLAlchemy>=2.0
+python-dotenv>=1.0

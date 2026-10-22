@@ -17,6 +17,7 @@ from matchup_filters import (
 from optimizer import PLAYERS_CSV, ROSTER_SLOTS
 from vegas_strategy import build_vegas_pool
 from alpha_rule import build_alpha_pool
+from nfl_data import apply_injury_report
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
 
@@ -208,16 +209,19 @@ def build_player_pool(
 ) -> tuple[pd.DataFrame, str]:
     """Returns (players_df, source_description) for the optimizer.
 
-    players_df has columns: name, position, team, salary, projected_points.
-    Falls back to the bundled sample data if no FanDuel export has been uploaded.
+    players_df has columns: name, position, team, salary, projected_points,
+    and attrs["injury_exclusions"] lists who the live injury report removed
+    (see nfl_data.py). Falls back to the bundled sample data if no FanDuel
+    export has been uploaded.
     `strategy` picks the lineup rules for an uploaded pool: STRATEGY_MATCHUP
     (full-slate matchup filters), STRATEGY_VEGAS (top-3 Vegas games),
     STRATEGY_COMBINED (Vegas picks, matchup filters for the other slots), or
     STRATEGY_ALPHA (the Alpha Rule, top-3 Sunday 1pm and 4pm games only).
     """
     if not has_uploaded_pool():
-        sample = pd.read_csv(PLAYERS_CSV)
-        return sample, "sample data (upload a FanDuel export to use real salaries)"
+        sample, injury_note, removed = apply_injury_report(pd.read_csv(PLAYERS_CSV))
+        sample.attrs["injury_exclusions"] = removed
+        return sample, f"sample data (upload a FanDuel export to use real salaries) + {injury_note}"
 
     salaries = pd.read_csv(UPLOAD_PATH)
     salaries["match_key"] = salaries["name"].apply(normalize_name)
@@ -247,6 +251,10 @@ def build_player_pool(
     pool = pool.dropna(subset=["projected_points"])
     pool["projected_points"] = pool["projected_points"].round(2)
 
+    # Before the strategies, so their "injured starter" fill-in logic sees
+    # this week's report rather than the FanDuel export's snapshot.
+    pool, injury_note, removed = apply_injury_report(pool)
+
     if strategy == STRATEGY_VEGAS:
         pool, eligibility_note = _apply_vegas_strategy(pool)
     elif strategy == STRATEGY_COMBINED:
@@ -256,4 +264,5 @@ def build_player_pool(
     else:
         pool, eligibility_note = _apply_matchup_eligibility(pool)
 
-    return pool, f"uploaded FanDuel salaries + {stats_note} + {eligibility_note}"
+    pool.attrs["injury_exclusions"] = removed
+    return pool, f"uploaded FanDuel salaries + {stats_note} + {injury_note} + {eligibility_note}"

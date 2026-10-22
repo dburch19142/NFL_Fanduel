@@ -24,3 +24,15 @@ def live_server():
     yield f"http://127.0.0.1:{port}"
     server.shutdown()
     thread.join()
+
+
+@pytest.fixture(autouse=True)
+def no_live_nfl_database(tmp_path, monkeypatch):
+    """Keep tests off the real NFL Assistant database, whose injury report
+    changes daily. Tests that want one point NFL_DATABASE_URL at a fixture."""
+    import nfl_data
+
+    monkeypatch.setenv("NFL_DATABASE_URL", f"sqlite:///{(tmp_path / 'no-nfl.db').as_posix()}")
+    nfl_data.reset()
+    yield
+    nfl_data.reset()

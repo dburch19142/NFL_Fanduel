@@ -10,12 +10,19 @@ these rules, in this order:
   WR swap: in the WR1 and WR2 slots, if the team's WR1 faces a top-10 pass
         defense (fewest pass yards allowed/game, league-wide), the team's
         WR2 takes the slot instead.
+  Two-player bring-back: when the QB's WR1 draws few targets (under a 22%
+        target share), the stack is dropped and the bring-back takes the
+        opposing WR1 (WR2 slot) plus the opposing TE (TE slot, by target
+        share); the optimizer fills the open WR slot.
   RB1:  the fill-in for an injured lead back. With none on the slate, RB1 is
         picked like RB2.
   RB2:  a lead back on a team that's favored or implied for 24+, from a
-        team without an RB in the lineup yet. Ranked: facing a team whose
-        QB1 and/or WR1 is out, then the weaker rush defense (most rush yards
-        allowed/game), then the better projection.
+        team without an RB in the lineup yet. One RB slot may instead go to
+        an underdog's workhorse: a lead back with most (over 50%) of his
+        team's carries this season. Ranked: on a team starting a backup QB
+        (it leans on the run) or facing a team whose WR1 is out, then the
+        weaker rush defense (most rush yards allowed/game), then the better
+        projection.
   WR3:  from the second- or third-highest over/under game, never a team
         starting a backup QB. On each team, the WR1 or WR2 -- whichever role
         the opposing defense has given up more to, against what those
@@ -23,15 +30,16 @@ these rules, in this order:
         highest-implied team gets the slot.
   TE:   a TE on a team implied for 23+, with targets inside the 10 this
         season. Ranked by target share, then the FanDuel points the opponent
-        allows TEs per game.
+        allows TEs per game. Skipped when the two-player bring-back took
+        the TE.
   DEF:  the defense facing the worst offense in these games (lowest
         Vegas-implied score); ties go to the better-projected defense. Never
         one facing any QB, RB, WR or TE the rules picked; the players it
         faces are then dropped from the pool so FLEX can't face it either.
-  FLEX: a WR2, RB2 or TE from the second- or third-highest over/under
-        game -- on each of those teams, its WR2, its second-best-projected
-        RB and its top TE by target share -- whichever of them the optimizer
-        likes best.
+  FLEX: a WR2, RB or TE from the second- or third-highest over/under
+        game -- on each of those teams, its WR2, its two best-projected RBs
+        (lead back included) and its top TE by target share -- whichever of
+        them the optimizer likes best.
 
 No more than four lineup players come from any one game; the rules skip a
 candidate whose game is full, and the optimizer enforces it for FLEX (see
@@ -51,8 +59,8 @@ WR1 is out when its season leader in target share is off the (injury-
 filtered) slate -- its top WR left then counts as WR1; its lead back is
 injured when its season leader in carries is, and the fill-in is its
 best-projected RB left on the slate. Where more than one fill-in is
-available, the one facing a team whose QB1 or WR1 is out comes first, then
-the weaker rush defense.
+available, the one on a team starting a backup QB or facing a team whose
+WR1 is out comes first, then the weaker rush defense.
 
 How a defense treats each WR role (see defense_vs_receivers): for every
 game it played, each opponent's WR1 and WR2 (by season target share) score
@@ -87,6 +95,8 @@ SUNDAY = 6  # pandas dayofweek
 ALPHA_GAME_COUNT = 3
 TOP_N_PASS_DEFENSE = 10  # a "good" pass D, for the WR swap
 RB_MIN_IMPLIED = 24.0
+WORKHORSE_CARRY_SHARE = 0.5  # "most of his team's carries", for an underdog's back
+LOW_STACK_TARGET_SHARE = 0.22  # QB's WR1 below this: two-player bring-back instead
 WR3_MIN_TARGET_SHARE = 0.18
 TE_MIN_IMPLIED = 23.0
 MAX_FROM_GAME = 4
@@ -245,8 +255,8 @@ def apply_alpha_rule(
     cheapest["ANY_FLEX"] = min(cheapest.get(p, 0) for p in FLEX_ELIGIBLE)
 
     def flex_candidates() -> list[int]:
-        # Each second- or third-game team's WR2, RB2 and top TE not already
-        # picked by a rule.
+        # Each second- or third-game team's WR2, two best-projected RBs
+        # (lead back included) and top TE not already picked by a rule.
         out = []
         for team in later_teams:
             on_team = pool[pool["team"] == team]
@@ -256,7 +266,7 @@ def apply_alpha_rule(
                 ["projected_points", "salary"], ascending=False)
             tes = on_team[on_team["position"] == "TE"].sort_values(
                 ["target_share", "projected_points"], ascending=False)
-            out += list(wrs.index[1:2]) + list(rbs.index[1:2]) + list(tes.index[:1])
+            out += list(wrs.index[1:2]) + list(rbs.index[:2]) + list(tes.index[:1])
         return [i for i in out if untagged(i)]
 
     def def_reserve(picked_teams: set[str]) -> float:
@@ -327,8 +337,26 @@ def apply_alpha_rule(
         notes.append(f"{label} {pool.loc[i, 'name']}: {why} "
                      f"({pool.loc[i, 'target_share']:.0%} target share).")
 
-    tag_wr1(qb_team, "WR1", "the QB's WR1")
+    # Two-player bring-back: when the QB's WR1 draws few targets, the stack
+    # gives way to the opposing WR1 plus the opposing TE.
+    stack_wrs = team_wrs(qb_team)
+    opp_tes = pool[(pool["position"] == "TE") & (pool["team"] == qb_opp)].sort_values(
+        ["target_share", "projected_points"], ascending=False)
+    stack_share = stack_wrs["target_share"].iloc[0] if not stack_wrs.empty else 0.0
+    double_bring_back = (not stack_wrs.empty and stack_share < LOW_STACK_TARGET_SHARE
+                         and not opp_tes.empty)
+    if double_bring_back:
+        notes.append(f"Two-player bring-back: {qb_team}'s WR1 {stack_wrs.iloc[0]['name']} has only a "
+                     f"{stack_share:.0%} target share (under {LOW_STACK_TARGET_SHARE:.0%}), so no stack; "
+                     f"the bring-back takes {qb_opp}'s WR1 and TE, and the optimizer fills the open WR.")
+    else:
+        tag_wr1(qb_team, "WR1", "the QB's WR1")
     tag_wr1(qb_opp, "WR2", f"WR1 of the opposing team ({qb_opp})")
+    if double_bring_back:
+        t = opp_tes.index[0]
+        tag(t, "TE")
+        notes.append(f"TE {pool.loc[t, 'name']}: the second half of the bring-back, {qb_opp}'s top TE "
+                     f"({pool.loc[t, 'target_share']:.0%} target share).")
 
     # RB1: the fill-in for an injured lead back. RB2 (and RB1 when there's no
     # fill-in): a lead back on a favored or 24+ team, ranked by matchup.
@@ -339,24 +367,34 @@ def apply_alpha_rule(
     }
     worst_rush = sorted((t for t in opponent if t in rush_yds_allowed),
                         key=rush_yds_allowed.get, reverse=True)
-    weakened = backup_teams | wr1_out_teams
-
-    def matchup(faced: str) -> str:
-        out = [what for what, teams in (("QB1", backup_teams), ("WR1", wr1_out_teams)) if faced in teams]
-        rush = (f"the {_worst(worst_rush.index(faced))} rush D "
+    def matchup(team: str, faced: str) -> str:
+        rush = (f"{faced}, the {_worst(worst_rush.index(faced))} rush D "
                 f"({rush_yds_allowed[faced]:.0f} rush yds allowed/game)") if faced in worst_rush else faced
-        if out:
-            return f"faces {rush}, whose {' and '.join(out)} {'are' if len(out) > 1 else 'is'} out"
-        return f"faces {rush}"
+        out = f"faces {rush}" + (", whose WR1 is out" if faced in wr1_out_teams else "")
+        if team in backup_teams:
+            out += f"; {team} is starting a backup QB, so it leans on the run"
+        return out
 
     def rb_rank(i: int) -> tuple:
-        faced = pool.loc[i, "opponent"]
-        return (faced in weakened, rush_yds_allowed.get(faced, 0),
+        # A back whose own QB1 is out gets the work; so does one facing a
+        # team down its WR1.
+        team, faced = pool.loc[i, "team"], pool.loc[i, "opponent"]
+        return (team in backup_teams or faced in wr1_out_teams, rush_yds_allowed.get(faced, 0),
                 pool.loc[i, "projected_points"], pool.loc[i, "salary"])
 
-    # Slots still open after each pick, for the salary check.
+    # Slots still open after each pick, for the salary check. The two-player
+    # bring-back leaves a WR slot for the optimizer and has filled the TE.
     after = {"RB1": ["RB", "WR", "TE", "DEF", "FLEX"], "RB2": ["WR", "TE", "DEF", "FLEX"],
              "WR3": ["TE", "DEF", "FLEX"], "TE": ["DEF", "FLEX"], "DEF": ["FLEX"]}
+    if double_bring_back:
+        after = {k: [s for s in v if s != "TE"] + ["WR"] for k, v in after.items()}
+
+    # Workhorses: lead backs with most of their team's carries this season.
+    team_carries = stats.groupby("team")["carries"].sum()
+
+    def carry_share(i: int) -> float:
+        total = team_carries.get(pool.loc[i, "team"], 0)
+        return pool.loc[i, "carries"] / total if total else 0.0
 
     rb_slots = ["RB1", "RB2"]
     fill_ins = [lead_backs[t] for t in sorted(rb_out_teams) if t in lead_backs and open_spot(t)]
@@ -365,29 +403,38 @@ def apply_alpha_rule(
         tag(i, "RB1")
         team, faced = pool.loc[i, "team"], pool.loc[i, "opponent"]
         notes.append(f"RB1 {pool.loc[i, 'name']} ({team} vs {faced}): fills in for {team}'s injured "
-                     f"lead back; {matchup(faced)}.")
+                     f"lead back; {matchup(team, faced)}.")
         rb_slots = ["RB2"]
     else:
         notes.append("No injured lead back has a fill-in on the slate; RB1 is picked like RB2.")
 
+    underdog_used = False  # only one RB slot may go to an underdog's workhorse
     for label in rb_slots:
         rb_teams = set(pool.loc[pool["required_group"].isin(["RB1", "RB2"]), "team"])
         candidates = [i for t, i in lead_backs.items() if t not in rb_teams and untagged(i) and open_spot(t)]
         favored = [i for i in candidates if implied[pool.loc[i, "team"]] >= RB_MIN_IMPLIED
                    or implied[pool.loc[i, "team"]] > implied[pool.loc[i, "opponent"]]]
+        workhorses = [] if underdog_used else [
+            i for i in candidates if i not in favored and carry_share(i) > WORKHORSE_CARRY_SHARE]
         if not candidates:
             notes.append(f"No lead back fits the {label} rule; {label} rule skipped.")
             continue
-        if not favored:
+        if not favored and not workhorses:
             notes.append(f"No lead back's team is favored or implied for {RB_MIN_IMPLIED:g}+; "
                          f"{label} considers every lead back.")
-        i = affordable(sorted(favored or candidates, key=rb_rank, reverse=True), label, after[label])
+        i = affordable(sorted(favored + workhorses or candidates, key=rb_rank, reverse=True),
+                       label, after[label])
         if i is None:
             continue
         tag(i, label)
         team, faced = pool.loc[i, "team"], pool.loc[i, "opponent"]
+        workhorse = ""
+        if i in workhorses:
+            underdog_used = True
+            workhorse = (f"; an underdog's workhorse with {carry_share(i):.0%} of {team}'s carries "
+                         "(the one RB slot allowed off a favored team)")
         notes.append(f"{label} {pool.loc[i, 'name']} ({team} vs {faced}, implied "
-                     f"{implied[team]:.1f}): {matchup(faced)}.")
+                     f"{implied[team]:.1f}): {matchup(team, faced)}{workhorse}.")
 
     # WR3: the role the defense handles worse, from the second or third game.
     if len(games) > 1:
@@ -432,11 +479,13 @@ def apply_alpha_rule(
     high = te[te["team"].map(implied) >= TE_MIN_IMPLIED]
     goal_line = high[high["goal_line_targets"] > 0]
     te_candidates = goal_line if not goal_line.empty else high if not high.empty else te
-    if goal_line.empty:
+    if goal_line.empty and not double_bring_back:
         notes.append("No TE on a 23+ team has a target inside the 10; TE rule relaxed"
                      + ("." if not high.empty else " to every TE."))
     t = None
-    if te_candidates.empty:
+    if double_bring_back:
+        pass  # the bring-back took the TE
+    elif te_candidates.empty:
         notes.append("No TE fits under the per-game cap; TE rule skipped.")
     else:
         te_candidates = te_candidates.assign(opp_te=te_candidates["opponent"].map(te_allowed).fillna(0))
@@ -477,21 +526,21 @@ def apply_alpha_rule(
         facing = pool["position"].isin(OFFENSE) & (pool["team"] == faced) & pool["required_group"].isna()
         pool = pool[~facing]
 
-    # FLEX: a WR2, RB2 or TE from the second or third game, in a game with
+    # FLEX: a WR2, RB or TE from the second or third game, in a game with
     # room left and at a salary that still fits; the optimizer picks among them.
     left = salary_cap - pool.loc[pool["required_group"].notna(), "salary"].sum()
     flex = [i for i in flex_candidates()
             if open_spot(pool.loc[i, "team"]) and pool.loc[i, "salary"] <= left]
     if flex:
         tag(flex, "FLEX")
-        which = "the only WR2, RB2 or TE" if len(flex) == 1 else f"one of {len(flex)} WR2s, RB2s and TEs"
+        which = "the only WR2, RB or TE" if len(flex) == 1 else f"one of {len(flex)} WR2s, RBs and TEs"
         notes.append(f"FLEX, {which} from the second and third games "
                      f"at ${left:,.0f} or less: " + ", ".join(
                          f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']} {pool.loc[i, 'position']})"
                          for i in pool.loc[flex].sort_values("projected_points", ascending=False).index
                      ) + ".")
     elif later_teams:
-        notes.append(f"No WR2, RB2 or TE from the second or third game fits under the cap and the "
+        notes.append(f"No WR2, RB or TE from the second or third game fits under the cap and the "
                      f"per-game limit; FLEX is the optimizer's choice.")
     else:
         notes.append("Only one game; FLEX is the optimizer's choice.")

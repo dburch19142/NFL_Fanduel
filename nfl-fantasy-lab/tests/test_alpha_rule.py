@@ -59,11 +59,12 @@ def _pool_and_stats():
     return pd.DataFrame(players), pd.DataFrame(stats)
 
 
-def _run(pool=None, stats=None, odds=ODDS, pass_allowed=PASS_ALLOWED, defense_vs=None):
+def _run(pool=None, stats=None, odds=ODDS, pass_allowed=PASS_ALLOWED, defense_vs=None,
+         rush_allowed=RUSH_ALLOWED):
     base_pool, base_stats = _pool_and_stats()
     return apply_alpha_rule(
         base_pool if pool is None else pool, odds, base_stats if stats is None else stats,
-        RUSH_ALLOWED, pass_allowed, defense_vs,
+        rush_allowed, pass_allowed, defense_vs,
     )
 
 
@@ -126,16 +127,27 @@ def test_rb_with_no_favored_team_considers_every_lead_back():
     assert _group(result, "RB1") == {"EEE RB1"}  # faces FFF, the worst rush D
 
 
-def test_rb_facing_a_team_whose_qb1_is_out_can_take_the_slot():
+def test_rb_on_a_team_starting_a_backup_qb_takes_the_slot():
+    # CCC (implied 29.0) is down to its backup QB, so it leans on its back,
+    # who outranks backs facing weaker rush Ds.
+    pool, stats = _pool_and_stats()
+    pool = pool[pool["name"] != "CCC QB"]
+    pool = pd.concat([pool, pd.DataFrame([_player("CCC Backup", "QB", "CCC", 6000, 3)])])
+    result, notes = _run(pool, stats)
+    assert any("QB1 out, starting a backup: CCC (CCC Backup)" in n for n in notes)
+    assert _group(result, "RB1") == {"CCC RB1"}
+    assert _group(result, "RB2") == {"FFF RB1"}
+    assert any("CCC is starting a backup QB, so it leans on the run" in n for n in notes)
+
+
+def test_rb_facing_a_team_starting_a_backup_qb_gets_no_boost():
+    # DDD is down to its backup; CCC's back, facing DDD, ranks on rush D alone.
     pool, stats = _pool_and_stats()
     pool = pool[pool["name"] != "DDD QB"]
     pool = pd.concat([pool, pd.DataFrame([_player("DDD Backup", "QB", "DDD", 6000, 3)])])
-    result, notes = _run(pool, stats)
-    assert any("QB1 out, starting a backup: DDD (DDD Backup)" in n for n in notes)
-    # CCC plays DDD: facing a team down its QB1 outranks the weaker rush D.
-    assert _group(result, "RB1") == {"CCC RB1"}
-    assert _group(result, "RB2") == {"FFF RB1"}
-    assert any("whose QB1 is out" in n for n in notes)
+    result, _ = _run(pool, stats)
+    assert _group(result, "RB1") == {"FFF RB1"}
+    assert _group(result, "RB2") == {"CCC RB1"}
 
 
 def test_rb_facing_a_team_whose_wr1_is_out_can_take_the_slot():
@@ -160,6 +172,63 @@ def test_rb1_is_the_fill_in_for_an_injured_lead_back():
     assert any("fills in for DDD's injured lead back" in n for n in notes)
     # RB2: FFF's back, the favored back facing the weakest rush D (EEE).
     assert _group(result, "RB2") == {"FFF RB1"}
+
+
+def _with_carries(stats, carries):
+    """stats plus season carries, {name: carries}."""
+    rows = [_stat(name, "QB" if name.endswith("QB") else "RB", name.split()[0], carries=c)
+            for name, c in carries.items()]
+    return pd.concat([stats[~stats["match_key"].isin([n.lower() for n in carries])], pd.DataFrame(rows)])
+
+
+def test_one_rb_slot_can_go_to_an_underdogs_workhorse():
+    # EEE is an underdog implied for 23.5, but its back has 100 of 120 carries
+    # and faces FFF, the worst rush D.
+    pool, stats = _pool_and_stats()
+    stats = _with_carries(stats, {"EEE RB1": 100, "EEE QB": 20})
+    result, notes = _run(pool, stats)
+    assert _group(result, "RB1") == {"EEE RB1"}
+    assert _group(result, "RB2") == {"FFF RB1"}
+    assert any("underdog's workhorse with 83% of EEE's carries" in n for n in notes)
+
+
+def test_only_one_rb_slot_goes_to_an_underdog():
+    # DDD (implied 20.0) is a workhorse facing a weaker rush D than FFF's
+    # back does, but EEE's workhorse already took the underdog slot.
+    pool, stats = _pool_and_stats()
+    stats = _with_carries(stats, {"EEE RB1": 100, "EEE QB": 20, "DDD RB1": 90, "DDD QB": 10})
+    result, _ = _run(pool, stats, rush_allowed={**RUSH_ALLOWED, "CCC": 145})
+    assert _group(result, "RB1") == {"EEE RB1"}
+    assert _group(result, "RB2") == {"FFF RB1"}
+
+
+def test_underdog_back_without_most_of_the_carries_is_passed_over():
+    pool, stats = _pool_and_stats()
+    stats = _with_carries(stats, {"EEE RB1": 40, "EEE QB": 60})
+    result, _ = _run(pool, stats)
+    assert "EEE RB1" not in _group(result, "RB1") | _group(result, "RB2")
+
+
+def test_two_player_bring_back_when_the_qbs_wr1_draws_few_targets():
+    pool, stats = _pool_and_stats()
+    stats.loc[stats["team"] == "BBB", "target_share"] = [0.0, 0.20, 0.15, 0.10]  # QB, WR1-3
+    stats = pd.concat([stats, pd.DataFrame([_stat("AAA TE", "TE", "AAA", share=0.12)])])
+    result, notes = _run(pool, stats)
+    assert _group(result, "WR1") == set()
+    assert _group(result, "WR2") == {"AAA WR1"}
+    assert _group(result, "TE") == {"AAA TE"}
+    assert any("Two-player bring-back: BBB's WR1 BBB WR1 has only a 20% target share" in n for n in notes)
+    assert not any("TE rule relaxed" in n for n in notes)
+    lineup = optimize_lineup(60000, result)
+    assert {"BBB QB", "AAA WR1", "AAA TE"} <= set(lineup["name"])
+
+
+def test_qbs_wr1_at_22_percent_keeps_the_stack():
+    pool, stats = _pool_and_stats()
+    stats.loc[stats["team"] == "BBB", "target_share"] = [0.0, 0.22, 0.15, 0.10]
+    result, notes = _run(pool, stats)
+    assert _group(result, "WR1") == {"BBB WR1"}
+    assert not any("Two-player bring-back" in n for n in notes)
 
 
 def test_wr_facing_a_top_10_pass_d_swaps_to_his_teams_wr2():
@@ -253,12 +322,14 @@ def test_lineup_has_at_most_four_players_from_one_game():
     assert len(lineup[lineup["team"].isin(["AAA", "BBB"])]) == 4
 
 
-def test_flex_is_a_wr2_rb2_or_te_from_the_second_or_third_game():
+def test_flex_is_a_wr2_rb_or_te_from_the_second_or_third_game():
     result, notes = _run()
     flex = result[result["required_group"] == "FLEX"]
-    allowed = {f"{t} {role}" for t in ("CCC", "DDD", "EEE", "FFF") for role in ("WR2", "RB2", "TE")}
+    allowed = {f"{t} {role}" for t in ("CCC", "DDD", "EEE", "FFF") for role in ("WR2", "RB1", "RB2", "TE")}
     assert len(flex) > 0
     assert set(flex["name"]) <= allowed
+    # EEE's lead back isn't picked by an RB rule, so FLEX can take him.
+    assert "EEE RB1" in set(flex["name"])
     assert any(n.startswith("FLEX, one of") and "from the second and third games" in n for n in notes)
     lineup = optimize_lineup(60000, result)
     assert len(set(lineup["name"]) & set(flex["name"])) == 1

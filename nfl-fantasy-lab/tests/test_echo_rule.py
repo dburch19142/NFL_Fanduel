@@ -152,3 +152,30 @@ def test_cheap_rule_pick_is_kept_when_no_better_value_has_a_role():
     result, notes = _run()
     kept = next(n for n in notes if n.startswith("Value check, no better value"))
     assert "AAA TE" in kept and "AAA TE" in _group(result, "TE")
+
+
+def _downgrade_pool(wr3_points):
+    # The bring-back (AAA WR1, $5,900, 12 pts) is under the value line, and
+    # the only better value, BBB WR2 ($9,000, 24 pts), doesn't fit until the
+    # WR3 (CCC WR1, now $13,000) moves down.
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 12.0)
+    pool.loc[pool["name"] == "BBB WR2", ["salary", "projected_points"]] = (9000, 24.0)
+    pool.loc[pool["name"] == "CCC WR1", ["salary", "projected_points"]] = (13000, wr3_points)
+    return pool
+
+
+def test_most_expensive_pick_is_downgraded_to_make_room():
+    result, notes = _run(pool=_downgrade_pool(15.0))
+    assert _group(result, "WR2") == {"BBB WR2"}
+    assert len(_group(result, "WR3") & {"EEE WR1", "FFF WR1"}) == 1
+    assert any(n.startswith("Value check, most expensive pick downgraded") and "WR3 CCC WR1" in n
+               and "freeing $6,000 for AAA WR1" in n for n in notes)
+
+
+def test_no_downgrade_when_it_costs_projected_points():
+    # Moving a 30-point WR3 down to a 14-point WR to gain 12 points elsewhere loses 4.
+    result, notes = _run(pool=_downgrade_pool(30.0))
+    assert "CCC WR1" in _group(result, "WR3")
+    assert any("no better value" in n and "AAA WR1" in n for n in notes)

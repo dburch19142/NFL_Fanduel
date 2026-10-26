@@ -26,8 +26,13 @@ backs it can take, and how FLEX is filled:
         below the line gives way to a better value at its position with a
         real role (rule 2's bar) -- from its own game first, then any of
         these games; one clearing 2.5 if there is one, else the best value
-        -- that fits the cap and the per-game limit. RB fill-ins for an
-        injured lead back (rule 1), DEF and QB are left as picked.
+        -- that fits the cap and the per-game limit. When nothing fits, the
+        most expensive other RB, WR or TE pick moves down to a cheaper
+        player at its position with a real role (the QB's WR1 stays on the
+        QB's team) to free salary, and the swap is retried -- taking the
+        pairing that projects best, and only if the two moves together
+        don't cost projected points. RB fill-ins for an injured lead back
+        (rule 1), DEF and QB are left as picked.
   7. Avoid traps: RBs with under 35% of their team's carries (committee
         backs) are dropped before the Alpha Rule runs, unless they're
         filling in for an injured lead back. Projections are season
@@ -156,8 +161,9 @@ def apply_echo_rule(
     filling_in = (pool["position"] == "RB") & pool["team"].isin(rb_out)
     low = pool.index[pool["required_group"].notna() & pool["position"].isin(FLEX_ELIGIBLE) & ~filling_in
                      & (pool["salary"] < CHEAP_SALARY) & (pool["value"] < VALUE_FLOOR)]
-    swaps, unfixed = [], []
-    for i in low:
+    def replacement(i: int) -> int | None:
+        # The best better-value swap for pick i that fits the cap and game
+        # limits as the picks stand now.
         picked = pool["required_group"].notna()
         in_game = pool.loc[picked, "team"].map(game_of).value_counts().to_dict()
         open_slots = roster_size - int(picked.sum())
@@ -169,26 +175,80 @@ def apply_echo_rule(
         options = options[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
                            for t in options["team"]]]
         if options.empty:
-            unfixed.append(i)
-            continue
+            return None
         same_game = options[options["team"].map(game_of) == game]
         clearing = [s[s["value"] >= VALUE_FLOOR] for s in (same_game, options)]
         clearing = next((c for c in clearing if not c.empty), None)
         if clearing is not None:
-            j = clearing.sort_values(["projected_points", "value"]).index[-1]
-        else:
-            j = options.sort_values(["value", "projected_points"]).index[-1]
-        label = pool.loc[i, "required_group"]
-        pool.loc[j, "required_group"], pool.loc[i, "required_group"] = label, None
-        swaps.append(f"{label} {pool.loc[i, 'name']} ({pool.loc[i, 'value']:.1f}) -> "
-                     f"{pool.loc[j, 'name']} ({pool.loc[j, 'team']}, ${pool.loc[j, 'salary']:,}, "
-                     f"{pool.loc[j, 'value']:.1f})")
+            return clearing.sort_values(["projected_points", "value"]).index[-1]
+        return options.sort_values(["value", "projected_points"]).index[-1]
+
+    def move(old: int, new: int) -> None:
+        pool.loc[new, "required_group"], pool.loc[old, "required_group"] = pool.loc[old, "required_group"], None
+
+    def downgrade_for(i: int) -> tuple[int, int, int] | None:
+        # When nothing fits for pick i: free salary by moving the most
+        # expensive other RB/WR/TE pick down to a cheaper player at its
+        # position with a real role (the QB's WR1 stays on the QB's team),
+        # then retry. Takes the pairing that projects best, and only one that
+        # doesn't cost projected points overall. Returns (expensive pick,
+        # its downgrade, pick i's replacement).
+        picked = pool["required_group"].notna()
+        others = pool[picked & pool["position"].isin(FLEX_ELIGIBLE) & ~filling_in & (pool.index != i)]
+        if others.empty:
+            return None
+        e = others.sort_values(["salary", "projected_points"]).index[-1]
+        game = game_of.get(pool.loc[e, "team"])
+        in_game = pool.loc[picked, "team"].map(game_of).value_counts().to_dict()
+        cheaper = pool[(pool["position"] == pool.loc[e, "position"]) & ~picked
+                       & (pool["salary"] < pool.loc[e, "salary"])]
+        cheaper = cheaper[has_role(cheaper)]
+        cheaper = cheaper[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
+                           for t in cheaper["team"]]]
+        if pool.loc[e, "required_group"] == "WR1":
+            cheaper = cheaper[cheaper["team"] == pool.loc[e, "team"]]
+        best, best_gain = None, 0.0
+        for d in cheaper.index:
+            move(e, d)
+            r = replacement(i)
+            move(d, e)
+            if r is None:
+                continue
+            gain = (pool.loc[d, "projected_points"] - pool.loc[e, "projected_points"]
+                    + pool.loc[r, "projected_points"] - pool.loc[i, "projected_points"])
+            if gain >= best_gain:
+                best, best_gain = (e, d, r), gain
+        return best
+
+    def describe(old: int, new: int) -> str:
+        return (f"{pool.loc[new, 'required_group']} {pool.loc[old, 'name']} ({pool.loc[old, 'value']:.1f}) -> "
+                f"{pool.loc[new, 'name']} ({pool.loc[new, 'team']}, ${pool.loc[new, 'salary']:,}, "
+                f"{pool.loc[new, 'value']:.1f})")
+
+    swaps, downgrades, unfixed = [], [], []
+    for i in low:
+        j = replacement(i)
+        if j is None:
+            plan = downgrade_for(i)
+            if plan is None:
+                unfixed.append(i)
+                continue
+            e, d, j = plan
+            move(e, d)
+            freed = pool.loc[e, "salary"] - pool.loc[d, "salary"]
+            downgrades.append(f"{describe(e, d)}, freeing ${freed:,} for {pool.loc[i, 'name']}")
+        move(i, j)
+        swaps.append(describe(i, j))
+    if downgrades:
+        notes.append("Value check, most expensive pick downgraded to make room (pts per $1K): "
+                     + "; ".join(downgrades) + ".")
     if swaps:
         notes.append(f"Value check, rule picks under ${CHEAP_SALARY:,} below {VALUE_FLOOR:g} pts per $1K "
                      "swapped for better values (pts per $1K): " + "; ".join(swaps) + ".")
     if unfixed:
         notes.append("Value check, no better value with a real role fits for: " + ", ".join(
-            f"{pool.loc[i, 'name']} ({pool.loc[i, 'value']:.1f})" for i in unfixed) + "; kept.")
+            f"{pool.loc[i, 'name']} ({pool.loc[i, 'value']:.1f})" for i in unfixed)
+            + ", even after downgrading the most expensive pick; kept.")
 
     tagged = pool["required_group"].notna()
     in_game = pool.loc[tagged, "team"].map(game_of).value_counts().to_dict()

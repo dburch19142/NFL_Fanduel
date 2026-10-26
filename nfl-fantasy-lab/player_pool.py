@@ -209,16 +209,16 @@ def _apply_alpha_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 
 
 def _apply_echo_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
-    """Echo Rule strategy (see echo_rule.py): the Alpha Rule plus seven
-    updates for the cheap picks. Notes and fallback work like the Alpha
-    Rule's."""
+    """Echo Rule strategy (see echo_rule.py): the Alpha Rule with the Beta
+    strategy's RBs and seven updates for the cheap picks. Notes and fallback
+    work like the Alpha Rule's."""
     try:
         restricted, notes = build_echo_pool(pool)
     except Exception as exc:
         pool, note = _apply_matchup_eligibility(pool)
         return pool, f"Echo Rule unavailable ({exc}); using {note}"
     restricted.attrs["strategy_notes"] = notes
-    return restricted, "Echo Rule (Alpha Rule + value, role and game-script updates), no injury designation"
+    return restricted, "Echo Rule (Alpha Rule + Beta RBs + value, role and game-script updates), no injury designation"
 
 
 def _apply_beta_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
@@ -278,7 +278,8 @@ def build_player_pool(
     STRATEGY_ALPHA (the Alpha Rule, top-3 Sunday 1pm and 4pm games only),
     STRATEGY_BETA (RBs from top-10 rush offenses facing bottom-10 rush
     defenses on Sunday afternoon, matchup filters for the rest), or
-    STRATEGY_ECHO (the Echo Rule, the Alpha Rule with seven updates).
+    STRATEGY_ECHO (the Echo Rule, the Alpha Rule with Beta RBs and seven
+    updates).
     """
     if not has_uploaded_pool():
         sample, injury_note, removed = apply_injury_report(pd.read_csv(PLAYERS_CSV))

@@ -1,8 +1,19 @@
-"""The "Echo Rule" lineup strategy: the Alpha Rule (see alpha_rule.py) with
-seven updates aimed at the cheap picks -- the players who have to outscore
-their salary for a lineup to win. The Alpha Rule still picks QB, WR1, WR2,
-RB1, RB2, WR3, TE and DEF; the updates change the games it works from, the
-backs it can take, and how FLEX is filled:
+"""The "Echo Rule" lineup strategy: the Alpha Rule (see alpha_rule.py) and
+the Beta strategy's running backs (see beta_strategy.py), with seven updates
+aimed at the cheap picks -- the players who have to outscore their salary
+for a lineup to win. The Alpha Rule picks QB, WR1, WR2, WR3, TE and DEF;
+Beta, when it can, the RBs; the updates change the games it works from, the
+backs it can take, and how FLEX is filled.
+
+  Beta RBs: a team with a top-10 rushing offense facing a bottom-10 rushing
+        defense in a Sunday 1pm or 4pm game -- in any such game, not just
+        the Alpha Rule's -- supplies the RBs. Their lead backs take RB1 and
+        RB2 (one per team, the weaker rush defense first, then the better
+        projection), as long as each fits under the cap with the rest of the
+        lineup, keeps the per-game limit and isn't facing the lineup's DEF.
+        With two Beta lead backs in, every other RB is dropped, so an RB at
+        FLEX is a Beta back too. With one, he takes RB2 and the Alpha Rule's
+        RB1 stays; with none, the Alpha Rule's RBs stay.
 
   1. Injury opportunity: when a team's leader at a position is out (most
         carries for RB, highest target share for WR and TE), the player
@@ -33,8 +44,8 @@ backs it can take, and how FLEX is filled:
         pairing that projects best, and only if the two moves together
         don't cost projected points. Every swap leaves room under the cap
         for a FLEX candidate that passes the Echo Rule (when one could at
-        any salary), so FLEX isn't left to the optimizer. RB fill-ins for an injured lead back
-        (rule 1), DEF and QB are left as picked.
+        any salary), so FLEX isn't left to the optimizer. RB fill-ins for
+        an injured lead back (rule 1), DEF and QB are left as picked.
   7. Avoid traps: RBs with under 35% of their team's carries (committee
         backs) are dropped before the Alpha Rule runs, unless they're
         filling in for an injured lead back. Projections are season
@@ -55,6 +66,7 @@ from alpha_rule import (
     apply_alpha_rule,
     get_defense_vs_receivers,
 )
+from beta_strategy import load_rushing_ranks, qualifying_teams
 from matchup_filters import build_eligibility
 from optimizer import DEFAULT_SALARY_CAP, FLEX_COUNT, FLEX_ELIGIBLE, ROSTER_SLOTS
 from real_stats import normalize_name
@@ -103,11 +115,15 @@ def apply_echo_rule(
     pass_yds_allowed: dict[str, float],
     defense_vs: dict | None = None,
     salary_cap: float = DEFAULT_SALARY_CAP,
+    rushing_ranks: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, list[str]]:
-    """The Alpha Rule plus the seven updates in the module docstring.
-    Arguments and return value match apply_alpha_rule's."""
+    """The Alpha Rule, Beta RBs and the seven updates in the module
+    docstring. Arguments and return value match apply_alpha_rule's, plus
+    `rushing_ranks` (beta_strategy.rushing_ranks' output); without it the
+    Alpha Rule's RBs stay."""
     stats = player_stats.drop_duplicates(["match_key", "team", "position"])
     slate_teams = set(pool["team"])
+    all_odds = odds
     odds, games_note = echo_games(odds, slate_teams)
     notes = [games_note]
 
@@ -122,6 +138,7 @@ def apply_echo_rule(
         notes.append(f"Committee backs dropped (under {COMMITTEE_CARRY_SHARE:.0%} of team carries): "
                      + ", ".join(keyed.loc[committee, "name"]) + ".")
     pool = pool[~committee.to_numpy()].reset_index(drop=True)
+    slate_pool = pool
 
     pool, alpha_notes = apply_alpha_rule(
         pool, odds, player_stats, rush_yds_allowed, pass_yds_allowed, defense_vs, salary_cap,
@@ -135,6 +152,30 @@ def apply_echo_rule(
         implied.update(implied_points(g))
         game_of[g["home"]] = game_of[g["away"]] = f"{g['away']} @ {g['home']}"
 
+    # Beta: the qualifying teams, wherever they play on Sunday afternoon.
+    beta = [q for q in qualifying_teams(rushing_ranks, all_odds) if q["team"] in slate_teams] \
+        if rushing_ranks is not None else []
+    beta_teams = {q["team"] for q in beta}
+    beta_rank = {q["team"]: q["defense_rank"] for q in beta}
+    for _, g in afternoon_games(all_odds).iterrows():
+        if beta_teams & {g["home"], g["away"]}:
+            implied.update(implied_points(g))
+            game_of[g["home"]] = game_of[g["away"]] = f"{g['away']} @ {g['home']}"
+    opponent_of = {}
+    for _, g in afternoon_games(all_odds).iterrows():
+        opponent_of[g["home"]], opponent_of[g["away"]] = g["away"], g["home"]
+    on_pool = set(zip(pool["name"], pool["team"]))
+    off_pool = pd.Series([k not in on_pool for k in zip(slate_pool["name"], slate_pool["team"])],
+                         index=slate_pool.index, dtype=bool)
+    # Not from the offense the DEF faces: the Alpha Rule dropped those.
+    def_faces = set(pool.loc[pool["required_group"] == "DEF", "opponent"])
+    extra = slate_pool[(slate_pool["position"] == "RB") & slate_pool["team"].isin(beta_teams - def_faces)
+                       & off_pool]
+    if not extra.empty:
+        extra = extra.assign(opponent=extra["team"].map(opponent_of), required_group=None,
+                             max_from_game=MAX_FROM_GAME)
+        pool = pd.concat([pool, extra[[c for c in pool.columns if c in extra.columns]]], ignore_index=True)
+
     pool["required_group"] = pool["required_group"].where(pool["required_group"] != "FLEX")
     pool["match_key"] = pool["name"].apply(normalize_name)
     pool = pool.merge(stats[["match_key", "team", "position", "target_share", "carries"]],
@@ -143,6 +184,66 @@ def apply_echo_rule(
     pool["target_share"] = pool["target_share"].fillna(0)
     pool["carry_share"] = pool["carry_share"].fillna(0)
     pool["value"] = pool.apply(value, axis=1)
+    roster_size = sum(ROSTER_SLOTS.values()) + FLEX_COUNT
+    cheapest_flex = pool.loc[pool["position"].isin(FLEX_ELIGIBLE), "salary"].min()
+
+    # Beta RBs: their lead backs take the RB slots when they fit.
+    if not beta:
+        notes.append("Beta RBs: no team with a top-10 rushing offense faces a bottom-10 rushing defense "
+                     "on Sunday afternoon" + ("" if rushing_ranks is not None else " (rushing ranks unavailable)")
+                     + "; the Alpha Rule's RBs stay.")
+    else:
+        notes.append("Beta RB teams: " + ", ".join(
+            f"{q['team']} vs {q['opponent']} (No. {q['offense_rank']} rush O vs No. {q['defense_rank']} "
+            f"worst rush D)" for q in beta) + ".")
+        rbs = pool[(pool["position"] == "RB") & pool["team"].isin(beta_teams)]
+        leads = [backs.sort_values(["projected_points", "salary"]).index[-1] for _, backs in rbs.groupby("team")]
+        leads.sort(key=lambda i: (beta_rank[pool.loc[i, "team"]], -pool.loc[i, "projected_points"]))
+        alpha_rbs = [i for label in ("RB1", "RB2") for i in pool.index[pool["required_group"] == label]]
+        def_faces = set(pool.loc[pool["required_group"] == "DEF", "opponent"])
+        others = list(pool.index[pool["required_group"].notna() & ~pool.index.isin(alpha_rbs)])
+        flex_reserve = (roster_size - len(others) - 2) * cheapest_flex
+        all_rbs = pool.index[pool["position"] == "RB"]
+
+        def fits(lineup: list[int], i: int, rb_reserve: float) -> bool:
+            # i joins `lineup` under the cap (with `rb_reserve` held for an
+            # RB slot still open), the per-game limit and away from the DEF.
+            in_game = pool.loc[lineup, "team"].map(game_of).value_counts()
+            return (pool.loc[lineup + [i], "salary"].sum() + rb_reserve + flex_reserve <= salary_cap
+                    and pool.loc[i, "team"] not in def_faces
+                    and in_game.get(game_of.get(pool.loc[i, "team"]), 0) < MAX_FROM_GAME)
+
+        chosen = []
+        for i in leads:
+            if len(chosen) == 2:
+                break
+            if chosen and pool.loc[i, "team"] == pool.loc[chosen[0], "team"]:
+                continue
+            reserve = 0 if chosen else pool.loc[all_rbs.drop(i), "salary"].min()
+            if fits(others + chosen, i, reserve):
+                chosen.append(i)
+        if len(chosen) == 1:
+            keep = [r for r in alpha_rbs if pool.loc[r, "team"] != pool.loc[chosen[0], "team"]][:1]
+            if not keep or not fits(others + keep, chosen[0], 0):
+                chosen = []
+        if len(chosen) == 2:
+            pool.loc[alpha_rbs, "required_group"] = None
+            pool.loc[chosen[0], "required_group"], pool.loc[chosen[1], "required_group"] = "RB1", "RB2"
+            drop = (pool["position"] == "RB") & ~pool["team"].isin(beta_teams)
+            pool = pool[~drop]
+            notes.append("Beta RBs: " + " and ".join(
+                f"{pool.loc[i, 'name']} ({pool.loc[i, 'team']} vs {pool.loc[i, 'opponent']}, "
+                f"${pool.loc[i, 'salary']:,})" for i in chosen)
+                + " take RB1 and RB2; every other RB is dropped.")
+        elif chosen:
+            pool.loc[[r for r in alpha_rbs if r not in keep], "required_group"] = None
+            pool.loc[keep, "required_group"] = "RB1"
+            pool.loc[chosen[0], "required_group"] = "RB2"
+            notes.append(f"Beta RBs: only {pool.loc[chosen[0], 'name']} ({pool.loc[chosen[0], 'team']}) fits; "
+                         "he takes RB2 and the Alpha Rule's RB1 stays.")
+        else:
+            notes.append("Beta RBs: no Beta lead back fits under the cap, the per-game limit and the DEF; "
+                         "the Alpha Rule's RBs stay.")
 
     leader_out = [(position, team) for position, col in (("RB", "carries"), ("WR", "target_share"),
                                                          ("TE", "target_share"))
@@ -179,6 +280,8 @@ def apply_echo_rule(
             add(ranked(team, "WR").index[1:2], "WR2, second or third game")
             add(ranked(team, "RB").index[:2], "RB, second or third game")
             add(ranked(team, "TE").index[:1], "top TE, second or third game")
+        for team in sorted(beta_teams):
+            add(ranked(team, "RB").index[:2], "RB, Beta rushing matchup")
         # Update 5: more stack and bring-back pieces from the top game.
         if qb_team is not None:
             def untagged_wrs(team: str) -> list[int]:
@@ -227,8 +330,6 @@ def apply_echo_rule(
     # a real role -- from its own game first, then any of these games; one
     # clearing the floor if there is one, else the best value -- as long as
     # it fits the cap and the per-game limit.
-    roster_size = sum(ROSTER_SLOTS.values()) + FLEX_COUNT
-    cheapest_flex = pool.loc[pool["position"].isin(FLEX_ELIGIBLE), "salary"].min()
     # A back filling in for an injured lead back (update 1) is exempt: his
     # projection reflects his old role, not the carries he's inheriting.
     # Receivers aren't: an injured WR1's targets spread across the roster.
@@ -382,9 +483,14 @@ def build_echo_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         defense_vs = None
         extra.append(f"Defense-vs-receiver history unavailable ({exc}); WR3 and TE treat every "
                      "defense as average.")
+    try:
+        rushing = load_rushing_ranks(season)
+    except Exception as exc:
+        rushing = None
+        extra.append(f"Rushing ranks unavailable ({exc}); no Beta RBs this week.")
     pool, notes = apply_echo_rule(
         pool, context["odds"], stats, context["rush_yds_allowed"], context["pass_yds_allowed"],
-        defense_vs,
+        defense_vs, rushing_ranks=rushing,
     )
     notes[:0] = [f"Week {week} lines from ESPN (DraftKings)."] + extra
     return pool, notes

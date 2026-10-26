@@ -196,3 +196,49 @@ def test_swaps_leave_room_for_a_flex_that_passes():
     locked = result.loc[result["required_group"].notna() & (result["required_group"] != "FLEX"), "salary"].sum()
     assert not flex.empty and (flex["salary"] <= 60000 - locked).all()
     assert not any("FLEX is the optimizer's choice" in n for n in notes)
+
+
+def _rushing(offense, defense):
+    # offense/defense: {team: rank}; everyone else ranks 20th.
+    return pd.DataFrame([{"team": t, "offense_rank": offense.get(t, 20), "defense_rank": defense.get(t, 20),
+                          "rush_ypg": 100.0, "rush_allowed_ypg": 100.0} for t in TEAMS]).set_index("team")
+
+
+def _run_beta(rushing, pool=None):
+    base_pool, _ = _pool_and_stats()
+    return apply_echo_rule(base_pool if pool is None else pool, ODDS, _stats_with_carries(),
+                           RUSH_ALLOWED, PASS_ALLOWED, rushing_ranks=rushing)
+
+
+def test_beta_backs_take_both_rb_slots_even_outside_the_alpha_games():
+    # HHH (No. 1 rush O) faces GGG (No. 1 worst rush D) in the fourth Sunday
+    # afternoon game, which the Alpha Rule leaves out; EEE faces FFF (No. 2).
+    result, notes = _run_beta(_rushing({"HHH": 1, "EEE": 2}, {"GGG": 1, "FFF": 2}))
+    assert _group(result, "RB1") == {"HHH RB1"} and _group(result, "RB2") == {"EEE RB1"}
+    assert set(result.loc[result["position"] == "RB", "team"]) <= {"HHH", "EEE"}
+    assert any("every other RB is dropped" in n for n in notes)
+    lineup = optimize_lineup(60000, result)
+    assert set(lineup.loc[lineup["position"] == "RB", "team"]) <= {"HHH", "EEE"}
+
+
+def test_one_beta_back_takes_rb2_and_the_alpha_rb1_stays():
+    alpha_result, _ = _run()
+    alpha_rb1 = _group(alpha_result, "RB1")
+    result, notes = _run_beta(_rushing({"HHH": 1}, {"GGG": 1}))
+    assert _group(result, "RB2") == {"HHH RB1"}
+    assert _group(result, "RB1") == alpha_rb1
+    assert any("he takes RB2" in n for n in notes)
+
+
+def test_no_beta_team_keeps_the_alpha_rbs():
+    alpha_result, _ = _run()
+    result, notes = _run_beta(_rushing({}, {}))
+    assert _group(result, "RB1") == _group(alpha_result, "RB1")
+    assert any(n.startswith("Beta RBs: no team") for n in notes)
+
+
+def test_beta_back_facing_the_def_is_skipped():
+    # The DEF faces DDD, so DDD's backs never come back into the pool.
+    result, _ = _run_beta(_rushing({"DDD": 1, "HHH": 2}, {"CCC": 1, "GGG": 2}))
+    assert not ((result["team"] == "DDD") & (result["position"] == "RB")).any()
+    assert _group(result, "RB2") == {"HHH RB1"}

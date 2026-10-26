@@ -242,3 +242,14 @@ def test_beta_back_facing_the_def_is_skipped():
     result, _ = _run_beta(_rushing({"DDD": 1, "HHH": 2}, {"CCC": 1, "GGG": 2}))
     assert not ((result["team"] == "DDD") & (result["position"] == "RB")).any()
     assert _group(result, "RB2") == {"HHH RB1"}
+
+
+def test_echo_keeps_the_alpha_two_player_bring_back():
+    # BBB's WR1 at a 20% target share: no stack, AAA's WR1 and TE instead.
+    stats = _stats_with_carries()
+    stats.loc[stats["match_key"] == "bbb wr1", "target_share"] = 0.20
+    result, notes = _run(stats=stats)
+    assert not _group(result, "WR1")
+    assert _group(result, "WR2") == {"AAA WR1"} and _group(result, "TE") == {"AAA TE"}
+    assert any(n.startswith("Two-player bring-back") for n in notes)
+    assert optimize_lineup(60000, result)["name"].isin(["BBB QB"]).any()

@@ -1,9 +1,11 @@
 """The "Echo Rule" lineup strategy: the Alpha Rule (see alpha_rule.py) and
 the Beta strategy's running backs (see beta_strategy.py), with seven updates
 aimed at the cheap picks -- the players who have to outscore their salary
-for a lineup to win. The Alpha Rule picks QB, WR1, WR2, WR3, TE and DEF;
-Beta, when it can, the RBs; the updates change the games it works from, the
-backs it can take, and how FLEX is filled.
+for a lineup to win. The Alpha Rule picks QB, WR1, WR2, WR3, TE and DEF --
+including its two-player bring-back (the opposing WR1 and TE in place of
+the stack when the QB's WR1 draws under a 22% target share) and its
+underdog workhorse back; Beta, when it can, the RBs; the updates change the
+games it works from, the backs it can take, and how FLEX is filled.
 
   Beta RBs: a team with a top-10 rushing offense facing a bottom-10 rushing
         defense in a Sunday 1pm or 4pm game -- in any such game, not just

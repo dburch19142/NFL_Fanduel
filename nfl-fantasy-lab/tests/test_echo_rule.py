@@ -179,3 +179,20 @@ def test_no_downgrade_when_it_costs_projected_points():
     result, notes = _run(pool=_downgrade_pool(30.0))
     assert "CCC WR1" in _group(result, "WR3")
     assert any("no better value" in n and "AAA WR1" in n for n in notes)
+
+
+def test_swaps_leave_room_for_a_flex_that_passes():
+    # Swapping the bring-back (AAA WR1, $5,900) straight to BBB WR2 ($14,000)
+    # would leave $5,000, under every passing FLEX candidate ($6,000), so a
+    # pick is downgraded too and FLEX is still the Echo Rule's.
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 12.0)
+    pool.loc[pool["name"] == "BBB WR2", ["salary", "projected_points"]] = (14000, 40.0)
+    result, notes = _run(pool=pool)
+    assert _group(result, "WR2") == {"BBB WR2"}
+    assert any(n.startswith("Value check, most expensive pick downgraded") for n in notes)
+    flex = result[result["required_group"] == "FLEX"]
+    locked = result.loc[result["required_group"].notna() & (result["required_group"] != "FLEX"), "salary"].sum()
+    assert not flex.empty and (flex["salary"] <= 60000 - locked).all()
+    assert not any("FLEX is the optimizer's choice" in n for n in notes)

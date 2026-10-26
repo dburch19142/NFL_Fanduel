@@ -133,3 +133,22 @@ def test_echo_strategy_falls_back_to_matchup_filters(monkeypatch):
     result, note = player_pool._apply_echo_strategy(pool)
     assert "Echo Rule unavailable (odds unavailable)" in note
     assert len(result) == len(pool)
+
+
+def test_cheap_rule_pick_below_value_gives_way_to_a_better_value():
+    # The bring-back (AAA WR1) costs $5,900 for 10 pts (1.7 per $1K); BBB WR2,
+    # in the same game with a 20% target share, is $4,000 for 11 (2.8).
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 10.0)
+    pool.loc[pool["name"] == "BBB WR2", "salary"] = 4000
+    result, notes = _run(pool=pool)
+    assert _group(result, "WR2") == {"BBB WR2"}
+    assert any("WR2 AAA WR1 (1.7) -> BBB WR2 (BBB, $4,000, 2.8)" in n for n in notes)
+
+
+def test_cheap_rule_pick_is_kept_when_no_better_value_has_a_role():
+    # No TE on the slate has a target share on record.
+    result, notes = _run()
+    kept = next(n for n in notes if n.startswith("Value check, no better value"))
+    assert "AAA TE" in kept and "AAA TE" in _group(result, "TE")

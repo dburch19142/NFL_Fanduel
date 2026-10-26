@@ -22,7 +22,12 @@ backs it can take, and how FLEX is filled:
         bring-back), while the game has room under the four-player cap.
   6. Value: a FLEX candidate must project 2.5+ FanDuel points per $1,000
         of salary. If fewer than two clear it, the four best values stay.
-        The notes also flag any rule pick under $6,000 below that line.
+        The same goes for the RB, WR and TE rule picks under $6,000: one
+        below the line gives way to a better value at its position with a
+        real role (rule 2's bar) -- from its own game first, then any of
+        these games; one clearing 2.5 if there is one, else the best value
+        -- that fits the cap and the per-game limit. RB fill-ins for an
+        injured lead back (rule 1), DEF and QB are left as picked.
   7. Avoid traps: RBs with under 35% of their team's carries (committee
         backs) are dropped before the Alpha Rule runs, unless they're
         filling in for an injured lead back. Projections are season
@@ -44,7 +49,7 @@ from alpha_rule import (
     get_defense_vs_receivers,
 )
 from matchup_filters import build_eligibility
-from optimizer import DEFAULT_SALARY_CAP, FLEX_ELIGIBLE
+from optimizer import DEFAULT_SALARY_CAP, FLEX_COUNT, FLEX_ELIGIBLE, ROSTER_SLOTS
 from real_stats import normalize_name
 from vegas_strategy import _load_week_context, get_player_season_stats, implied_points, top_games
 
@@ -132,15 +137,61 @@ def apply_echo_rule(
     pool["carry_share"] = pool["carry_share"].fillna(0)
     pool["value"] = pool.apply(value, axis=1)
 
+    def has_role(rows: pd.DataFrame) -> pd.Series:
+        # Update 2's bar: a 15%+ target share, or 40%+ of the carries for an RB.
+        return rows["carry_share"].where(rows["position"] == "RB", rows["target_share"]) >= rows[
+            "position"].map(lambda p: FLEX_MIN_CARRY_SHARE if p == "RB" else FLEX_MIN_TARGET_SHARE)
+
+    # Update 6, rule picks: a RB, WR or TE pick under $6,000 that projects
+    # below the value floor gives way to a better value at its position with
+    # a real role -- from its own game first, then any of these games; one
+    # clearing the floor if there is one, else the best value -- as long as
+    # it fits the cap and the per-game limit.
+    roster_size = sum(ROSTER_SLOTS.values()) + FLEX_COUNT
+    cheapest_flex = pool.loc[pool["position"].isin(FLEX_ELIGIBLE), "salary"].min()
+    # A back filling in for an injured lead back (update 1) is exempt: his
+    # projection reflects his old role, not the carries he's inheriting.
+    # Receivers aren't: an injured WR1's targets spread across the roster.
+    rb_out = _leader_out_teams(pool, stats, set(implied), "RB", "carries")
+    filling_in = (pool["position"] == "RB") & pool["team"].isin(rb_out)
+    low = pool.index[pool["required_group"].notna() & pool["position"].isin(FLEX_ELIGIBLE) & ~filling_in
+                     & (pool["salary"] < CHEAP_SALARY) & (pool["value"] < VALUE_FLOOR)]
+    swaps, unfixed = [], []
+    for i in low:
+        picked = pool["required_group"].notna()
+        in_game = pool.loc[picked, "team"].map(game_of).value_counts().to_dict()
+        open_slots = roster_size - int(picked.sum())
+        budget = salary_cap - pool.loc[picked, "salary"].sum() + pool.loc[i, "salary"] - open_slots * cheapest_flex
+        game = game_of.get(pool.loc[i, "team"])
+        options = pool[(pool["position"] == pool.loc[i, "position"]) & ~picked
+                       & (pool["salary"] <= budget) & (pool["value"] > pool.loc[i, "value"])]
+        options = options[has_role(options)]
+        options = options[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
+                           for t in options["team"]]]
+        if options.empty:
+            unfixed.append(i)
+            continue
+        same_game = options[options["team"].map(game_of) == game]
+        clearing = [s[s["value"] >= VALUE_FLOOR] for s in (same_game, options)]
+        clearing = next((c for c in clearing if not c.empty), None)
+        if clearing is not None:
+            j = clearing.sort_values(["projected_points", "value"]).index[-1]
+        else:
+            j = options.sort_values(["value", "projected_points"]).index[-1]
+        label = pool.loc[i, "required_group"]
+        pool.loc[j, "required_group"], pool.loc[i, "required_group"] = label, None
+        swaps.append(f"{label} {pool.loc[i, 'name']} ({pool.loc[i, 'value']:.1f}) -> "
+                     f"{pool.loc[j, 'name']} ({pool.loc[j, 'team']}, ${pool.loc[j, 'salary']:,}, "
+                     f"{pool.loc[j, 'value']:.1f})")
+    if swaps:
+        notes.append(f"Value check, rule picks under ${CHEAP_SALARY:,} below {VALUE_FLOOR:g} pts per $1K "
+                     "swapped for better values (pts per $1K): " + "; ".join(swaps) + ".")
+    if unfixed:
+        notes.append("Value check, no better value with a real role fits for: " + ", ".join(
+            f"{pool.loc[i, 'name']} ({pool.loc[i, 'value']:.1f})" for i in unfixed) + "; kept.")
+
     tagged = pool["required_group"].notna()
     in_game = pool.loc[tagged, "team"].map(game_of).value_counts().to_dict()
-
-    # Update 6: flag cheap rule picks that don't pay off their salary.
-    cheap = pool[tagged & (pool["salary"] < CHEAP_SALARY) & (pool["value"] < VALUE_FLOOR)]
-    if not cheap.empty:
-        notes.append(f"Value check, rule picks under ${CHEAP_SALARY:,} projecting below "
-                     f"{VALUE_FLOOR:g} pts per $1K: " + ", ".join(
-                         f"{r.name} ({r.value:.1f})" for r in cheap.itertuples()) + ".")
 
     def ranked(team: str, position: str) -> pd.DataFrame:
         on_team = pool[(pool["team"] == team) & (pool["position"] == position)]

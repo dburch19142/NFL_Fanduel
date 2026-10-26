@@ -1,0 +1,135 @@
+"""Unit tests for the Echo Rule strategy (no network needed). The slate and
+stats come from the Alpha Rule tests, plus season carries for each team's
+backs: RB1 has 150, RB2 40 (a 21% committee share)."""
+import pandas as pd
+
+import player_pool
+from echo_rule import apply_echo_rule, echo_games
+from optimizer import optimize_lineup
+from test_alpha_rule import ODDS, PASS_ALLOWED, RUSH_ALLOWED, TEAMS, _group, _pool_and_stats, _stat
+
+
+def _stats_with_carries(extra=()):
+    _, stats = _pool_and_stats()
+    rbs = [_stat(f"{t} RB{n}", "RB", t, carries=c) for t in TEAMS for n, c in ((1, 150), (2, 40))]
+    return pd.concat([stats, pd.DataFrame(rbs + list(extra))], ignore_index=True)
+
+
+def _run(pool=None, stats=None, odds=ODDS):
+    base_pool, _ = _pool_and_stats()
+    return apply_echo_rule(
+        base_pool if pool is None else pool, odds, _stats_with_carries() if stats is None else stats,
+        RUSH_ALLOWED, PASS_ALLOWED,
+    )
+
+
+def _flex_names(notes):
+    return next(n for n in notes if n.startswith("FLEX, "))
+
+
+def test_games_under_46_are_left_out():
+    odds = ODDS.assign(total=ODDS["total"].where(ODDS["home"] != "FFF", 45.0))
+    used, note = echo_games(odds, set(TEAMS))
+    assert "FFF" not in set(used["home"])
+    assert "46+" in note
+    pool, _ = _run(odds=odds)
+    assert set(pool["team"]) == {"AAA", "BBB", "CCC", "DDD"}
+
+
+def test_game_rule_relaxes_with_fewer_than_two_46_plus_games():
+    odds = ODDS.assign(total=ODDS["total"].where(ODDS["home"] == "BBB", 44.0))
+    used, note = echo_games(odds, set(TEAMS))
+    assert used is odds
+    assert "using the top 3 instead" in note
+
+
+def test_committee_backs_are_dropped():
+    pool, notes = _run()
+    assert not (pool["name"] == "FFF RB2").any()
+    assert any(n.startswith("Committee backs dropped") for n in notes)
+
+
+def test_fill_in_for_an_injured_lead_back_stays_in_the_pool():
+    base_pool, _ = _pool_and_stats()
+    pool, _ = _run(pool=base_pool[base_pool["name"] != "FFF RB1"])
+    assert "FFF RB2" in _group(pool, "RB1")
+
+
+def test_alpha_flex_note_is_replaced():
+    _, notes = _run()
+    assert sum(n.startswith("FLEX") and "one of" in n for n in notes) == 1
+    assert "pts/$1K" in _flex_names(notes)
+
+
+def test_flex_needs_a_real_role():
+    # The second and third games' TEs have no target share on record.
+    _, notes = _run()
+    role = next(n for n in notes if n.startswith("FLEX passes over (role)"))
+    assert "EEE TE" in role and "EEE TE" not in _flex_names(notes)
+
+
+def test_flex_pass_catchers_on_a_big_favorite_are_passed_over():
+    # CCC is favored by 9 over DDD.
+    _, notes = _run()
+    script = next(n for n in notes if n.startswith("FLEX passes over (game script)"))
+    assert "CCC WR2" in script
+
+
+def test_flex_rbs_need_a_team_that_leads():
+    # DDD (20.0) and EEE (23.5) are underdogs implied for under 24.
+    result, notes = _run()
+    flex_rbs = result[(result["required_group"] == "FLEX") & (result["position"] == "RB")]
+    assert not set(flex_rbs["team"]) & {"DDD", "EEE"}
+    if "EEE RB1" not in set(result.loc[result["required_group"].notna(), "name"]):
+        assert any("EEE RB1" in n for n in notes if n.startswith("FLEX passes over (game script)"))
+
+
+def test_flex_can_take_a_second_stack_piece():
+    # CCC's TE takes the TE slot, leaving room in the top game for the QB's next WR.
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    pool.loc[pool["name"] == "BBB WR2", "salary"] = 4000
+    stats = _stats_with_carries([_stat("CCC TE", "TE", "CCC", share=0.2, goal_line=3)])
+    result, notes = _run(pool=pool, stats=stats)
+    assert "CCC TE" in _group(result, "TE")
+    assert "BBB WR2" in _group(result, "FLEX")
+    assert "BBB WR2 (BBB WR, 2.8 pts/$1K, stack, the QB's next WR)" in _flex_names(notes)
+
+
+def test_value_floor_keeps_only_players_paying_off_their_salary():
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    for name in ("EEE WR2", "FFF WR2"):
+        pool.loc[pool["name"] == name, ["salary", "projected_points"]] = (4000, 12.0)
+    result, notes = _run(pool=pool)
+    assert _group(result, "FLEX") == {"EEE WR2", "FFF WR2"}
+    assert not any("best values" in n for n in notes)
+
+
+def test_value_floor_relaxes_to_the_best_values():
+    _, notes = _run()
+    assert any("keeping the" in n and "best values" in n for n in notes)
+
+
+def test_cheap_rule_picks_below_value_are_flagged():
+    _, notes = _run()
+    assert any(n.startswith("Value check") for n in notes)
+
+
+def test_optimizer_builds_a_lineup_from_the_echo_picks():
+    pool, _ = _run()
+    lineup = optimize_lineup(60000, pool)
+    flex = _group(pool, "FLEX")
+    assert flex & set(lineup["name"])
+
+
+def test_echo_strategy_falls_back_to_matchup_filters(monkeypatch):
+    def _boom(*args, **kwargs):
+        raise RuntimeError("odds unavailable")
+
+    monkeypatch.setattr(player_pool, "build_echo_pool", _boom)
+    monkeypatch.setattr(player_pool, "build_eligibility", _boom)
+    pool, _ = _pool_and_stats()
+    result, note = player_pool._apply_echo_strategy(pool)
+    assert "Echo Rule unavailable (odds unavailable)" in note
+    assert len(result) == len(pool)

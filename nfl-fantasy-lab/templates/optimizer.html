@@ -43,6 +43,7 @@
       <option value="combined" {{ "selected" if strategy == "combined" }}>Combined (Vegas picks + matchup filters)</option>
       <option value="alpha" {{ "selected" if strategy == "alpha" }}>Alpha Rule</option>
       <option value="beta" {{ "selected" if strategy == "beta" }}>Beta (rushing matchups)</option>
+      <option value="echo" {{ "selected" if strategy == "echo" }}>Echo Rule</option>
     </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
@@ -141,5 +142,13 @@
        FLEX. Every other slot comes from players in any game who clear the matchup rules above.
        If the qualifying teams have fewer than two healthy RBs, the RBs fall back to the matchup
        rules.</p>
+    <p>The <strong>Echo Rule</strong> is the Alpha Rule with seven updates for the cheap picks.
+       It uses only games with an over/under of 46+ (the Alpha Rule's top three if fewer than two
+       qualify) and drops running backs with under 35% of their team's carries unless they're
+       filling in for an injured starter. FLEX comes from the Alpha Rule's FLEX pool plus the QB's
+       next WR and TE, the other team's next WR, and anyone inheriting an injured starter's role.
+       A FLEX candidate needs a real role (15%+ target share, or 40%+ of the carries for an RB),
+       a good game script (an RB on a favored or 24+ team; no pass catchers on a team favored by
+       7+) and 2.5+ projected points per $1,000 of salary.</p>
   </footer>
 {% endblock %}

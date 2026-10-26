@@ -16,9 +16,10 @@ only when the player pool carries per-team "opponent" data (see
 player_pool.py); silently skipped otherwise.
 
 And, when the pool carries a "required_group" column (the Top-3 Vegas games
-strategy, see vegas_strategy.py, or the Alpha Rule, see alpha_rule.py), at
+strategy, see vegas_strategy.py, or the Alpha and Echo Rules, see
+alpha_rule.py and echo_rule.py), at
 least one player from each labeled group. When it also carries a
-"max_from_game" column (the Alpha Rule), no more than that many players
+"max_from_game" column (the Alpha and Echo Rules), no more than that many players
 from any one game.
 """
 import pandas as pd

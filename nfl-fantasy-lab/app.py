@@ -23,6 +23,7 @@ from player_pool import (
     save_uploaded_csv,
     STRATEGY_ALPHA,
     STRATEGY_BETA,
+    STRATEGY_ECHO,
     STRATEGY_COMBINED,
     STRATEGY_MATCHUP,
     STRATEGY_VEGAS,
@@ -81,7 +82,8 @@ def optimizer_page():
     must_include = ""
     lineup_count = LINEUP_COUNT
     strategy = request.values.get("strategy", STRATEGY_MATCHUP)
-    if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA, STRATEGY_BETA):
+    if strategy not in (STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA, STRATEGY_BETA,
+                        STRATEGY_ECHO):
         strategy = STRATEGY_MATCHUP
 
     players, pool_source = build_player_pool(strategy=strategy)

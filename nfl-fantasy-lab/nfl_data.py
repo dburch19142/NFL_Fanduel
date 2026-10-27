@@ -24,6 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from backtest import backtest_week
 from real_stats import normalize_name
 
 HERE = Path(__file__).resolve().parent
@@ -140,8 +141,12 @@ def apply_injury_report(pool: pd.DataFrame) -> tuple[pd.DataFrame, str, list[dic
     """Drop pool players the latest report rules out. Defenses are kept.
 
     Returns (filtered pool, one-line note for the pool source, removed players).
-    Leaves the pool untouched, with a note saying why, if the data isn't there.
+    Leaves the pool untouched, with a note saying why, if the data isn't there,
+    or in backtest mode, where the report would describe a later week (see
+    backtest.py).
     """
+    if backtest_week() is not None:
+        return pool, f"live injury report skipped (backtest of week {backtest_week()})", []
     try:
         report = injury_report()
     except Exception as exc:  # a missing or broken database shouldn't stop the optimizer

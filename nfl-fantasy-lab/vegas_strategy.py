@@ -43,6 +43,7 @@ import time
 
 import pandas as pd
 
+from backtest import backtest_week, read_stats
 from espn_ingest import fetch_json
 from matchup_filters import (
     BOTTOM_N_PASS_DEFENSE,
@@ -92,6 +93,17 @@ def parse_scoreboard_odds(scoreboard: dict) -> pd.DataFrame:
             "kickoff": event.get("date"),
         })
     return pd.DataFrame(rows, columns=["home", "away", "total", "home_spread", "kickoff"])
+
+
+def closing_odds(scoreboard: dict) -> pd.DataFrame:
+    """Like parse_scoreboard_odds, but from each game's ESPN summary, which
+    keeps the closing line after kickoff (the scoreboard drops it). Used in
+    backtest mode (see backtest.py)."""
+    events = []
+    for event in scoreboard.get("events", []):
+        pick = (fetch_json("summary", {"event": event["id"]}).get("pickcenter") or [{}])[0]
+        events.append({**event, "competitions": [{**event["competitions"][0], "odds": [pick]}]})
+    return parse_scoreboard_odds({"events": events})
 
 
 def implied_points(game: pd.Series) -> dict[str, float]:
@@ -339,7 +351,7 @@ def get_player_season_stats(season: int, force_refresh: bool = False) -> pd.Data
             if "carries" in cached.columns:  # caches written before the RB2 rule lack it
                 return cached
 
-    weekly = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season))
+    weekly = read_stats(STATS_PLAYER_WEEK_URL.format(season))
     weekly = weekly[weekly["season_type"] == "REG"]
     stats = weekly.groupby(["player_id", "player_display_name", "position", "team"]).agg(
         games=("week", "nunique"),
@@ -352,7 +364,7 @@ def get_player_season_stats(season: int, force_refresh: bool = False) -> pd.Data
     stats["rushing_yards_pg"] = stats["rushing_yards"] / stats["games"]
 
     try:
-        pbp = pd.read_parquet(PBP_URL.format(season), columns=[
+        pbp = read_stats(PBP_URL.format(season), columns=[
             "season_type", "pass_attempt", "yardline_100", "receiver_player_id",
         ])
         near_goal = pbp[(pbp["season_type"] == "REG") & (pbp["pass_attempt"] == 1)
@@ -384,7 +396,7 @@ def _load_week_context(season: int, week: int, force_refresh: bool = False) -> d
                 return raw
 
     scoreboard = fetch_json("scoreboard", {"week": week, "dates": season, "seasontype": 2})
-    odds = parse_scoreboard_odds(scoreboard)
+    odds = closing_odds(scoreboard) if backtest_week() is not None else parse_scoreboard_odds(scoreboard)
     allowed = defense_allowed_per_game(season)
     context = {
         "odds": odds,

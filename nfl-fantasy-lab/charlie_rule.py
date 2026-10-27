@@ -38,6 +38,7 @@ the other strategies.
 import pandas as pd
 
 from alpha_rule import afternoon_games
+from backtest import read_stats
 from echo_rule import carry_shares
 from matchup_filters import STATS_TEAM_WEEK_URL, build_eligibility
 from optimizer import DEFAULT_SALARY_CAP
@@ -238,7 +239,7 @@ def build_charlie_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     season, week = week_info["season"], week_info["week"]
     context = _load_week_context(season, week)
     stats = get_player_season_stats(season)
-    splash = defense_splash(pd.read_parquet(STATS_TEAM_WEEK_URL.format(season)))
+    splash = defense_splash(read_stats(STATS_TEAM_WEEK_URL.format(season)))
     pool, notes = apply_charlie_rule(pool, context["odds"], stats, set(context["bad_sack_teams"]), splash)
     notes.insert(0, f"Week {week} lines from ESPN (DraftKings).")
     return pool, notes

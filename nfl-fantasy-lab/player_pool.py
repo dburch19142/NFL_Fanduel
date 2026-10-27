@@ -22,6 +22,7 @@ from charlie_rule import build_charlie_pool
 from delta_rule import build_delta_pool
 from beta_strategy import beta_notes, beta_rb_mask, load_rushing_ranks, qualifying_teams
 from nfl_data import apply_injury_report
+import backtest
 
 UPLOAD_PATH = "data/uploads/fanduel_latest.csv"
 
@@ -367,4 +368,5 @@ def build_player_pool(
         pool, eligibility_note = _apply_matchup_eligibility(pool)
 
     pool.attrs["injury_exclusions"] = removed
-    return pool, f"uploaded FanDuel salaries + {stats_note} + {injury_note} + {eligibility_note}"
+    source = f"uploaded FanDuel salaries + {stats_note} + {injury_note} + {eligibility_note}"
+    return pool, f"{backtest.describe()} + {source}" if backtest.describe() else source

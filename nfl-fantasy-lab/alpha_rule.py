@@ -77,6 +77,7 @@ import time
 
 import pandas as pd
 
+from backtest import read_stats
 from matchup_filters import CACHE_DIR, STATS_PLAYER_WEEK_URL, build_eligibility
 from optimizer import DEFAULT_SALARY_CAP, FLEX_ELIGIBLE
 from real_stats import normalize_name
@@ -143,7 +144,7 @@ def get_defense_vs_receivers(season: int, force_refresh: bool = False) -> dict:
         if time.time() - os.path.getmtime(cache_file) < STATS_CACHE_MAX_AGE_SECONDS:
             with open(cache_file) as f:
                 return json.load(f)
-    result = defense_vs_receivers(pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season)))
+    result = defense_vs_receivers(read_stats(STATS_PLAYER_WEEK_URL.format(season)))
     os.makedirs(CACHE_DIR, exist_ok=True)
     with open(cache_file, "w") as f:
         json.dump(result, f)

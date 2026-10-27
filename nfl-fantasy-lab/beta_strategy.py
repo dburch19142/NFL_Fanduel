@@ -18,6 +18,7 @@ filters, and the notes say so.
 import pandas as pd
 
 from alpha_rule import afternoon_games
+from backtest import read_stats
 from matchup_filters import STATS_TEAM_WEEK_URL
 
 TOP_N_RUSH_OFFENSE = 10
@@ -76,5 +77,5 @@ def beta_notes(qualifying: list[dict]) -> list[str]:
 
 
 def load_rushing_ranks(season: int) -> pd.DataFrame:
-    team_week = pd.read_parquet(STATS_TEAM_WEEK_URL.format(season))
+    team_week = read_stats(STATS_TEAM_WEEK_URL.format(season))
     return rushing_ranks(team_week[team_week["season_type"] == "REG"])

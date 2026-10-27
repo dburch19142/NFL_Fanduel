@@ -38,6 +38,7 @@ import time
 
 import pandas as pd
 
+from backtest import backtest_season, backtest_week, cache_dir, read_stats
 from real_stats import normalize_name
 
 BOTTOM_N_PASS_DEFENSE = 10
@@ -45,7 +46,7 @@ BOTTOM_N_RUSH_DEFENSE = 10
 BOTTOM_N_PASS_DEFENSE_WR_TE = 15
 BOTTOM_N_DEF_MATCHUP = 10
 MIN_WR_TARGET_SHARE = 0.25
-CACHE_DIR = "data/cache"
+CACHE_DIR = cache_dir("data/cache")
 CACHE_MAX_AGE_SECONDS = 6 * 60 * 60  # matchups/stats can change gameday-to-gameday
 
 STATS_TEAM_WEEK_URL = "https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_{0}.parquet"
@@ -54,13 +55,15 @@ STATS_PLAYER_WEEK_URL = "https://github.com/nflverse/nflverse-data/releases/down
 
 def _season_has_player_data(year: int) -> bool:
     try:
-        df = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(year))
+        df = read_stats(STATS_PLAYER_WEEK_URL.format(year))
         return len(df[df["season_type"] == "REG"]) > 0
     except Exception:
         return False
 
 
 def latest_season_with_player_data(start_year: int | None = None) -> int:
+    if backtest_season() is not None:
+        return backtest_season()
     if start_year is None:
         start_year = pd.Timestamp.now().year
     for year in range(start_year, start_year - 4, -1):
@@ -82,12 +85,16 @@ def _per_game(df: pd.DataFrame, group_cols: list[str], stat_cols: list[str]) -> 
 
 def get_upcoming_week_matchups(season: int) -> tuple[int, dict[str, str]]:
     """Returns (week_number, {team: opponent}) for the next week with games
-    that haven't been played yet. A team on a bye that week is simply
-    absent from the dict."""
+    that haven't been played yet -- or, in backtest mode, the backtest week,
+    played or not. A team on a bye that week is simply absent from the
+    dict."""
     import nfl_data_py as nfl
 
     schedule = nfl.import_schedules([season])
-    upcoming = schedule[schedule["home_score"].isna()]
+    if backtest_week() is not None:
+        upcoming = schedule[(schedule["week"] == backtest_week()) & (schedule["game_type"] == "REG")]
+    else:
+        upcoming = schedule[schedule["home_score"].isna()]
     if upcoming.empty:
         raise RuntimeError(f"No upcoming games found for season {season}.")
 
@@ -114,7 +121,7 @@ def defense_allowed_per_game(season: int) -> pd.DataFrame:
     """Per-team yards/TDs allowed per game, one row per team, with columns
     team, pass_yds_allowed, pass_tds_allowed, rush_yds_allowed,
     rush_tds_allowed."""
-    team_week = pd.read_parquet(STATS_TEAM_WEEK_URL.format(season))
+    team_week = read_stats(STATS_TEAM_WEEK_URL.format(season))
     team_week = team_week[team_week["season_type"] == "REG"]
 
     per_game = _per_game(
@@ -177,7 +184,7 @@ def get_offense_weakness(season: int) -> dict[str, set[str]]:
       'sacks_allowed': bottom-BOTTOM_N_DEF_MATCHUP by sacks allowed/game
     A team's DEF is matchup-eligible only when this week's opponent is in
     *both* sets -- see the module docstring."""
-    team_week = pd.read_parquet(STATS_TEAM_WEEK_URL.format(season))
+    team_week = read_stats(STATS_TEAM_WEEK_URL.format(season))
     team_week = team_week[team_week["season_type"] == "REG"]
 
     per_game = _per_game(team_week, ["team"], ["passing_interceptions", "sacks_suffered"])
@@ -230,7 +237,7 @@ def build_eligibility(season: int | None = None, force_refresh: bool = False) ->
     defense = get_defense_eligibility(season)
     offense_weakness = get_offense_weakness(season)
 
-    player_week = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season))
+    player_week = read_stats(STATS_PLAYER_WEEK_URL.format(season))
     player_week = player_week[player_week["season_type"] == "REG"]
 
     qb = _per_game(

@@ -25,7 +25,9 @@ import urllib.request
 
 import pandas as pd
 
-CACHE_DIR = "data/cache"
+from backtest import cache_dir, read_stats
+
+CACHE_DIR = cache_dir("data/cache")
 CACHE_MAX_AGE_SECONDS = 24 * 60 * 60  # 1 day
 
 # Used only by latest_available_season(), for the game predictor's season range.
@@ -109,7 +111,7 @@ def get_offense_projections(season: int | None = None, force_refresh: bool = Fal
         if age < CACHE_MAX_AGE_SECONDS:
             return pd.read_csv(cache_file)
 
-    weekly = pd.read_parquet(STATS_PLAYER_WEEK_URL.format(season))
+    weekly = read_stats(STATS_PLAYER_WEEK_URL.format(season))
     weekly = weekly[weekly["season_type"] == "REG"]
     weekly = weekly[weekly["position"].isin(["QB", "RB", "WR", "TE"])].copy()
     weekly["interceptions"] = weekly["passing_interceptions"]

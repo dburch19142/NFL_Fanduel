@@ -45,6 +45,7 @@
       <option value="beta" {{ "selected" if strategy == "beta" }}>Beta (rushing matchups)</option>
       <option value="echo" {{ "selected" if strategy == "echo" }}>Echo Rule</option>
       <option value="charlie" {{ "selected" if strategy == "charlie" }}>Charlie Rule</option>
+      <option value="delta" {{ "selected" if strategy == "delta" }}>Delta Rule</option>
     </select>
     <label for="salary_cap">Salary cap ($)</label>
     <input type="number" id="salary_cap" name="salary_cap" value="{{ salary_cap|int }}" step="1">
@@ -170,5 +171,11 @@
        team's first. TE: $5,000 or less with a target inside the 10 on a team implied for 26+. DEF:
        $3,500 or less facing a bottom-10 offense in sacks allowed, ranked by its sacks plus two per
        interception. Picks that would break the cap give way to the next candidate.</p>
+    <p>The <strong>Delta Rule</strong> uses the traits three winning lineups shared, from every game
+       kicking off Sunday at 1pm or 4pm ET, and lets the optimizer pick the best-projected lineup that
+       has them all: a starting QB from a game with an over/under of 46+, at least one RB, WR or TE
+       from the team he's playing, only workhorse RBs (70%+ of their team's carries), at least one
+       team WR1 with a 25%+ target share, at least one player from a game under 40, and an underdog
+       defense. No more than four players come from one game.</p>
   </footer>
 {% endblock %}

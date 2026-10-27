@@ -19,8 +19,14 @@ And, when the pool carries a "required_group" column (the Top-3 Vegas games
 strategy, see vegas_strategy.py, or the Alpha, Echo and Charlie Rules,
 see alpha_rule.py, echo_rule.py and charlie_rule.py), at
 least one player from each labeled group. When it also carries a
-"max_from_game" column (the Alpha, Echo and Charlie Rules), no more than that many players
+"max_from_game" column (the Alpha, Echo, Charlie and Delta Rules), no more than that many players
 from any one game.
+
+And, for the Delta Rule (see delta_rule.py): a "required_groups" column of
+"|"-separated labels, where one player can carry several, needs at least
+one pick carrying each label; and a "bring_back" column, when any row is
+True, needs at least one RB, WR or TE from the team the lineup's QB is
+playing.
 """
 import pandas as pd
 import pulp
@@ -183,6 +189,22 @@ def _solve(
         for label in players["required_group"].dropna().unique():
             idx = players.index[players["required_group"] == label]
             prob += pulp.lpSum(picks[i] for i in idx) >= 1
+
+    # Overlapping groups (the Delta Rule, see delta_rule.py): at least one
+    # pick carrying each "|"-separated label in "required_groups".
+    if "required_groups" in players.columns:
+        labels = players["required_groups"].fillna("").str.split("|")
+        for label in sorted({label for row in labels for label in row if label}):
+            idx = players.index[[label in row for row in labels]]
+            prob += pulp.lpSum(picks[i] for i in idx) >= 1
+
+    # Bring-back (the Delta Rule): if a given QB is picked, at least one RB,
+    # WR or TE from the team he's playing must be picked too.
+    if "bring_back" in players.columns and "opponent" in players.columns and players["bring_back"].any():
+        for q in qb_idx:
+            back = players.index[(players["team"] == players.loc[q, "opponent"])
+                                 & players["position"].isin(FLEX_ELIGIBLE)]
+            prob += picks[q] <= pulp.lpSum(picks[i] for i in back)
 
     # Uniqueness: a lineup that picks every single player from an earlier
     # lineup is forbidden, forcing at least one swap versus each one already found.

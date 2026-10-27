@@ -18,6 +18,7 @@ from optimizer import PLAYERS_CSV, ROSTER_SLOTS
 from vegas_strategy import _load_week_context, build_vegas_pool
 from alpha_rule import build_alpha_pool
 from echo_rule import build_echo_pool
+from charlie_rule import build_charlie_pool
 from beta_strategy import beta_notes, beta_rb_mask, load_rushing_ranks, qualifying_teams
 from nfl_data import apply_injury_report
 
@@ -29,6 +30,7 @@ STRATEGY_COMBINED = "combined"
 STRATEGY_ALPHA = "alpha"
 STRATEGY_BETA = "beta"
 STRATEGY_ECHO = "echo"
+STRATEGY_CHARLIE = "charlie"
 
 # Positions allowed to fall back to the full real slate (ignoring the
 # matchup-eligibility rule) when too few players clear it to fill the
@@ -208,6 +210,19 @@ def _apply_alpha_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     return restricted, "Alpha Rule (top-3 Sunday 1pm and 4pm games), no injury designation"
 
 
+def _apply_charlie_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+    """Charlie Rule strategy (see charlie_rule.py): every slot modeled on the
+    Week 7, 2026 winning lineup. Notes and fallback work like the Alpha
+    Rule's."""
+    try:
+        restricted, notes = build_charlie_pool(pool)
+    except Exception as exc:
+        pool, note = _apply_matchup_eligibility(pool)
+        return pool, f"Charlie Rule unavailable ({exc}); using {note}"
+    restricted.attrs["strategy_notes"] = notes
+    return restricted, "Charlie Rule (double stack + bring-back, cheap workhorse, punt TE), no injury designation"
+
+
 def _apply_echo_strategy(pool: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     """Echo Rule strategy (see echo_rule.py): the Alpha Rule with the Beta
     strategy's RBs and seven updates for the cheap picks. Notes and fallback
@@ -279,7 +294,8 @@ def build_player_pool(
     STRATEGY_BETA (RBs from top-10 rush offenses facing bottom-10 rush
     defenses on Sunday afternoon, matchup filters for the rest), or
     STRATEGY_ECHO (the Echo Rule, the Alpha Rule with Beta RBs and seven
-    updates).
+    updates), or STRATEGY_CHARLIE (the Charlie Rule, modeled on a winning
+    lineup).
     """
     if not has_uploaded_pool():
         sample, injury_note, removed = apply_injury_report(pd.read_csv(PLAYERS_CSV))
@@ -328,6 +344,8 @@ def build_player_pool(
         pool, eligibility_note = _apply_beta_strategy(pool)
     elif strategy == STRATEGY_ECHO:
         pool, eligibility_note = _apply_echo_strategy(pool)
+    elif strategy == STRATEGY_CHARLIE:
+        pool, eligibility_note = _apply_charlie_strategy(pool)
     else:
         pool, eligibility_note = _apply_matchup_eligibility(pool)
 

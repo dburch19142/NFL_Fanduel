@@ -30,6 +30,7 @@ from player_pool import (
     STRATEGY_ALPHA,
     STRATEGY_BETA,
     STRATEGY_ECHO,
+    STRATEGY_CHARLIE,
     STRATEGY_COMBINED,
     STRATEGY_MATCHUP,
     STRATEGY_VEGAS,
@@ -45,7 +46,7 @@ MAX_TOOL_ROUNDS = 10
 MAX_LINEUPS = 10
 TEAMS_CSV = "data/teams.csv"
 
-STRATEGIES = [STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA, STRATEGY_BETA, STRATEGY_ECHO]
+STRATEGIES = [STRATEGY_MATCHUP, STRATEGY_VEGAS, STRATEGY_COMBINED, STRATEGY_ALPHA, STRATEGY_BETA, STRATEGY_ECHO, STRATEGY_CHARLIE]
 # The NFL Assistant tools offered to Claude, when nfl-assistant is available.
 NFL_TOOLS = ["get_injuries", "get_depth_chart", "get_player", "get_games", "get_top_totals", "get_team_leaders"]
 MAX_LISTED_EXCLUSIONS = 40
@@ -87,7 +88,9 @@ other slots. alpha: the Alpha Rule, the three highest over/under Sunday 1pm and 
 beta: RBs only from teams with a top-10 rushing offense facing a bottom-10 rushing defense \
 on Sunday at 1pm or 4pm ET, matchup filters for every other slot. echo: the Echo Rule, the \
 Alpha Rule with a QB from a top-3 over/under game, Beta's RBs, WR1/WR2 at 25%+ target share, a 15-18% WR3, 46+ totals only, no committee backs, and a FLEX that needs a real role, a good \
-game script and 2.5+ points per $1,000 of salary. If the user names no \
+game script and 2.5+ points per $1,000 of salary. charlie: the Charlie Rule, a QB with two 20%+ WRs \
+in a 46+ game (double stack plus a 25%+ bring-back), a pass-catching lead back, a cheap workhorse \
+with a cheap 20%+ WR from his game, a punt TE and a cheap DEF facing a leaky line. If the user names no \
 strategy, use matchup. Tool results include strategy_notes and pool_source; mention them \
 when they explain a pick or a missing player.
 

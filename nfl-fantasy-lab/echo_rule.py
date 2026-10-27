@@ -7,6 +7,17 @@ the stack when the QB's WR1 draws under a 22% target share) and its
 underdog workhorse back; Beta, when it can, the RBs; the updates change the
 games it works from, the backs it can take, and how FLEX is filled.
 
+  WRs by target share (season share of his team's targets; a team's WR1
+        is its healthy WR with the highest share, at whole-percent precision):
+        WR1 is the QB's teammate with the highest share, and needs 25%+.
+        WR2 is the opposing team's WR1, and needs 25%+. WR3 is a team's WR1
+        with a 15-18% share, from any of these games, the higher-implied
+        team first, as long as he fits under the cap and the per-game
+        limit. A slot with no WR who qualifies stays open for the
+        optimizer. Every other WR needs 15%+ -- at FLEX or in an open WR
+        slot, fill-ins for an injured WR1 included -- so the rest are
+        dropped; the value check's WR swaps keep to the same rules.
+
   Beta RBs: a team with a top-10 rushing offense facing a bottom-10 rushing
         defense in a Sunday 1pm or 4pm game -- in any such game, not just
         the Alpha Rule's -- supplies the RBs. Their lead backs take RB1 and
@@ -40,9 +51,9 @@ games it works from, the backs it can take, and how FLEX is filled.
         real role (rule 2's bar) -- from its own game first, then any of
         these games; one clearing 2.5 if there is one, else the best value
         -- that fits the cap and the per-game limit. When nothing fits, the
-        most expensive other RB, WR or TE pick moves down to a cheaper
-        player at its position with a real role (the QB's WR1 stays on the
-        QB's team) to free salary, and the swap is retried -- taking the
+        most expensive other RB, WR or TE pick that can move down goes to
+        a cheaper player at its position with a real role who can hold its
+        slot to free salary, and the swap is retried -- taking the
         pairing that projects best, and only if the two moves together
         don't cost projected points. Every swap leaves room under the cap
         for a FLEX candidate that passes the Echo Rule (when one could at
@@ -55,9 +66,11 @@ games it works from, the backs it can take, and how FLEX is filled.
         has already removed anyone with a designation, questionable
         included; and rule 3 keeps out the lowest-total games.
 
-Notes from the Alpha Rule are kept, except its FLEX note, which the Echo
-Rule's replaces.
+Notes from the Alpha Rule are kept, except its WR and FLEX notes, which the
+Echo Rule's replace.
 """
+import re
+
 import pandas as pd
 
 from alpha_rule import (
@@ -84,6 +97,9 @@ BIG_FAVORITE = 7.0  # implied-points edge where a team stops needing to throw
 VALUE_FLOOR = 2.5  # FanDuel points per $1,000 of salary
 VALUE_FALLBACK_COUNT = 4
 CHEAP_SALARY = 6000
+WR1_MIN_SHARE = 0.25  # WR1 (the QB's teammate) and WR2 (the bring-back)
+WR3_SHARE_RANGE = (0.15, 0.18)  # a team's WR1 drawing a mid-size share
+WR_MIN_SHARE = 0.15  # every other WR, FLEX included
 
 
 def value(row: pd.Series) -> float:
@@ -145,8 +161,9 @@ def apply_echo_rule(
     pool, alpha_notes = apply_alpha_rule(
         pool, odds, player_stats, rush_yds_allowed, pass_yds_allowed, defense_vs, salary_cap,
     )
+    # The Echo WR rules and FLEX replace the Alpha Rule's, so their notes go.
     notes += [n for n in alpha_notes
-              if not n.startswith("FLEX") and "FLEX is the optimizer's choice" not in n]
+              if not re.match(r"(FLEX|WR[123][ :])", n) and "FLEX is the optimizer's choice" not in n]
 
     games = top_games(afternoon_games(odds), slate_teams, n=ALPHA_GAME_COUNT)
     implied, game_of = {}, {}
@@ -311,7 +328,7 @@ def apply_echo_rule(
                 dropped["salary or game cap"].append(row["name"])
                 continue
             # Update 2: a real role, unless he's inheriting one.
-            if i not in fill_ins and (
+            if (i not in fill_ins or row["position"] == "WR") and (
                 row["carry_share"] < FLEX_MIN_CARRY_SHARE if row["position"] == "RB"
                 else row["target_share"] < FLEX_MIN_TARGET_SHARE
             ):
@@ -326,6 +343,71 @@ def apply_echo_rule(
                 continue
             kept.append(i)
         return candidates, kept, dropped, left
+
+    # WRs by target share: WR1 (the QB's teammate) and WR2 (the opposing
+    # WR1) at 25%+, WR3 a team's WR1 at 15-18%, everyone else at 15%+.
+    def share(i: int) -> float:
+        return round(float(pool.loc[i, "target_share"]), 2)
+
+    def team_wr1(team: str) -> int | None:
+        wrs = ranked(team, "WR")
+        return wrs.index[0] if not wrs.empty else None
+
+    def label_ok(label: str, rows: pd.DataFrame) -> pd.Series:
+        # Who can hold a WR rule's slot.
+        shares = rows["target_share"].round(2)
+        if label == "WR1":
+            return (rows["team"] == qb_team) & (shares >= WR1_MIN_SHARE)
+        if label == "WR2":
+            return pd.Series([i == team_wr1(qb_opp) for i in rows.index], index=rows.index) & (
+                shares >= WR1_MIN_SHARE)
+        if label == "WR3":
+            lo, hi = WR3_SHARE_RANGE
+            return pd.Series([i == team_wr1(t) for i, t in zip(rows.index, rows["team"])],
+                             index=rows.index) & shares.between(lo, hi)
+        return pd.Series(True, index=rows.index)
+
+    wr_notes = []
+    for label in ("WR1", "WR2"):
+        pool.loc[pool["required_group"] == label, "required_group"] = None
+        team = qb_team if label == "WR1" else qb_opp
+        i = team_wr1(team) if team is not None else None
+        if i is None:
+            wr_notes.append(f"{label}: no {team} WR on the slate; slot left to the optimizer.")
+        elif share(i) < WR1_MIN_SHARE:
+            wr_notes.append(f"{label}: {team}'s WR1 {pool.loc[i, 'name']} has a {share(i):.0%} target share "
+                            f"(under {WR1_MIN_SHARE:.0%}); slot left to the optimizer.")
+        elif pd.notna(pool.loc[i, "required_group"]):
+            wr_notes.append(f"{label}: {pool.loc[i, 'name']} is already the {pool.loc[i, 'required_group']} pick.")
+        else:
+            pool.loc[i, "required_group"] = label
+            wr_notes.append(f"{label} {pool.loc[i, 'name']} ({team}): {share(i):.0%} target share.")
+
+    pool.loc[pool["required_group"] == "WR3", "required_group"] = None
+    picked = pool["required_group"].notna()
+    in_game = pool.loc[picked, "team"].map(game_of).value_counts().to_dict()
+    open_slots = roster_size - int(picked.sum()) - 1
+    left = salary_cap - pool.loc[picked, "salary"].sum() - open_slots * cheapest_flex
+    wr3 = [i for i in (team_wr1(t) for t in implied) if i is not None and pd.isna(pool.loc[i, "required_group"])]
+    wr3 = [i for i in wr3 if label_ok("WR3", pool.loc[[i]]).iloc[0]]
+    fits = [i for i in wr3 if pool.loc[i, "salary"] <= left
+            and in_game.get(game_of.get(pool.loc[i, "team"]), 0) < MAX_FROM_GAME]
+    if fits:
+        i = max(fits, key=lambda i: (implied.get(pool.loc[i, "team"], 0), pool.loc[i, "projected_points"]))
+        pool.loc[i, "required_group"] = "WR3"
+        wr_notes.append(f"WR3 {pool.loc[i, 'name']} ({pool.loc[i, 'team']} WR1, implied "
+                        f"{implied.get(pool.loc[i, 'team'], 0):.1f}): {share(i):.0%} target share.")
+    else:
+        lo, hi = WR3_SHARE_RANGE
+        wr_notes.append(f"WR3: no team's WR1 with a {lo:.0%}-{hi:.0%} share fits"
+                        + (f" ({', '.join(pool.loc[wr3, 'name'])} over the cap or per-game limit)" if wr3 else "")
+                        + "; slot left to the optimizer.")
+
+    low_wrs = (pool["position"] == "WR") & pool["required_group"].isna() & (
+        pool["target_share"].round(2) < WR_MIN_SHARE)
+    pool = pool[~low_wrs]
+    wr_notes.append(f"WRs under a {WR_MIN_SHARE:.0%} target share dropped: {int(low_wrs.sum())}.")
+    notes.append("Echo WR rules: " + " ".join(wr_notes))
 
     # Update 6, rule picks: a RB, WR or TE pick under $6,000 that projects
     # below the value floor gives way to a better value at its position with
@@ -360,7 +442,7 @@ def apply_echo_rule(
         game = game_of.get(pool.loc[i, "team"])
         options = pool[(pool["position"] == pool.loc[i, "position"]) & ~picked
                        & (pool["salary"] <= budget) & (pool["value"] > pool.loc[i, "value"])]
-        options = options[has_role(options)]
+        options = options[has_role(options) & label_ok(pool.loc[i, "required_group"], options)]
         if options.empty:
             return None
         options = options[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
@@ -382,27 +464,31 @@ def apply_echo_rule(
 
     def downgrade_for(i: int) -> tuple[int, int, int] | None:
         # When nothing fits for pick i: free salary by moving the most
-        # expensive other RB/WR/TE pick down to a cheaper player at its
-        # position with a real role (the QB's WR1 stays on the QB's team),
-        # then retry. Takes the pairing that projects best, and only one that
-        # doesn't cost projected points overall. Returns (expensive pick,
-        # its downgrade, pick i's replacement).
+        # expensive other RB/WR/TE pick that can move down to a cheaper
+        # player at its position with a real role who can hold its slot
+        # (the WR rules lock WR1 and WR2 to one player), then retry. Takes
+        # the pairing that projects best, and only one that doesn't cost
+        # projected points overall. Returns (expensive pick, its downgrade,
+        # pick i's replacement).
         picked = pool["required_group"].notna()
-        others = pool[picked & pool["position"].isin(FLEX_ELIGIBLE) & ~filling_in & (pool.index != i)]
-        if others.empty:
-            return None
-        e = others.sort_values(["salary", "projected_points"]).index[-1]
-        game = game_of.get(pool.loc[e, "team"])
+        exempt = (pool["position"] == "RB") & pool["team"].isin(rb_out)
+        others = pool[picked & pool["position"].isin(FLEX_ELIGIBLE) & ~exempt & (pool.index != i)]
         in_game = pool.loc[picked, "team"].map(game_of).value_counts().to_dict()
-        cheaper = pool[(pool["position"] == pool.loc[e, "position"]) & ~picked
-                       & (pool["salary"] < pool.loc[e, "salary"])]
-        cheaper = cheaper[has_role(cheaper)]
-        if cheaper.empty:
+
+        def movable(e: int) -> pd.DataFrame:
+            game = game_of.get(pool.loc[e, "team"])
+            cheaper = pool[(pool["position"] == pool.loc[e, "position"]) & ~picked
+                           & (pool["salary"] < pool.loc[e, "salary"])]
+            cheaper = cheaper[has_role(cheaper) & label_ok(pool.loc[e, "required_group"], cheaper)]
+            return cheaper[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
+                            for t in cheaper["team"]]] if not cheaper.empty else cheaper
+
+        for e in others.sort_values(["salary", "projected_points"], ascending=False).index:
+            cheaper = movable(e)
+            if not cheaper.empty:
+                break
+        else:
             return None
-        cheaper = cheaper[[game_of.get(t) == game or in_game.get(game_of.get(t), 0) < MAX_FROM_GAME
-                           for t in cheaper["team"]]]
-        if pool.loc[e, "required_group"] == "WR1":
-            cheaper = cheaper[cheaper["team"] == pool.loc[e, "team"]]
         best, best_gain = None, 0.0
         for d in cheaper.index:
             move(e, d)

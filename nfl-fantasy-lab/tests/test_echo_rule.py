@@ -135,67 +135,11 @@ def test_echo_strategy_falls_back_to_matchup_filters(monkeypatch):
     assert len(result) == len(pool)
 
 
-def test_cheap_rule_pick_below_value_gives_way_to_a_better_value():
-    # The bring-back (AAA WR1) costs $5,900 for 10 pts (1.7 per $1K); BBB WR2,
-    # in the same game with a 20% target share, is $4,000 for 11 (2.8).
-    base_pool, _ = _pool_and_stats()
-    pool = base_pool.copy()
-    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 10.0)
-    pool.loc[pool["name"] == "BBB WR2", "salary"] = 4000
-    result, notes = _run(pool=pool)
-    assert _group(result, "WR2") == {"BBB WR2"}
-    assert any("WR2 AAA WR1 (1.7) -> BBB WR2 (BBB, $4,000, 2.8)" in n for n in notes)
-
-
 def test_cheap_rule_pick_is_kept_when_no_better_value_has_a_role():
     # No TE on the slate has a target share on record.
     result, notes = _run()
     kept = next(n for n in notes if n.startswith("Value check, no better value"))
     assert "AAA TE" in kept and "AAA TE" in _group(result, "TE")
-
-
-def _downgrade_pool(wr3_points):
-    # The bring-back (AAA WR1, $5,900, 12 pts) is under the value line, and
-    # the only better value, BBB WR2 ($9,000, 24 pts), doesn't fit until the
-    # WR3 (CCC WR1, now $13,000) moves down.
-    base_pool, _ = _pool_and_stats()
-    pool = base_pool.copy()
-    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 12.0)
-    pool.loc[pool["name"] == "BBB WR2", ["salary", "projected_points"]] = (9000, 24.0)
-    pool.loc[pool["name"] == "CCC WR1", ["salary", "projected_points"]] = (13000, wr3_points)
-    return pool
-
-
-def test_most_expensive_pick_is_downgraded_to_make_room():
-    result, notes = _run(pool=_downgrade_pool(15.0))
-    assert _group(result, "WR2") == {"BBB WR2"}
-    assert len(_group(result, "WR3") & {"EEE WR1", "FFF WR1"}) == 1
-    assert any(n.startswith("Value check, most expensive pick downgraded") and "WR3 CCC WR1" in n
-               and "freeing $6,000 for AAA WR1" in n for n in notes)
-
-
-def test_no_downgrade_when_it_costs_projected_points():
-    # Moving a 30-point WR3 down to a 14-point WR to gain 12 points elsewhere loses 4.
-    result, notes = _run(pool=_downgrade_pool(30.0))
-    assert "CCC WR1" in _group(result, "WR3")
-    assert any("no better value" in n and "AAA WR1" in n for n in notes)
-
-
-def test_swaps_leave_room_for_a_flex_that_passes():
-    # Swapping the bring-back (AAA WR1, $5,900) straight to BBB WR2 ($14,000)
-    # would leave $5,000, under every passing FLEX candidate ($6,000), so a
-    # pick is downgraded too and FLEX is still the Echo Rule's.
-    base_pool, _ = _pool_and_stats()
-    pool = base_pool.copy()
-    pool.loc[pool["name"] == "AAA WR1", ["salary", "projected_points"]] = (5900, 12.0)
-    pool.loc[pool["name"] == "BBB WR2", ["salary", "projected_points"]] = (14000, 40.0)
-    result, notes = _run(pool=pool)
-    assert _group(result, "WR2") == {"BBB WR2"}
-    assert any(n.startswith("Value check, most expensive pick downgraded") for n in notes)
-    flex = result[result["required_group"] == "FLEX"]
-    locked = result.loc[result["required_group"].notna() & (result["required_group"] != "FLEX"), "salary"].sum()
-    assert not flex.empty and (flex["salary"] <= 60000 - locked).all()
-    assert not any("FLEX is the optimizer's choice" in n for n in notes)
 
 
 def _rushing(offense, defense):
@@ -253,3 +197,88 @@ def test_echo_keeps_the_alpha_two_player_bring_back():
     assert _group(result, "WR2") == {"AAA WR1"} and _group(result, "TE") == {"AAA TE"}
     assert any(n.startswith("Two-player bring-back") for n in notes)
     assert optimize_lineup(60000, result)["name"].isin(["BBB QB"]).any()
+
+
+def _te_swap(bbb_te, fff_rb1=None):
+    # The TE rule takes AAA TE (the only TE with a target inside the 10) at
+    # $5,900 for 12 pts (2.0 per $1K); BBB TE, with a 20% target share, is
+    # the only better value. FFF RB2 gets a real role (48% of the carries).
+    base_pool, _ = _pool_and_stats()
+    pool = base_pool.copy()
+    pool.loc[pool["name"] == "AAA TE", ["salary", "projected_points"]] = (5900, 12.0)
+    pool.loc[pool["name"] == "BBB TE", ["salary", "projected_points"]] = bbb_te
+    if fff_rb1:
+        pool.loc[pool["name"] == "FFF RB1", ["salary", "projected_points"]] = fff_rb1
+    stats = _stats_with_carries([_stat("AAA TE", "TE", "AAA", share=0.05, goal_line=1),
+                                 _stat("BBB TE", "TE", "BBB", share=0.2)])
+    stats.loc[stats["match_key"] == "fff rb2", "carries"] = 140
+    return _run(pool=pool, stats=stats)
+
+
+def test_cheap_rule_pick_below_value_gives_way_to_a_better_value():
+    result, notes = _te_swap((4000, 11.0))
+    assert _group(result, "TE") == {"BBB TE"}
+    assert any("TE AAA TE (2.0) -> BBB TE (BBB, $4,000, 2.8)" in n for n in notes)
+
+
+def test_most_expensive_pick_is_downgraded_to_make_room_for_the_swap_and_a_flex():
+    # BBB TE costs $16,000: the swap alone would leave $4,500, under every
+    # passing FLEX candidate, so RB2 (FFF RB1, $9,000) moves down. WR1 and
+    # WR2 cost less but couldn't move anyway: the WR rules lock them.
+    result, notes = _te_swap((16000, 40.0), fff_rb1=(9000, 15.0))
+    assert _group(result, "TE") == {"BBB TE"}
+    assert "FFF RB1" not in _group(result, "RB2")
+    assert any(n.startswith("Value check, most expensive pick downgraded") and "RB2 FFF RB1" in n
+               for n in notes)
+    flex = result[result["required_group"] == "FLEX"]
+    locked = result.loc[result["required_group"].notna() & (result["required_group"] != "FLEX"), "salary"].sum()
+    assert not flex.empty and (flex["salary"] <= 60000 - locked).all()
+
+
+def test_no_downgrade_when_it_costs_projected_points():
+    # Moving a 50-point RB2 down to a 12-point back to gain 28 at TE loses 10.
+    result, notes = _te_swap((16000, 40.0), fff_rb1=(9000, 50.0))
+    assert _group(result, "TE") == {"AAA TE"} and "FFF RB1" in _group(result, "RB2")
+    assert any("no better value" in n and "AAA TE" in n for n in notes)
+
+
+def _wr_stats(shares):
+    stats = _stats_with_carries()
+    for key, share in shares.items():
+        stats.loc[stats["match_key"] == key, "target_share"] = share
+    return stats
+
+
+def test_wr1_is_the_qbs_teammate_with_25_percent():
+    result, notes = _run()
+    assert _group(result, "WR1") == {"BBB WR1"}
+    result, notes = _run(stats=_wr_stats({"bbb wr1": 0.24}))
+    assert not _group(result, "WR1")
+    assert any("WR1: BBB's WR1 BBB WR1 has a 24% target share" in n for n in notes)
+
+
+def test_wr2_is_the_opposing_wr1_with_25_percent():
+    result, _ = _run()
+    assert _group(result, "WR2") == {"AAA WR1"}
+    result, notes = _run(stats=_wr_stats({"aaa wr1": 0.24}))
+    assert not _group(result, "WR2")
+    assert any("WR2: AAA's WR1 AAA WR1 has a 24% target share" in n for n in notes)
+
+
+def test_wr3_is_a_teams_wr1_at_15_to_18_percent():
+    # CCC (implied 29) and EEE (23.5) have WR1s in range; CCC's 18.24% rounds to 18%.
+    stats = _wr_stats({"ccc wr1": 0.1824, "ccc wr2": 0.10, "eee wr1": 0.16, "eee wr2": 0.10})
+    result, _ = _run(stats=stats)
+    assert _group(result, "WR3") == {"CCC WR1"}
+    result, notes = _run()  # every WR1 draws 27%
+    assert not _group(result, "WR3")
+    assert any("WR3: no team's WR1 with a 15%-18% share fits" in n for n in notes)
+
+
+def test_other_wrs_need_15_percent_even_filling_in():
+    # EEE's WR1 is out, leaving EEE WR2 at 5% as its "WR1": no exemption.
+    base_pool, _ = _pool_and_stats()
+    result, _ = _run(pool=base_pool[base_pool["name"] != "EEE WR1"], stats=_wr_stats({"eee wr2": 0.05}))
+    wrs = set(result.loc[result["position"] == "WR", "name"])
+    assert "EEE WR2" not in wrs and "AAA WR3" not in wrs
+    assert "FFF WR2" in wrs  # 20%

@@ -7,6 +7,11 @@ the stack when the QB's WR1 draws under a 22% target share) and its
 underdog workhorse back; Beta, when it can, the RBs; the updates change the
 games it works from, the backs it can take, and how FLEX is filled.
 
+  QB game: the QB plays in one of the three highest over/under games
+        kicking off Sunday at 1pm or 4pm ET (of all of them, before the 46+
+        cut). The Alpha Rule's QB comes from the highest; any other QB
+        outside those three is dropped, so the optimizer can't take one.
+
   WRs by target share (season share of his team's targets; a team's WR1
         is its healthy WR with the highest share, at whole-percent precision):
         WR1 is the QB's teammate with the highest share, and needs 25%+.
@@ -344,6 +349,19 @@ def apply_echo_rule(
             kept.append(i)
         return candidates, kept, dropped, left
 
+    # QB game: one of the top three Sunday 1pm and 4pm games by over/under.
+    top3 = top_games(afternoon_games(all_odds), slate_teams, n=ALPHA_GAME_COUNT)
+    top3_teams = set(top3["home"]) | set(top3["away"])
+    top3_names = ", ".join(f"{g.away} @ {g.home} ({g.total:g})" for g in top3.itertuples())
+    if qb_team is not None and qb_team not in top3_teams:
+        pool.loc[pool["required_group"] == "QB", "required_group"] = None
+        notes.append(f"QB game: {qb.iloc[0]['name']} ({qb_team}) isn't in a top-3 over/under game "
+                     f"({top3_names}); QB left to the optimizer.")
+        qb_team = qb_opp = None
+    else:
+        notes.append(f"QB game: in the top 3 Sunday 1pm and 4pm over/unders ({top3_names}).")
+    pool = pool[~((pool["position"] == "QB") & ~pool["team"].isin(top3_teams))]
+
     # WRs by target share: WR1 (the QB's teammate) and WR2 (the opposing
     # WR1) at 25%+, WR3 a team's WR1 at 15-18%, everyone else at 15%+.
     def share(i: int) -> float:
@@ -373,7 +391,8 @@ def apply_echo_rule(
         team = qb_team if label == "WR1" else qb_opp
         i = team_wr1(team) if team is not None else None
         if i is None:
-            wr_notes.append(f"{label}: no {team} WR on the slate; slot left to the optimizer.")
+            wr_notes.append(f"{label}: no " + (f"{team} WR on the slate" if team else "QB pick")
+                            + "; slot left to the optimizer.")
         elif share(i) < WR1_MIN_SHARE:
             wr_notes.append(f"{label}: {team}'s WR1 {pool.loc[i, 'name']} has a {share(i):.0%} target share "
                             f"(under {WR1_MIN_SHARE:.0%}); slot left to the optimizer.")

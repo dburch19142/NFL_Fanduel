@@ -86,7 +86,7 @@ top three Vegas games by total. combined: the Vegas picks plus matchup filters f
 other slots. alpha: the Alpha Rule, the three highest over/under Sunday 1pm and 4pm ET games only. \
 beta: RBs only from teams with a top-10 rushing offense facing a bottom-10 rushing defense \
 on Sunday at 1pm or 4pm ET, matchup filters for every other slot. echo: the Echo Rule, the \
-Alpha Rule with Beta's RBs, WR1/WR2 at 25%+ target share, a 15-18% WR3, 46+ totals only, no committee backs, and a FLEX that needs a real role, a good \
+Alpha Rule with a QB from a top-3 over/under game, Beta's RBs, WR1/WR2 at 25%+ target share, a 15-18% WR3, 46+ totals only, no committee backs, and a FLEX that needs a real role, a good \
 game script and 2.5+ points per $1,000 of salary. If the user names no \
 strategy, use matchup. Tool results include strategy_notes and pool_source; mention them \
 when they explain a pick or a missing player.

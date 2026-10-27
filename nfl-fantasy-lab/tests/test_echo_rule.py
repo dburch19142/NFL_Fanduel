@@ -282,3 +282,17 @@ def test_other_wrs_need_15_percent_even_filling_in():
     wrs = set(result.loc[result["position"] == "WR", "name"])
     assert "EEE WR2" not in wrs and "AAA WR3" not in wrs
     assert "FFF WR2" in wrs  # 20%
+
+
+def test_qb_comes_from_a_top_3_over_under_game():
+    # The top three Sunday 1pm and 4pm games: AAA @ BBB (52), CCC @ DDD (49)
+    # and EEE @ FFF (48). Beta brings HHH's backs in from the fourth game,
+    # but never a QB from it.
+    result, notes = _run_beta(_rushing({"HHH": 1}, {"GGG": 1}))
+    assert _group(result, "QB") == {"BBB QB"}
+    assert set(result.loc[result["position"] == "QB", "team"]) <= {"AAA", "BBB", "CCC", "DDD", "EEE", "FFF"}
+    assert "HHH" in set(result["team"])
+    assert any(n.startswith("QB game: in the top 3") and "AAA @ BBB (52)" in n for n in notes)
+    lineup = optimize_lineup(60000, result)
+    assert lineup.loc[lineup["position"] == "QB", "team"].iloc[0] in {"AAA", "BBB", "CCC", "DDD", "EEE", "FFF"}
+
